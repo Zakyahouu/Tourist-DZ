@@ -1,0 +1,201 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '../../supabaseClient';
+import { useToast } from '../../context/ToastContext';
+import { Save, Image as ImageIcon, Type, FileText, CheckCircle, Upload, AlertCircle } from 'lucide-react';
+
+const AdminSettings = () => {
+    const { showToast } = useToast();
+    const [content, setContent] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [saved, setSaved] = useState(false);
+    const [uploadingKey, setUploadingKey] = useState(null);
+
+    useEffect(() => { fetchContent(); }, []);
+
+    async function fetchContent() {
+        setLoading(true);
+        const { data } = await supabase.from('site_content').select('*').order('category').order('key');
+
+        let currentData = data || [];
+        const requiredKeys = [
+            { key: 'gallery_hero_image', value: 'https://images.unsplash.com/photo-1534065406-8d6263567705?q=80&w=2670&auto=format&fit=crop', label: 'Gallery Page Hero Image', type: 'image', category: 'hero' },
+            { key: 'gallery_hero_title', value: 'Biskra Through Your Lens', label: 'Gallery Page Hero Title', type: 'text', category: 'hero' },
+            { key: 'gallery_hero_subtitle', value: 'Share your best shots of the oasis or vote in the latest photo competition.', label: 'Gallery Page Hero Subtitle', type: 'textarea', category: 'hero' }
+        ];
+
+        let missingKeys = false;
+        for (const req of requiredKeys) {
+            if (!currentData.find(d => d.key === req.key)) {
+                await supabase.from('site_content').insert([req]);
+                missingKeys = true;
+            }
+        }
+
+        if (missingKeys) {
+            const { data: refreshed } = await supabase.from('site_content').select('*').order('category').order('key');
+            setContent(refreshed || []);
+        } else {
+            setContent(currentData);
+        }
+
+        setLoading(false);
+    }
+
+    function updateValue(id, newValue) {
+        setContent(prev => prev.map(c => c.id === id ? { ...c, value: newValue } : c));
+        setSaved(false);
+    }
+
+    async function saveAll() {
+        setSaving(true);
+        try {
+            for (const item of content) {
+                await supabase.from('site_content').update({ value: item.value, updated_at: new Date().toISOString() }).eq('id', item.id);
+            }
+            setSaved(true);
+            setTimeout(() => setSaved(false), 3000);
+            showToast('Settings saved successfully!', 'success');
+        } catch (err) {
+            console.error('Save error:', err);
+            showToast('Error saving. Check console.', 'error');
+        } finally {
+            setSaving(false);
+        }
+    }
+
+    const handleImageUpload = async (id, file) => {
+        if (!file) return;
+        setUploadingKey(id);
+
+        const fileExt = file.name.split('.').pop();
+        const fileName = `cms-${Date.now()}.${fileExt}`;
+
+        try {
+            const { error: uploadError } = await supabase.storage
+                .from('site-images')
+                .upload(fileName, file);
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('site-images')
+                .getPublicUrl(fileName);
+
+            updateValue(id, publicUrl);
+            showToast('Image uploaded successfully!', 'success');
+            return publicUrl;
+        } catch (error) {
+            showToast('Upload failed: ' + error.message, 'error');
+            return null;
+        } finally {
+            setUploadingKey(null);
+        }
+    };
+
+    // Group by category
+    const grouped = content.reduce((acc, item) => {
+        const cat = item.category || 'general';
+        if (!acc[cat]) acc[cat] = [];
+        acc[cat].push(item);
+        return acc;
+    }, {});
+
+    const categoryLabels = {
+        hero: '🖼️ Hero Banners & Headlines',
+        media: '📸 Fallback Images (when sites have no photos)',
+        general: '⚙️ General'
+    };
+
+    const typeIcon = (type) => {
+        switch (type) {
+            case 'image': return <ImageIcon size={14} className="text-pink-500" />;
+            case 'textarea': return <FileText size={14} className="text-blue-500" />;
+            default: return <Type size={14} className="text-slate-400" />;
+        }
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h2 className="text-2xl font-bold text-slate-800">Website Content & Media</h2>
+                    <p className="text-sm text-slate-500">Control hero images, page titles, and fallback media across the website.</p>
+                </div>
+                <button onClick={saveAll} disabled={saving} className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-sm transition-all shadow-sm ${saved ? 'bg-emerald-600 text-white' : 'bg-sky-600 hover:bg-sky-700 text-white'} disabled:opacity-50`}>
+                    {saved ? <><CheckCircle size={18} /> Saved!</> : saving ? 'Saving...' : <><Save size={18} /> Save All Changes</>}
+                </button>
+            </div>
+
+            {loading ? (
+                <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-400">Loading settings...</div>
+            ) : Object.keys(grouped).length === 0 ? (
+                <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-400">
+                    <p className="font-medium text-lg mb-2">No content entries found.</p>
+                    <p className="text-sm">Run the <code className="bg-slate-100 px-2 py-1 rounded text-xs">005_site_content.sql</code> migration to seed default entries.</p>
+                </div>
+            ) : (
+                Object.entries(grouped).map(([category, items]) => (
+                    <div key={category} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
+                            <h3 className="text-base font-bold text-slate-700">{categoryLabels[category] || category}</h3>
+                        </div>
+                        <div className="divide-y divide-slate-100">
+                            {items.map(item => (
+                                <div key={item.id} className="px-6 py-5">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        {typeIcon(item.type)}
+                                        <label className="text-sm font-bold text-slate-600">{item.label || item.key}</label>
+                                        <span className="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded font-mono">{item.key}</span>
+                                    </div>
+
+                                    {item.type === 'image' ? (
+                                        <div className="flex gap-4 items-start">
+                                            <div className="flex-1 flex flex-col gap-2">
+                                                <div className="flex items-center gap-2">
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={e => handleImageUpload(item.id, e.target.files[0])}
+                                                        className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sky-500"
+                                                    />
+                                                    {uploadingKey === item.id && <span className="text-xs font-bold text-sky-600 animate-pulse">Uploading...</span>}
+                                                </div>
+                                                <input
+                                                    value={item.value || ''}
+                                                    onChange={e => updateValue(item.id, e.target.value)}
+                                                    placeholder="Or paste an Image URL..."
+                                                    className="w-full border border-slate-200 rounded-lg px-4 py-2 text-xs focus:outline-none focus:border-sky-500 font-mono text-slate-500"
+                                                />
+                                            </div>
+                                            {item.value && (
+                                                <div className="w-24 h-16 rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
+                                                    <img src={item.value} alt="Preview" className="w-full h-full object-cover" onError={e => e.target.style.display = 'none'} />
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : item.type === 'textarea' ? (
+                                        <textarea
+                                            value={item.value || ''}
+                                            onChange={e => updateValue(item.id, e.target.value)}
+                                            rows={2}
+                                            className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-sky-500 resize-none"
+                                        />
+                                    ) : (
+                                        <input
+                                            value={item.value || ''}
+                                            onChange={e => updateValue(item.id, e.target.value)}
+                                            className="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-sky-500"
+                                        />
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ))
+            )}
+        </div>
+    );
+};
+
+export default AdminSettings;

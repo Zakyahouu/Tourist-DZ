@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+:root {
+  /* Lighter, welcoming Touristic Theme */
+  --color-brand-primary: #e67e22;
+  /* Warm Terracotta */
+  --color-brand-secondary: #2980b9;
+  /* Desert Sky Blue */
+  --color-brand-accent: #f1c40f;
+  /* Golden Sand */
+  --color-brand-bg: #f8fcfb;
+  /* Very light cool tint background */
+  --color-brand-card: #ffffff;
+  /* White card */
+  --color-brand-text: #1e293b;
+  /* Dark slate text */
+  --color-brand-text-muted: #64748b;
+  /* Muted slate text */
+
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-arabic: 'Tajawal', 'Cairo', system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--color-brand-bg);
+  color: var(--color-brand-text);
+  font-family: var(--font-sans);
+}
+
+[dir="rtl"] {
+  font-family: var(--font-arabic);
+}
+
+/* Light Glassmorphism utility */
+.glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 1);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+}
+
+/* Dark Glassmorphism for specific overlays */
+.dark-glass {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
