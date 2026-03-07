@@ -16,6 +16,7 @@ const AdminAccommodations = () => {
     const [showImageModal, setShowImageModal] = useState(false);
     const [selectedAccForImages, setSelectedAccForImages] = useState(null);
     const [accImages, setAccImages] = useState([]);
+    const [loadingImages, setLoadingImages] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploadingImage, setUploadingImage] = useState(false);
 
@@ -66,12 +67,16 @@ const AdminAccommodations = () => {
 
     const openImages = async (acc) => {
         setSelectedAccForImages(acc);
-        await fetchAccImages(acc.id);
+        setAccImages([]);
         setShowImageModal(true);
+        setLoadingImages(true);
+        await fetchAccImages(acc.id);
+        setLoadingImages(false);
     };
 
     const fetchAccImages = async (accId) => {
-        const { data } = await supabase.from('accommodation_images').select('*').eq('accommodation_id', accId).order('created_at', { ascending: false });
+        const { data, error } = await supabase.from('accommodation_images').select('*').eq('accommodation_id', accId).order('created_at', { ascending: false });
+        if (error) return showToast('Could not load images: ' + error.message, 'error');
         setAccImages(data || []);
     };
 
@@ -244,7 +249,7 @@ const AdminAccommodations = () => {
                                 {accImages.length === 0 ? (
                                     <div className="text-center py-12 bg-white rounded-xl border border-slate-200 border-dashed">
                                         <ImageIcon size={48} className="mx-auto text-slate-300 mb-3" />
-                                        <p className="text-slate-500 font-medium">No images uploaded yet.</p>
+                                        <p className="text-slate-500 font-medium">{loadingImages ? 'Loading images...' : 'No images uploaded yet.'}</p>
                                     </div>
                                 ) : (
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

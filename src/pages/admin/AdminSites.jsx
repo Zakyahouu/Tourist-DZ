@@ -15,6 +15,7 @@ const AdminSites = () => {
     const [showImageModal, setShowImageModal] = useState(false);
     const [selectedSiteForImages, setSelectedSiteForImages] = useState(null);
     const [siteImages, setSiteImages] = useState([]);
+    const [loadingImages, setLoadingImages] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploadingImage, setUploadingImage] = useState(false);
     const [newImageUrl, setNewImageUrl] = useState(''); // Define this to avoid ReferenceError, though we use files now
@@ -120,12 +121,16 @@ const AdminSites = () => {
 
     const openImages = async (site) => {
         setSelectedSiteForImages(site);
-        await fetchSiteImages(site.id);
+        setSiteImages([]);
         setShowImageModal(true);
+        setLoadingImages(true);
+        await fetchSiteImages(site.id);
+        setLoadingImages(false);
     };
 
     const fetchSiteImages = async (siteId) => {
-        const { data } = await supabase.from('site_images').select('*').eq('site_id', siteId).order('created_at', { ascending: false });
+        const { data, error } = await supabase.from('site_images').select('*').eq('site_id', siteId).order('created_at', { ascending: false });
+        if (error) return showToast('Could not load images: ' + error.message, 'error');
         setSiteImages(data || []);
     };
 
@@ -456,7 +461,7 @@ const AdminSites = () => {
                             {siteImages.length === 0 ? (
                                 <div className="text-center py-10 text-slate-400 border-2 border-dashed border-slate-200 rounded-xl bg-white">
                                     <Image size={32} className="mx-auto mb-2 text-slate-300" />
-                                    No images found. Add one above.
+                                    {loadingImages ? 'Loading images...' : 'No images found. Add one above.'}
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
