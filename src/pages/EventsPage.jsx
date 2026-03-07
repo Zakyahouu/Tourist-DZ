@@ -107,7 +107,13 @@ const EventsPage = () => {
                     src={cms.events_hero_image || HERO_FALLBACK}
                     alt="Events Banner"
                     className="absolute inset-0 w-full h-full object-cover opacity-80"
-                    onError={(e) => { e.target.src = HERO_FALLBACK }}
+                    onError={(e) => {
+                        if (e.target.src !== HERO_FALLBACK) {
+                            e.target.src = HERO_FALLBACK;
+                        } else {
+                            e.target.style.display = 'none';
+                        }
+                    }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
                 <div className="relative z-10 text-center px-4 mt-8">

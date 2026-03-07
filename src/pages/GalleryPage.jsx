@@ -98,7 +98,14 @@ const GalleryPage = () => {
                     src={cms.gallery_hero_image || 'https://images.unsplash.com/photo-1534065406-8d6263567705?q=80&w=2670&auto=format&fit=crop'}
                     alt="Gallery Banner"
                     className="absolute inset-0 w-full h-full object-cover opacity-60"
-                    onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1534065406-8d6263567705?q=80&w=2670&auto=format&fit=crop' }}
+                    onError={(e) => {
+                        const fallback = 'https://images.unsplash.com/photo-1534065406-8d6263567705?q=80&w=2670&auto=format&fit=crop';
+                        if (e.target.src !== fallback) {
+                            e.target.src = fallback;
+                        } else {
+                            e.target.style.display = 'none';
+                        }
+                    }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-brand-bg)] to-transparent opacity-80"></div>
                 <div className="relative z-10 text-center px-4 mt-8">

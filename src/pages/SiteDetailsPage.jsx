@@ -107,7 +107,13 @@ const SiteDetailsPage = () => {
                     src={coverImage}
                     alt={site.name?.[lang] || site.name?.fr}
                     className="w-full h-full object-cover"
-                    onError={(e) => { e.target.src = FALLBACK_IMAGE }}
+                    onError={(e) => {
+                        if (e.target.src !== FALLBACK_IMAGE) {
+                            e.target.src = FALLBACK_IMAGE;
+                        } else {
+                            e.target.style.display = 'none';
+                        }
+                    }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-brand-bg)] via-black/20 to-black/30"></div>
 

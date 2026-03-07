@@ -99,7 +99,13 @@ const HomePage = () => {
                         src={cms.home_hero_image || HERO_FALLBACK}
                         alt="Biskra Oasis"
                         className="w-full h-full object-cover"
-                        onError={(e) => { e.target.src = HERO_FALLBACK }}
+                        onError={(e) => {
+                            if (e.target.src !== HERO_FALLBACK) {
+                                e.target.src = HERO_FALLBACK;
+                            } else {
+                                e.target.style.display = 'none'; // Prevent infinite loop if fallback also fails
+                            }
+                        }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-brand-bg)] via-[var(--color-brand-bg)]/20 to-black/30"></div>
                 </div>
@@ -197,7 +203,12 @@ const HomePage = () => {
                                             src={getSiteImage(site)}
                                             alt={site.name?.[lang] || site.name?.fr || ''}
                                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                            onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1545805553-c454eef7dd45?auto=format&fit=crop&q=80&w=800' }}
+                                            onError={(e) => {
+                                                const fallback = 'https://images.unsplash.com/photo-1545805553-c454eef7dd45?auto=format&fit=crop&q=80&w=800';
+                                                if (e.target.src !== fallback) {
+                                                    e.target.src = fallback;
+                                                }
+                                            }}
                                         />
                                         {/* Real Favorite Button */}
                                         <div className="absolute top-4 right-4 rtl:right-auto rtl:left-4 z-10">
