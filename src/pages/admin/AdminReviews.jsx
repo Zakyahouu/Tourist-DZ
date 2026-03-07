@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 import { Search, Trash2, Star, MessageSquare } from 'lucide-react';
+import { useToast } from '../../context/ToastContext';
 
 const AdminReviews = () => {
+    const { showToast } = useToast();
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -33,7 +35,9 @@ const AdminReviews = () => {
 
     async function handleDelete(id) {
         if (!confirm('Delete this review? This action cannot be undone.')) return;
-        await supabase.from('reviews').delete().eq('id', id);
+        const { error } = await supabase.from('reviews').delete().eq('id', id);
+        if (error) return showToast(error.message, 'error');
+        showToast('Review deleted.', 'success');
         fetchReviews();
     }
 

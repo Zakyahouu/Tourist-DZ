@@ -119,7 +119,7 @@ const SiteDetailsPage = () => {
                     <FavoriteButton siteId={site.id} size={20} />
                 </div>
 
-                <div className="absolute bottom-0 left-0 right-0 p-8 max-w-7xl mx-auto z-10 translate-y-4">
+                <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 max-w-7xl mx-auto z-10 translate-y-4">
                     <div className="flex items-center mb-4 gap-3">
                         <span className="bg-white text-[var(--color-brand-primary)] px-4 py-1.5 text-xs font-black rounded-full uppercase tracking-wider shadow-lg capitalize">
                             {site.category}
@@ -132,7 +132,7 @@ const SiteDetailsPage = () => {
                             </div>
                         )}
                     </div>
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-[var(--color-brand-text)] drop-shadow-sm leading-tight">
+                    <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-[var(--color-brand-text)] drop-shadow-sm leading-tight">
                         {site.name?.[lang] || site.name?.fr}
                     </h1>
                 </div>

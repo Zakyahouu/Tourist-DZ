@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 import { Search, Eye, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { useToast } from '../../context/ToastContext';
 
 const STATUS_OPTIONS = ['pending', 'approved', 'rejected'];
 
 const AdminSolidarity = () => {
+    const { showToast } = useToast();
     const [apps, setApps] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -29,7 +31,9 @@ const AdminSolidarity = () => {
     });
 
     async function changeStatus(id, newStatus) {
-        await supabase.from('solidarity_applications').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', id);
+        const { error } = await supabase.from('solidarity_applications').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', id);
+        if (error) return showToast(error.message, 'error');
+        showToast(`Application marked as ${newStatus}.`, 'success');
         fetchApps();
     }
 

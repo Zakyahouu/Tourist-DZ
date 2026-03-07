@@ -81,7 +81,9 @@ const AdminEvents = () => {
 
     const handleDelete = async (id) => {
         if (!confirm('Delete this event permanently?')) return;
-        await supabase.from('events').delete().eq('id', id);
+        const { error } = await supabase.from('events').delete().eq('id', id);
+        if (error) return showToast(error.message, 'error');
+        showToast('Event deleted.', 'success');
         fetchEvents();
     };
 
@@ -96,6 +98,7 @@ const AdminEvents = () => {
             location: evt.location || '',
             latitude: evt.latitude || '',
             longitude: evt.longitude || '',
+            max_participants: evt.max_participants || '',
             is_solidarity: evt.is_solidarity,
             is_active: evt.is_active,
             audio_url: evt.audio_url || '',
@@ -122,7 +125,9 @@ const AdminEvents = () => {
 
     const toggleRegistrationStatus = async (regId, currentStatus) => {
         const newStatus = currentStatus === 'confirmed' ? 'pending' : 'confirmed';
-        await supabase.from('event_registrations').update({ status: newStatus }).eq('id', regId);
+        const { error } = await supabase.from('event_registrations').update({ status: newStatus }).eq('id', regId);
+        if (error) return showToast(error.message, 'error');
+        showToast(`Registration set to ${newStatus}.`, 'success');
         openRegistrations(selectedEventForRegistrations);
     };
 

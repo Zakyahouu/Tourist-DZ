@@ -62,35 +62,6 @@ const AdminSettings = () => {
         }
     }
 
-    const handleImageUpload = async (id, file) => {
-        if (!file) return;
-        setUploadingKey(id);
-
-        const fileExt = file.name.split('.').pop();
-        const fileName = `cms-${Date.now()}.${fileExt}`;
-
-        try {
-            const { error: uploadError } = await supabase.storage
-                .from('site-images')
-                .upload(fileName, file);
-
-            if (uploadError) throw uploadError;
-
-            const { data: { publicUrl } } = supabase.storage
-                .from('site-images')
-                .getPublicUrl(fileName);
-
-            updateValue(id, publicUrl);
-            showToast('Image uploaded successfully!', 'success');
-            return publicUrl;
-        } catch (error) {
-            showToast('Upload failed: ' + error.message, 'error');
-            return null;
-        } finally {
-            setUploadingKey(null);
-        }
-    };
-
     // Group by category — exclude image-type items (images are managed as local assets)
     const grouped = content.reduce((acc, item) => {
         if (item.type === 'image') return acc; // images are local assets, not editable

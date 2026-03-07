@@ -42,6 +42,7 @@ const AuthPage = () => {
                     email,
                     password,
                     options: {
+                        emailRedirectTo: `${window.location.origin}/auth`,
                         data: {
                             full_name: fullName,
                             preferred_language: i18n.language
@@ -84,7 +85,7 @@ const AuthPage = () => {
             </div>
 
             {/* Right Side: Auth Form */}
-            <div className="w-full lg:w-1/2 flex flex-col pt-safe bg-white lg:bg-[var(--color-brand-bg)]">
+            <div className="w-full lg:w-1/2 flex flex-col pt-16 lg:pt-0 bg-white lg:bg-[var(--color-brand-bg)]">
 
                 <div className="p-8 lg:p-12">
                     <button onClick={() => navigate('/')} className="inline-flex items-center px-4 py-2 bg-gray-50 rounded-full text-sm font-bold text-gray-600 hover:text-[var(--color-brand-secondary)] hover:bg-gray-100 border border-gray-200 shadow-sm transition-all">

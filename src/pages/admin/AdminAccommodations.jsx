@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 import { Search, Plus, Edit2, Trash2, X, Hotel, Phone, Globe, DollarSign, Image as ImageIcon } from 'lucide-react';
+import { useToast } from '../../context/ToastContext';
 
 const TYPES = ['hotel', 'guesthouse', 'hostel'];
 
 const AdminAccommodations = () => {
+    const { showToast } = useToast();
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -37,18 +39,23 @@ const AdminAccommodations = () => {
     });
 
     async function handleSave(formData) {
+        let error;
         if (modal.mode === 'create') {
-            await supabase.from('accommodations').insert(formData);
+            ({ error } = await supabase.from('accommodations').insert(formData));
         } else {
-            await supabase.from('accommodations').update(formData).eq('id', modal.data.id);
+            ({ error } = await supabase.from('accommodations').update(formData).eq('id', modal.data.id));
         }
+        if (error) return showToast(error.message, 'error');
+        showToast(`Accommodation ${modal.mode === 'create' ? 'created' : 'updated'} successfully!`, 'success');
         setModal(null);
         fetchItems();
     }
 
     async function handleDelete(id) {
         if (!confirm('Delete this accommodation?')) return;
-        await supabase.from('accommodations').delete().eq('id', id);
+        const { error } = await supabase.from('accommodations').delete().eq('id', id);
+        if (error) return showToast(error.message, 'error');
+        showToast('Accommodation deleted.', 'success');
         fetchItems();
     }
 

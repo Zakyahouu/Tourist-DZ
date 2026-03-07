@@ -82,8 +82,8 @@ const AccommodationDetailsPage = () => {
                     </span>
                 </div>
 
-                <div className="absolute bottom-0 left-0 right-0 p-8 max-w-7xl mx-auto z-10 translate-y-4">
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white drop-shadow-lg leading-tight mb-3">
+                <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 max-w-7xl mx-auto z-10 translate-y-4">
+                    <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white drop-shadow-lg leading-tight mb-3">
                         {accommodation.name?.[lang] || accommodation.name?.fr}
                     </h1>
 

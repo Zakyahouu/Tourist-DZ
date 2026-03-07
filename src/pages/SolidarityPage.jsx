@@ -61,7 +61,7 @@ const SolidarityPage = () => {
     if (success) {
         return (
             <div className="flex flex-col min-h-screen bg-[var(--color-brand-bg)] items-center justify-center p-6 text-center">
-                <div className="bg-white p-12 lg:p-16 rounded-[3rem] border border-teal-100 max-w-xl w-full flex flex-col items-center animate-fade-in relative overflow-hidden shadow-2xl shadow-teal-900/10">
+                <div className="bg-white p-8 sm:p-12 lg:p-16 rounded-[3rem] border border-teal-100 max-w-xl w-full flex flex-col items-center animate-fade-in relative overflow-hidden shadow-2xl shadow-teal-900/10">
                     <div className="absolute inset-0 bg-teal-500/5 blur-3xl rounded-full"></div>
                     <div className="w-28 h-28 bg-gradient-to-br from-teal-400 to-teal-500 rounded-full flex items-center justify-center mb-8 shadow-xl shadow-teal-500/30 relative z-10 border-8 border-teal-50">
                         <CheckCircle size={56} className="text-white" />
@@ -85,14 +85,14 @@ const SolidarityPage = () => {
                 <div className="bg-white border border-gray-100 rounded-[3rem] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.05)] flex flex-col lg:flex-row">
 
                     {/* Left Side: Program Information */}
-                    <div className="w-full lg:w-1/2 p-10 lg:p-16 bg-gradient-to-br from-teal-500 to-teal-700 relative border-b lg:border-b-0 lg:border-r border-teal-800/10 flex flex-col justify-center overflow-hidden">
+                    <div className="w-full lg:w-1/2 p-6 sm:p-10 lg:p-16 bg-gradient-to-br from-teal-500 to-teal-700 relative border-b lg:border-b-0 lg:border-r border-teal-800/10 flex flex-col justify-center overflow-hidden">
                         <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none mix-blend-overlay"></div>
 
                         <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-[2rem] flex items-center justify-center mb-10 border border-white/30 shadow-xl relative z-10">
                             <HeartHandshake size={44} className="text-white" />
                         </div>
 
-                        <h1 className="text-5xl lg:text-6xl font-black text-white mb-6 relative z-10 leading-[1.1] tracking-tight">
+                        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white mb-6 relative z-10 leading-[1.1] tracking-tight">
                             Solidarity <br /><span className="text-teal-100">Tourism</span>
                         </h1>
                         <p className="text-xl text-teal-50 mb-12 leading-relaxed max-w-md relative z-10 font-medium">
@@ -122,8 +122,8 @@ const SolidarityPage = () => {
                     </div>
 
                     {/* Right Side: Application Form */}
-                    <div className="w-full lg:w-1/2 p-10 lg:p-16 bg-white flex flex-col justify-center relative">
-                        <h2 className="text-4xl font-black text-[var(--color-brand-text)] mb-3 tracking-tight">Request a Trip Spot</h2>
+                    <div className="w-full lg:w-1/2 p-6 sm:p-10 lg:p-16 bg-white flex flex-col justify-center relative">
+                        <h2 className="text-2xl sm:text-4xl font-black text-[var(--color-brand-text)] mb-3 tracking-tight">Request a Trip Spot</h2>
                         <p className="text-base text-gray-500 font-medium mb-10 pb-8 border-b border-gray-100">Fill out the details below. All fields are confidential and required to help us prepare.</p>
 
                         <form onSubmit={handleSubmit} className="space-y-6">

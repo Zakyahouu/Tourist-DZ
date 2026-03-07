@@ -75,6 +75,7 @@ const AdminSites = () => {
             });
             if (error) return showToast(error.message, 'error');
         }
+        showToast(`Site ${editingSite ? 'updated' : 'created'} successfully!`, 'success');
         setShowModal(false);
         setEditingSite(null);
         setForm(emptySite);
@@ -83,7 +84,9 @@ const AdminSites = () => {
 
     const handleDelete = async (id) => {
         if (!confirm('Delete this site permanently?')) return;
-        await supabase.from('tourist_sites').delete().eq('id', id);
+        const { error } = await supabase.from('tourist_sites').delete().eq('id', id);
+        if (error) return showToast(error.message, 'error');
+        showToast('Site deleted.', 'success');
         fetchSites();
     };
 

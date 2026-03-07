@@ -110,10 +110,10 @@ const HomePage = () => {
                     <span className="inline-block py-1.5 px-4 rounded-full bg-white/90 text-[var(--color-brand-primary)] font-bold tracking-widest uppercase text-xs mb-6 shadow-md backdrop-blur-sm">
                         {cms.home_hero_badge || t('app.tagline')}
                     </span>
-                    <h1 className="text-5xl md:text-7xl font-black text-white mb-6 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
+                    <h1 className="text-3xl sm:text-5xl md:text-7xl font-black text-white mb-6 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
                         {cms.home_hero_title || t('home.discoverBiskra').split(' ')[0]} <span className="text-[var(--color-brand-accent)]">{t('home.discoverBiskra').split(' ')[1] || 'Biskra'}</span>
                     </h1>
-                    <p className="text-lg md:text-xl text-white font-medium mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] max-w-2xl mx-auto">
+                    <p className="text-sm sm:text-lg md:text-xl text-white font-medium mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] max-w-2xl mx-auto">
                         {cms.home_hero_subtitle || t('home.heroSubtitle')}
                     </p>
 
@@ -135,11 +135,11 @@ const HomePage = () => {
                             value={searchQuery}
                             onChange={e => setSearchQuery(e.target.value)}
                             placeholder={t('home.searchPlaceholder')}
-                            className="w-full bg-transparent text-gray-800 focus:outline-none placeholder-gray-400 py-3 text-lg font-medium"
+                            className="w-full bg-transparent text-gray-800 focus:outline-none placeholder-gray-400 py-2 sm:py-3 text-base sm:text-lg font-medium"
                         />
                         <button
                             type="submit"
-                            className="bg-[var(--color-brand-primary)] hover:bg-[#c74c1a] text-white px-8 py-3 rounded-full font-bold text-sm uppercase tracking-wider transition-colors shadow-lg shadow-orange-500/30 flex items-center gap-2 flex-shrink-0"
+                            className="bg-[var(--color-brand-primary)] hover:bg-[#c74c1a] text-white px-5 py-2.5 sm:px-8 sm:py-3 rounded-full font-bold text-sm uppercase tracking-wider transition-colors shadow-lg shadow-orange-500/30 flex items-center gap-2 flex-shrink-0"
                         >
                             Search <ArrowRight size={16} className="rtl:rotate-180" />
                         </button>
@@ -149,7 +149,7 @@ const HomePage = () => {
 
             <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
                 {/* Category Filter */}
-                <div className="bg-white rounded-2xl p-4 md:p-6 mb-20 shadow-xl border border-gray-100 flex overflow-x-auto lg:overflow-visible lg:justify-center space-x-4 hide-scrollbar">
+                <div className="bg-white rounded-2xl p-4 md:p-6 mb-8 md:mb-20 shadow-xl border border-gray-100 flex overflow-x-auto lg:overflow-visible lg:justify-center space-x-4 hide-scrollbar">
                     {categories.map((cat) => (
                         <button
                             key={cat.id}
@@ -170,7 +170,7 @@ const HomePage = () => {
                     <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-10 gap-4">
                         <div>
                             <span className="text-[var(--color-brand-primary)] font-bold tracking-widest uppercase text-xs mb-2 block">{t('home.featuredPlaces')}</span>
-                            <h2 className="text-4xl font-bold text-[var(--color-brand-text)]">
+                            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-brand-text)]">
                                 {searchQuery ? `Results for "${searchQuery}"` : activeCategory === 'all' ? t('home.discoverBiskra') : `${categories.find(c => c.id === activeCategory)?.label || ''} Sites`}
                             </h2>
                         </div>
@@ -237,7 +237,7 @@ const HomePage = () => {
                     <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-10 gap-4">
                         <div>
                             <span className="text-[var(--color-brand-primary)] font-bold tracking-widest uppercase text-xs mb-2 block">{t('details.events')}</span>
-                            <h2 className="text-4xl font-bold text-[var(--color-brand-text)]">{t('home.upcomingEvents')}</h2>
+                            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-brand-text)]">{t('home.upcomingEvents')}</h2>
                         </div>
                         <Link to="/events" className="inline-flex items-center text-[var(--color-brand-secondary)] hover:text-blue-800 font-bold transition-colors bg-[var(--color-brand-secondary)]/5 hover:bg-[var(--color-brand-secondary)]/10 px-5 py-2.5 rounded-xl">
                             {t('home.viewAll')} <ArrowRight size={20} className="ml-2 rtl:rotate-180" />

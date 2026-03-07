@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 import { Search, Trash2, Trophy, Image as ImageIcon } from 'lucide-react';
+import { useToast } from '../../context/ToastContext';
 
 const AdminGallery = () => {
+    const { showToast } = useToast();
     const [photos, setPhotos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -22,12 +24,16 @@ const AdminGallery = () => {
 
     const handleDelete = async (id) => {
         if (!confirm('Delete this photo?')) return;
-        await supabase.from('gallery').delete().eq('id', id);
+        const { error } = await supabase.from('gallery').delete().eq('id', id);
+        if (error) return showToast(error.message, 'error');
+        showToast('Photo deleted.', 'success');
         fetchPhotos();
     };
 
     const toggleCompetition = async (photo) => {
-        await supabase.from('gallery').update({ is_competition_entry: !photo.is_competition_entry }).eq('id', photo.id);
+        const { error } = await supabase.from('gallery').update({ is_competition_entry: !photo.is_competition_entry }).eq('id', photo.id);
+        if (error) return showToast(error.message, 'error');
+        showToast(photo.is_competition_entry ? 'Removed from competition.' : 'Added to competition!', 'success');
         fetchPhotos();
     };
 

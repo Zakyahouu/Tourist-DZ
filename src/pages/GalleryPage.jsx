@@ -104,7 +104,7 @@ const GalleryPage = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-brand-bg)] via-[var(--color-brand-bg)]/40 to-black/50"></div>
                 <div className="relative z-10 text-center px-4 mt-8">
-                    <h1 className="text-4xl md:text-5xl font-black text-white drop-shadow-lg mb-2" dangerouslySetInnerHTML={{ __html: cms.gallery_hero_title || 'Biskra <span class="text-[var(--color-brand-accent)]">Through Your Lens</span>' }}>
+                    <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-white drop-shadow-lg mb-2" dangerouslySetInnerHTML={{ __html: cms.gallery_hero_title || 'Biskra <span class="text-[var(--color-brand-accent)]">Through Your Lens</span>' }}>
                     </h1>
                     <p className="text-gray-100 max-w-xl mx-auto drop-shadow-md font-medium">
                         {cms.gallery_hero_subtitle || 'Share your best shots of the oasis or vote in the latest photo competition.'}
