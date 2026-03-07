@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Camera, Heart, Trophy, X, Upload } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import galleryHeroImage from '../assets/gallery_hero_image.webp';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useNavigate } from 'react-router-dom';
@@ -90,26 +91,16 @@ const GalleryPage = () => {
         setPhotos(prev => prev.map(p => p.id === photoId ? { ...p, likes_count: (p.likes_count || 0) + 1 } : p));
     }
 
-    const HERO_FALLBACK = 'https://images.unsplash.com/photo-1534065406-8d6263567705?q=80&w=2670&auto=format&fit=crop';
+    const HERO_FALLBACK = galleryHeroImage;
 
     return (
         <div className="flex flex-col min-h-screen bg-[var(--color-brand-bg)] relative">
             {/* Hero */}
             <div className="relative w-full h-[25vh] lg:h-[35vh] bg-black overflow-hidden flex flex-col items-center justify-center">
                 <img
-                    src={cms.gallery_hero_image || HERO_FALLBACK}
+                    src={galleryHeroImage}
                     alt="Biskra Gallery"
-                    className="w-full h-full object-cover transition-opacity duration-500"
-                    onLoad={(e) => e.target.style.opacity = 1}
-                    style={{ opacity: 0 }}
-                    onError={(e) => {
-                        if (e.target.src !== HERO_FALLBACK) {
-                            e.target.src = HERO_FALLBACK;
-                        } else {
-                            e.target.parentElement.style.background = 'linear-gradient(to bottom, #434343, #000000)'; // Dark professional fallback
-                            e.target.style.display = 'none';
-                        }
-                    }}
+                    className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-brand-bg)] via-[var(--color-brand-bg)]/40 to-black/50"></div>
                 <div className="relative z-10 text-center px-4 mt-8">
@@ -124,12 +115,12 @@ const GalleryPage = () => {
             <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 -mt-6 relative z-20 pb-20">
                 {/* Controls */}
                 <div className="flex flex-col md:flex-row justify-between items-center mb-12 bg-white/90 backdrop-blur-md p-4 rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/50">
-                    <div className="flex space-x-2 space-x-reverse bg-gray-50 rounded-2xl p-1.5 border border-gray-200 w-full md:w-auto mb-4 md:mb-0">
-                        <button onClick={() => setFilter('all')} className={`flex - 1 md: flex - none px - 6 py - 2.5 text - sm font - bold rounded - xl transition - all ${filter === 'all' ? 'bg-white text-[var(--color-brand-secondary)] shadow-sm' : 'text-gray-500 hover:text-gray-800'} `}>
+                    <div className="flex space-x-2 bg-gray-50 rounded-2xl p-1.5 border border-gray-200 w-full md:w-auto mb-4 md:mb-0">
+                        <button onClick={() => setFilter('all')} className={`flex-1 md:flex-none px-6 py-2.5 text-sm font-bold rounded-xl transition-all ${filter === 'all' ? 'bg-white text-[var(--color-brand-secondary)] shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}>
                             All Discoveries
                         </button>
-                        <button onClick={() => setFilter('competition')} className={`flex - 1 md: flex - none px - 6 py - 2.5 text - sm font - bold rounded - xl transition - all ${filter === 'competition' ? 'bg-white text-[var(--color-brand-secondary)] shadow-sm' : 'text-gray-500 hover:text-gray-800'} `}>
-                            🏆 Competition
+                        <button onClick={() => setFilter('competition')} className={`flex-1 md:flex-none px-6 py-2.5 text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 ${filter === 'competition' ? 'bg-white text-[var(--color-brand-secondary)] shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}>
+                            <Trophy size={14} /> Competition
                         </button>
                     </div>
                     <button onClick={() => user ? setShowUpload(true) : navigate('/auth', { state: { from: '/gallery' } })} className="w-full md:w-auto flex items-center justify-center px-8 py-3.5 bg-[var(--color-brand-primary)] hover:bg-orange-500 text-white font-bold rounded-2xl transition-colors shadow-lg shadow-orange-500/30">
@@ -206,7 +197,7 @@ const GalleryPage = () => {
                                 </div>
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input type="checkbox" checked={isCompetition} onChange={e => setIsCompetition(e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-sky-600" />
-                                    <span className="text-sm font-medium text-gray-700">🏆 Submit as competition entry</span>
+                                    <span className="text-sm font-medium text-gray-700 flex items-center gap-1.5"><Trophy size={14} /> Submit as competition entry</span>
                                 </label>
                                 <div className="flex justify-end gap-3 pt-2">
                                     <button type="button" onClick={() => setShowUpload(false)} className="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>

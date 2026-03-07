@@ -4,6 +4,7 @@ import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import { Search, Filter, Image as ImageIcon, MapPin, Star, ArrowLeft } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { Link, useLocation } from 'react-router-dom';
+import fallbackNatural from '../assets/fallback_image_natural.webp';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -48,7 +49,7 @@ const MapPage = () => {
     const [selectedSite, setSelectedSite] = useState(null);
     const lang = i18n.language || 'fr';
 
-    const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1545805553-c454eef7dd45?auto=format&fit=crop&q=80&w=800';
+    const FALLBACK_IMAGE = fallbackNatural;
 
     useEffect(() => {
         async function fetchMapData() {
@@ -178,7 +179,7 @@ const MapPage = () => {
                                     <img src={selectedSite.site_images[0].image_url} alt="" className="w-full h-full object-cover" />
                                 ) : (
                                     <img
-                                        src={`https://images.unsplash.com/photo-1545805553-c454eef7dd45?auto=format&fit=crop&q=80&w=600`}
+                                        src={fallbackNatural}
                                         alt=""
                                         className="w-full h-full object-cover opacity-90"
                                     />

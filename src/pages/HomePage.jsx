@@ -1,7 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, MapPin, Calendar as CalendarIcon, ArrowRight, Star } from 'lucide-react';
+import { Search, MapPin, Calendar as CalendarIcon, ArrowRight, Star, Globe, Landmark, Leaf, Palette, Flame } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import heroImage from '../assets/home_hero_image.webp';
+import fallbackNatural from '../assets/fallback_image_natural.webp';
+import fallbackHistorical from '../assets/fallback_image_historical.webp';
+import fallbackCultural from '../assets/fallback_image_cultural.webp';
+import fallbackThermal from '../assets/fallback_image_thermal.webp';
 import { Link, useNavigate } from 'react-router-dom';
 import FavoriteButton from '../components/FavoriteButton';
 
@@ -70,25 +75,23 @@ const HomePage = () => {
     }
 
     const categories = [
-        { id: 'all', label: t('categories.all'), icon: '🌍' },
-        { id: 'historical', label: t('categories.historical'), icon: '🏛️' },
-        { id: 'natural', label: t('categories.natural'), icon: '🌴' },
-        { id: 'cultural', label: t('categories.cultural'), icon: '🏺' },
-        { id: 'thermal', label: t('categories.thermal'), icon: '♨️' },
+        { id: 'all', label: t('categories.all'), Icon: Globe },
+        { id: 'historical', label: t('categories.historical'), Icon: Landmark },
+        { id: 'natural', label: t('categories.natural'), Icon: Leaf },
+        { id: 'cultural', label: t('categories.cultural'), Icon: Palette },
+        { id: 'thermal', label: t('categories.thermal'), Icon: Flame },
     ];
 
     const getSiteImage = (site) => {
         if (site.site_images?.[0]?.image_url) return site.site_images[0].image_url;
         const fallbacks = {
-            natural: cms.fallback_image_natural || 'https://images.unsplash.com/photo-1545805553-c454eef7dd45?auto=format&fit=crop&q=80&w=800',
-            historical: cms.fallback_image_historical || 'https://images.unsplash.com/photo-1549487535-61df1f822aa7?auto=format&fit=crop&q=80&w=800',
-            cultural: cms.fallback_image_cultural || 'https://images.unsplash.com/photo-1534065406-8d6263567705?auto=format&fit=crop&q=80&w=800',
-            thermal: cms.fallback_image_thermal || 'https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&fit=crop&q=80&w=800',
+            natural: fallbackNatural,
+            historical: fallbackHistorical,
+            cultural: fallbackCultural,
+            thermal: fallbackThermal,
         };
-        return fallbacks[site.category] || fallbacks.natural;
+        return fallbacks[site.category] || fallbackNatural;
     };
-
-    const HERO_FALLBACK = 'https://images.unsplash.com/photo-1545805553-c454eef7dd45?auto=format&fit=crop&q=80&w=2670';
 
     return (
         <div className="flex flex-col min-h-screen bg-[var(--color-brand-bg)]">
@@ -96,19 +99,9 @@ const HomePage = () => {
             <section className="relative h-[65vh] flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 z-0">
                     <img
-                        src={cms.home_hero_image || HERO_FALLBACK}
+                        src={heroImage}
                         alt="Biskra Oasis"
-                        className="w-full h-full object-cover transition-opacity duration-500"
-                        onLoad={(e) => e.target.style.opacity = 1}
-                        style={{ opacity: 0 }}
-                        onError={(e) => {
-                            if (e.target.src !== HERO_FALLBACK) {
-                                e.target.src = HERO_FALLBACK;
-                            } else {
-                                e.target.parentElement.style.background = 'linear-gradient(to bottom, #2c3e50, #000000)'; // Final emergency background
-                                e.target.style.display = 'none';
-                            }
-                        }}
+                        className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-brand-bg)] via-[var(--color-brand-bg)]/40 to-black/50"></div>
                 </div>
@@ -161,12 +154,12 @@ const HomePage = () => {
                         <button
                             key={cat.id}
                             onClick={() => setActiveCategory(cat.id)}
-                            className={`flex-shrink-0 flex items-center px-5 py-3 rounded-xl text-sm font-bold transition-all ${activeCategory === cat.id
+                            className={`flex-shrink-0 flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all ${activeCategory === cat.id
                                 ? 'bg-[var(--color-brand-secondary)] text-white shadow-md'
                                 : 'bg-transparent hover:bg-gray-50 text-[var(--color-brand-text-muted)] hover:text-[var(--color-brand-secondary)]'
                                 }`}
                         >
-                            <span className="mr-2 text-xl">{cat.icon}</span>
+                            <cat.Icon size={16} className="flex-shrink-0" />
                             {cat.label}
                         </button>
                     ))}
@@ -206,12 +199,7 @@ const HomePage = () => {
                                             src={getSiteImage(site)}
                                             alt={site.name?.[lang] || site.name?.fr || ''}
                                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                            onError={(e) => {
-                                                const fallback = 'https://images.unsplash.com/photo-1545805553-c454eef7dd45?auto=format&fit=crop&q=80&w=800';
-                                                if (e.target.src !== fallback) {
-                                                    e.target.src = fallback;
-                                                }
-                                            }}
+                                            onError={(e) => { e.target.src = fallbackNatural; }}
                                         />
                                         {/* Real Favorite Button */}
                                         <div className="absolute top-4 right-4 rtl:right-auto rtl:left-4 z-10">

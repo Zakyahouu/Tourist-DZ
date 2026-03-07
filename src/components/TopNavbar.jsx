@@ -42,7 +42,7 @@ const TopNavbar = () => {
                     <div className="flex items-center flex-shrink-0 z-10 basis-1/4">
                         <Link to="/" className="flex items-center">
                             <span className={`text-2xl font-black tracking-tight transition-colors ${scrolled ? 'text-gray-900' : 'text-gray-900 drop-shadow-sm'}`}>
-                                Tourstic<span className="text-[var(--color-brand-primary)]">DZ</span>
+                                Tourist <span className="text-[var(--color-brand-primary)]">DZ</span>
                             </span>
                         </Link>
                     </div>

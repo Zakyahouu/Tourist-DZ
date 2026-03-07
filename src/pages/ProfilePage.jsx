@@ -4,6 +4,7 @@ import { Heart, Star, Calendar, LogOut, MapPin, Image as ImageIcon, Shield } fro
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
+import fallbackHistorical from '../assets/fallback_image_historical.webp';
 
 const ProfilePage = () => {
     const { i18n } = useTranslation();
@@ -247,7 +248,7 @@ const ProfilePage = () => {
                             favoriteSites.map((fav) => {
                                 const site = fav.tourist_sites;
                                 if (!site) return null;
-                                const imgUrl = site.site_images?.[0]?.image_url || 'https://images.unsplash.com/photo-1549487535-61df1f822aa7?auto=format&fit=crop&q=80&w=600';
+                                const imgUrl = site.site_images?.[0]?.image_url || fallbackHistorical;
 
                                 return (
                                     <Link key={fav.id} to={`/site/${site.id}`} className="group bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-all flex flex-col">
@@ -256,7 +257,7 @@ const ProfilePage = () => {
                                                 src={imgUrl}
                                                 alt={site.name?.[i18n.language] || site.name?.fr}
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                                onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1549487535-61df1f822aa7?auto=format&fit=crop&q=80&w=600' }}
+                                                onError={(e) => { e.target.src = fallbackHistorical; }}
                                             />
                                             <div className="absolute top-3 left-3 bg-white/90 backdrop-blur px-2.5 py-1 rounded text-[10px] font-black uppercase text-[var(--color-brand-primary)] tracking-wider">
                                                 {site.category}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../supabaseClient';
 import { Mail, Lock, User, ArrowRight, ArrowLeft } from 'lucide-react';
+import authPanelImage from '../assets/home_hero_image.webp';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -63,10 +64,9 @@ const AuthPage = () => {
             {/* Left Side: Image/Branding (Hidden on small screens) */}
             <div className="hidden lg:flex w-1/2 relative flex-col justify-end p-16 overflow-hidden bg-[var(--color-brand-secondary)] border-r border-gray-200">
                 <img
-                    src="https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?q=80&w=2670&auto=format&fit=crop"
-                    alt="Biskra Arch"
+                    src={authPanelImage}
+                    alt="Biskra"
                     className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-80"
-                    onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?q=80&w=2670&auto=format&fit=crop' }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-brand-secondary)] via-[var(--color-brand-secondary)]/50 to-transparent"></div>
 
@@ -78,7 +78,7 @@ const AuthPage = () => {
                         {t('app.tagline')}
                     </h1>
                     <p className="text-xl text-blue-100 font-medium leading-relaxed">
-                        Join ToursticDZ to unlock hidden gems, organize your itinerary, and connect with the community.
+                        Join Tourist DZ to unlock hidden gems, organize your itinerary, and connect with the community.
                     </p>
                 </div>
             </div>
@@ -102,7 +102,7 @@ const AuthPage = () => {
                             </span>
                         </div>
                         <h1 className="text-3xl font-black text-[var(--color-brand-text)] text-center mb-3 tracking-tight">{t('app.title')}</h1>
-                        <p className="text-[var(--color-brand-text-muted)] text-base font-medium text-center">{t('app.tagline')} ✨</p>
+                        <p className="text-[var(--color-brand-text-muted)] text-base font-medium text-center">{t('app.tagline')}</p>
                     </div>
 
                     <div className="mb-10 text-center lg:text-left rtl:lg:text-right">

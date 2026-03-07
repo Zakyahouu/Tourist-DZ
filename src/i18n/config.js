@@ -7,7 +7,7 @@ const resources = {
     en: {
         translation: {
             "app": {
-                "title": "ToursticDZ",
+                "title": "Tourist DZ",
                 "tagline": "Discover Biskra",
                 "login": "Login",
                 "signup": "Sign Up",
@@ -57,7 +57,7 @@ const resources = {
     fr: {
         translation: {
             "app": {
-                "title": "ToursticDZ",
+                "title": "Tourist DZ",
                 "tagline": "Découvrez Biskra",
                 "login": "Connexion",
                 "signup": "S'inscrire",
@@ -107,7 +107,7 @@ const resources = {
     ar: {
         translation: {
             "app": {
-                "title": "ToursticDZ",
+                "title": "Tourist DZ",
                 "tagline": "اكتشف بسكرة",
                 "login": "تسجيل الدخول",
                 "signup": "إنشاء حساب",

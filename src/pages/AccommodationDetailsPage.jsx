@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapPin, Star, ArrowLeft, Hotel, Phone, Globe, DollarSign } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import fallbackNatural from '../assets/fallback_image_natural.webp';
 import { useParams, useNavigate } from 'react-router-dom';
 
 const AccommodationDetailsPage = () => {
@@ -50,7 +51,7 @@ const AccommodationDetailsPage = () => {
     );
 
     // Sort images so primary is first
-    const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=2670';
+    const FALLBACK_IMAGE = fallbackNatural;
     const images = (accommodation.accommodation_images || [])
         .sort((a, b) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0))
         .map(img => img.image_url)
@@ -66,11 +67,10 @@ const AccommodationDetailsPage = () => {
                     src={coverImage}
                     alt={accommodation.name?.[lang] || accommodation.name?.fr || 'Accommodation image'}
                     className="w-full h-full object-cover"
-                    onError={(e) => { e.target.src = FALLBACK_IMAGE }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-brand-bg)] via-black/20 to-black/40"></div>
 
-                <div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10">
+                <div className="absolute top-20 left-6 right-6 flex justify-between items-center z-10">
                     <button
                         onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/map')}
                         className="flex items-center text-[var(--color-brand-text)] font-bold bg-white/90 hover:bg-white backdrop-blur-md px-5 py-2.5 rounded-full transition-colors shadow-sm"

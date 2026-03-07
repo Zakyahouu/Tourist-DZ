@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 import { useToast } from '../../context/ToastContext';
-import { Save, Image as ImageIcon, Type, FileText, CheckCircle, Upload, AlertCircle } from 'lucide-react';
+import { Save, Type, FileText, CheckCircle } from 'lucide-react';
 
 const AdminSettings = () => {
     const { showToast } = useToast();
@@ -9,7 +9,6 @@ const AdminSettings = () => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
-    const [uploadingKey, setUploadingKey] = useState(null);
 
     useEffect(() => { fetchContent(); }, []);
 
@@ -19,7 +18,6 @@ const AdminSettings = () => {
 
         let currentData = data || [];
         const requiredKeys = [
-            { key: 'gallery_hero_image', value: 'https://images.unsplash.com/photo-1534065406-8d6263567705?q=80&w=2670&auto=format&fit=crop', label: 'Gallery Page Hero Image', type: 'image', category: 'hero' },
             { key: 'gallery_hero_title', value: 'Biskra Through Your Lens', label: 'Gallery Page Hero Title', type: 'text', category: 'hero' },
             { key: 'gallery_hero_subtitle', value: 'Share your best shots of the oasis or vote in the latest photo competition.', label: 'Gallery Page Hero Subtitle', type: 'textarea', category: 'hero' }
         ];
@@ -93,8 +91,9 @@ const AdminSettings = () => {
         }
     };
 
-    // Group by category
+    // Group by category — exclude image-type items (images are managed as local assets)
     const grouped = content.reduce((acc, item) => {
+        if (item.type === 'image') return acc; // images are local assets, not editable
         const cat = item.category || 'general';
         if (!acc[cat]) acc[cat] = [];
         acc[cat].push(item);
@@ -102,14 +101,13 @@ const AdminSettings = () => {
     }, {});
 
     const categoryLabels = {
-        hero: '🖼️ Hero Banners & Headlines',
-        media: '📸 Fallback Images (when sites have no photos)',
-        general: '⚙️ General'
+        hero: 'Hero Headlines & Badges',
+        media: 'Fallback Content',
+        general: 'General'
     };
 
     const typeIcon = (type) => {
         switch (type) {
-            case 'image': return <ImageIcon size={14} className="text-pink-500" />;
             case 'textarea': return <FileText size={14} className="text-blue-500" />;
             default: return <Type size={14} className="text-slate-400" />;
         }
@@ -119,8 +117,8 @@ const AdminSettings = () => {
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-slate-800">Website Content & Media</h2>
-                    <p className="text-sm text-slate-500">Control hero images, page titles, and fallback media across the website.</p>
+                    <h2 className="text-2xl font-bold text-slate-800">Website Content</h2>
+                    <p className="text-sm text-slate-500">Edit page titles, subtitles, and hero text across the website.</p>
                 </div>
                 <button onClick={saveAll} disabled={saving} className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-sm transition-all shadow-sm ${saved ? 'bg-emerald-600 text-white' : 'bg-sky-600 hover:bg-sky-700 text-white'} disabled:opacity-50`}>
                     {saved ? <><CheckCircle size={18} /> Saved!</> : saving ? 'Saving...' : <><Save size={18} /> Save All Changes</>}
@@ -149,32 +147,7 @@ const AdminSettings = () => {
                                         <span className="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded font-mono">{item.key}</span>
                                     </div>
 
-                                    {item.type === 'image' ? (
-                                        <div className="flex gap-4 items-start">
-                                            <div className="flex-1 flex flex-col gap-2">
-                                                <div className="flex items-center gap-2">
-                                                    <input
-                                                        type="file"
-                                                        accept="image/*"
-                                                        onChange={e => handleImageUpload(item.id, e.target.files[0])}
-                                                        className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sky-500"
-                                                    />
-                                                    {uploadingKey === item.id && <span className="text-xs font-bold text-sky-600 animate-pulse">Uploading...</span>}
-                                                </div>
-                                                <input
-                                                    value={item.value || ''}
-                                                    onChange={e => updateValue(item.id, e.target.value)}
-                                                    placeholder="Or paste an Image URL..."
-                                                    className="w-full border border-slate-200 rounded-lg px-4 py-2 text-xs focus:outline-none focus:border-sky-500 font-mono text-slate-500"
-                                                />
-                                            </div>
-                                            {item.value && (
-                                                <div className="w-24 h-16 rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
-                                                    <img src={item.value} alt="Preview" className="w-full h-full object-cover" onError={e => e.target.style.display = 'none'} />
-                                                </div>
-                                            )}
-                                        </div>
-                                    ) : item.type === 'textarea' ? (
+                                    {item.type === 'textarea' ? (
                                         <textarea
                                             value={item.value || ''}
                                             onChange={e => updateValue(item.id, e.target.value)}

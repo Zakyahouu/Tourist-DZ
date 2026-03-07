@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Calendar, Users, MapPin, Search, CheckCircle, Headphones, QrCode } from 'lucide-react';
+import { Calendar, Users, MapPin, Search, CheckCircle, Headphones, QrCode, Accessibility } from 'lucide-react';
+import eventsHeroImage from '../assets/events_hero_image.webp';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -96,27 +97,15 @@ const EventsPage = () => {
         { id: 'cultural', label: t('categories.cultural') },
     ];
 
-    const HERO_FALLBACK = 'https://images.unsplash.com/photo-1549487535-61df1f822aa7?q=80&w=2670&auto=format&fit=crop';
-
     return (
         <div className="flex flex-col min-h-screen bg-[var(--color-brand-bg)]">
 
             {/* Desktop Hero Section */}
             <div className="relative w-full h-[30vh] lg:h-[40vh] bg-gray-100 overflow-hidden flex items-center justify-center">
                 <img
-                    src={cms.events_hero_image || HERO_FALLBACK}
+                    src={eventsHeroImage}
                     alt="Biskra Events"
-                    className="w-full h-full object-cover transition-opacity duration-500"
-                    onLoad={(e) => e.target.style.opacity = 1}
-                    style={{ opacity: 0 }}
-                    onError={(e) => {
-                        if (e.target.src !== HERO_FALLBACK) {
-                            e.target.src = HERO_FALLBACK;
-                        } else {
-                            e.target.parentElement.style.background = 'linear-gradient(to bottom, #1a2a6c, #b21f1f, #fdbb2d)'; // Cool sunset fallback
-                            e.target.style.display = 'none';
-                        }
-                    }}
+                    className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-brand-bg)] via-[var(--color-brand-bg)]/40 to-black/50"></div>
                 <div className="relative z-10 text-center px-4 mt-8">
@@ -193,8 +182,8 @@ const EventsPage = () => {
                                                     {event.type}
                                                 </span>
                                                 {event.is_solidarity && (
-                                                    <span title="Solidarity Tourism Event" className="bg-teal-50 text-teal-600 px-2.5 py-1 rounded-lg border border-teal-200 text-[10px] font-bold tracking-wider uppercase flex items-center">
-                                                        ♿ Solidarity
+                                                    <span title="Solidarity Tourism Event" className="bg-teal-50 text-teal-600 px-2.5 py-1 rounded-lg border border-teal-200 text-[10px] font-bold tracking-wider uppercase flex items-center gap-1">
+                                                        <Accessibility size={10} /> Solidarity
                                                     </span>
                                                 )}
                                             </div>

@@ -7,7 +7,7 @@ const Footer = () => {
                 <div>
                     <Link to="/" className="inline-block">
                         <span className="text-2xl font-black tracking-tight text-[var(--color-brand-secondary)]">
-                            Tourstic<span className="text-[var(--color-brand-primary)]">DZ</span>
+                            Tourist <span className="text-[var(--color-brand-primary)]">DZ</span>
                         </span>
                     </Link>
                     <p className="mt-4 text-[var(--color-brand-text-muted)] text-sm leading-relaxed max-w-sm mx-auto md:mx-0">
@@ -32,7 +32,7 @@ const Footer = () => {
                 </div>
             </div>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-8 border-t border-gray-100 text-center text-gray-400 text-sm font-medium">
-                &copy; {new Date().getFullYear()} ToursticDZ. Built for Biskra. All rights reserved.
+                &copy; {new Date().getFullYear()} Tourist DZ. Built for Biskra. All rights reserved.
             </div>
         </footer>
     );
