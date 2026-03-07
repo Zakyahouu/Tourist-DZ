@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MapPin, Accessibility, Star, ArrowLeft, QrCode, Send } from 'lucide-react';
+import { MapPin, Accessibility, Star, ArrowLeft, QrCode, Send, Headphones } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useParams, useNavigate } from 'react-router-dom';
 import FavoriteButton from '../components/FavoriteButton';
@@ -263,13 +263,13 @@ const SiteDetailsPage = () => {
                                         </li>
                                     )}
                                     <li className="flex items-start">
-                                        <div className={`p-2.5 rounded-xl mr-3 flex-shrink-0 ${site.wheelchair_accessible ? 'bg-teal-50 text-teal-600' : 'bg-gray-50 text-gray-400'}`}>
+                                        <div className="bg-green-100 p-2 rounded-lg mr-3 text-green-600">
                                             <Accessibility size={18} />
                                         </div>
-                                        <div>
-                                            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-0.5">Accessibility</p>
-                                            <p className="text-sm text-[var(--color-brand-text)] font-semibold">
-                                                {site.wheelchair_accessible ? 'Wheelchair Accessible' : 'Limited Access'}
+                                        <div className="text-left">
+                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{t('details.accessibility')}</p>
+                                            <p className="text-sm font-bold text-gray-700">
+                                                {site.wheelchair_accessible ? t('accessibility.accessible') : t('accessibility.limited')}
                                             </p>
                                         </div>
                                     </li>
@@ -310,16 +310,35 @@ const SiteDetailsPage = () => {
                                             <QrCode size={28} className="text-white" />
                                         </div>
                                         <div>
-                                            <h4 className="font-black text-white text-lg">Smart Audio Guide</h4>
-                                            <p className="text-xs text-blue-200 font-bold uppercase tracking-wider mt-0.5">Available On-Site</p>
+                                            <h4 className="font-black text-white text-lg">{t('features.qrTitle')}</h4>
+                                            <p className="text-xs text-blue-200 font-bold uppercase tracking-wider mt-0.5">{t('features.availableIn')} {i18n.language?.toUpperCase()}</p>
                                         </div>
                                     </div>
                                     <p className="text-sm text-blue-100/90 leading-relaxed font-medium relative z-10 mb-4">
-                                        Scan the QR code at the entrance for a multi-lingual audio tour of this site.
+                                        {t('features.qrDesc')}
                                     </p>
                                     <div className="bg-white rounded-2xl p-4 inline-block relative z-10">
                                         <img src={site.qr_code_url} alt="QR Code" className="w-32 h-32 object-contain" />
                                     </div>
+                                </div>
+                            )}
+
+                            {/* Audio Guide Card */}
+                            {site.audio_url && (
+                                <div className="bg-white rounded-3xl p-7 border border-gray-100 shadow-xl shadow-gray-200/50">
+                                    <div className="flex items-center mb-5 border-b border-gray-100 pb-3">
+                                        <div className="bg-orange-100 p-2.5 rounded-xl mr-4 text-orange-600">
+                                            <Headphones size={20} />
+                                        </div>
+                                        <h3 className="text-lg font-black text-[var(--color-brand-text)]">{t('features.audioGuide')}</h3>
+                                    </div>
+                                    <audio controls className="w-full">
+                                        <source src={site.audio_url} type="audio/mpeg" />
+                                        Your browser does not support the audio element.
+                                    </audio>
+                                    <p className="text-xs text-slate-400 mt-4 leading-relaxed italic">
+                                        {t('features.audioGuideDesc')}
+                                    </p>
                                 </div>
                             )}
                         </div>

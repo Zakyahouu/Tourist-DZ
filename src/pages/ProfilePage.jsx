@@ -132,15 +132,22 @@ const ProfilePage = () => {
                             )}
                         </div>
                         <div className="flex-1 text-center sm:text-left">
-                            <h1 className="text-2xl font-black text-[var(--color-brand-text)] mb-1">{displayName}</h1>
+                            <div className="flex items-center justify-center sm:justify-start gap-3 mb-1">
+                                <h1 className="text-2xl font-black text-[var(--color-brand-text)]">{displayName}</h1>
+                                {isAdmin && (
+                                    <span className="flex items-center gap-1.5 px-3 py-1 bg-sky-100 text-sky-700 text-[10px] font-black uppercase tracking-widest rounded-full border border-sky-200">
+                                        <Shield size={12} className="fill-current" /> Admin
+                                    </span>
+                                )}
+                            </div>
                             <p className="text-sm text-gray-400 font-medium mb-3">{user.email}</p>
                             <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
                                 <span className="text-xs font-bold px-3 py-1 rounded-full bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] capitalize">
                                     {safeProfile.role || 'tourist'}
                                 </span>
                                 {isAdmin && (
-                                    <Link to="/admin" className="text-xs font-bold px-3 py-1 rounded-full bg-sky-50 text-sky-600 border border-sky-200 flex items-center gap-1 hover:bg-sky-100 transition-colors">
-                                        <Shield size={12} /> Admin Panel
+                                    <Link to="/admin" className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center gap-1 hover:bg-emerald-100 transition-colors">
+                                        Access Admin Dashboard
                                     </Link>
                                 )}
                             </div>

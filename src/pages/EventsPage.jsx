@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Calendar, Users, MapPin, Search, CheckCircle } from 'lucide-react';
+import { Calendar, Users, MapPin, Search, CheckCircle, Headphones, QrCode } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -32,6 +32,7 @@ const EventsPage = () => {
                 let query = supabase
                     .from('events')
                     .select('*')
+                    .eq('is_active', true)
                     .gte('end_date', new Date().toISOString()) // Only future/current events
                     .order('start_date', { ascending: true });
 
@@ -205,6 +206,27 @@ const EventsPage = () => {
                                                 <div className="flex items-center text-xs text-gray-500 font-bold">
                                                     <Users size={14} className="mr-2 text-[var(--color-brand-primary)]" />
                                                     {event.max_participants} places
+                                                </div>
+                                            )}
+                                            {event.audio_url && (
+                                                <div className="mt-4 p-3 bg-orange-50 rounded-xl border border-orange-100">
+                                                    <p className="text-[10px] font-bold text-orange-600 uppercase mb-2 flex items-center">
+                                                        <Headphones size={12} className="mr-1" /> {t('features.audioGuide')}
+                                                    </p>
+                                                    <audio controls className="w-full h-8 scale-90 -ml-2">
+                                                        <source src={event.audio_url} type="audio/mpeg" />
+                                                    </audio>
+                                                </div>
+                                            )}
+                                            {event.qr_code_url && (
+                                                <div className="mt-4 p-3 bg-blue-50 rounded-xl border border-blue-100 flex items-center gap-3">
+                                                    <div className="p-1.5 bg-blue-600 rounded-lg shrink-0">
+                                                        <QrCode size={14} className="text-white" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[10px] font-bold text-blue-700 uppercase">{t('features.qrTitle')}</p>
+                                                        <p className="text-[9px] text-blue-500 font-medium tracking-tight">{t('features.qrDesc')}</p>
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>

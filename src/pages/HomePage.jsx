@@ -109,10 +109,10 @@ const HomePage = () => {
                         {cms.home_hero_badge || t('app.tagline')}
                     </span>
                     <h1 className="text-5xl md:text-7xl font-black text-white mb-6 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
-                        {cms.home_hero_title || 'Discover'} <span className="text-[var(--color-brand-accent)]">Biskra</span>
+                        {cms.home_hero_title || t('home.discoverBiskra').split(' ')[0]} <span className="text-[var(--color-brand-accent)]">{t('home.discoverBiskra').split(' ')[1] || 'Biskra'}</span>
                     </h1>
                     <p className="text-lg md:text-xl text-white font-medium mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] max-w-2xl mx-auto">
-                        {cms.home_hero_subtitle || "Experience the enchanting palm groves, therapeutic hot springs, and rich history of Algeria's premier oasis destination."}
+                        {cms.home_hero_subtitle || t('home.heroSubtitle')}
                     </p>
 
                     {/* Global Hero Search Bar */}
@@ -132,7 +132,7 @@ const HomePage = () => {
                             type="text"
                             value={searchQuery}
                             onChange={e => setSearchQuery(e.target.value)}
-                            placeholder="Search destinations, hotels, events..."
+                            placeholder={t('home.searchPlaceholder')}
                             className="w-full bg-transparent text-gray-800 focus:outline-none placeholder-gray-400 py-3 text-lg font-medium"
                         />
                         <button
@@ -167,13 +167,13 @@ const HomePage = () => {
                 <section className="mb-24">
                     <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-10 gap-4">
                         <div>
-                            <span className="text-[var(--color-brand-primary)] font-bold tracking-widest uppercase text-xs mb-2 block">Top Destinations</span>
+                            <span className="text-[var(--color-brand-primary)] font-bold tracking-widest uppercase text-xs mb-2 block">{t('home.featuredPlaces')}</span>
                             <h2 className="text-4xl font-bold text-[var(--color-brand-text)]">
-                                {searchQuery ? `Results for "${searchQuery}"` : activeCategory === 'all' ? 'Must-visit in Biskra' : `${categories.find(c => c.id === activeCategory)?.label || ''} Sites`}
+                                {searchQuery ? `Results for "${searchQuery}"` : activeCategory === 'all' ? t('home.discoverBiskra') : `${categories.find(c => c.id === activeCategory)?.label || ''} Sites`}
                             </h2>
                         </div>
                         <Link to="/map" className="inline-flex items-center text-[var(--color-brand-secondary)] hover:text-blue-800 font-bold transition-colors bg-[var(--color-brand-secondary)]/5 hover:bg-[var(--color-brand-secondary)]/10 px-5 py-2.5 rounded-xl">
-                            View on Map <ArrowRight size={20} className="ml-2 rtl:rotate-180" />
+                            {t('home.viewAll')} <ArrowRight size={20} className="ml-2 rtl:rotate-180" />
                         </Link>
                     </div>
 
@@ -234,11 +234,11 @@ const HomePage = () => {
                 <section className="mb-24 pb-12">
                     <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-10 gap-4">
                         <div>
-                            <span className="text-[var(--color-brand-primary)] font-bold tracking-widest uppercase text-xs mb-2 block">Experiences</span>
-                            <h2 className="text-4xl font-bold text-[var(--color-brand-text)]">Upcoming Tours & Events</h2>
+                            <span className="text-[var(--color-brand-primary)] font-bold tracking-widest uppercase text-xs mb-2 block">{t('details.events')}</span>
+                            <h2 className="text-4xl font-bold text-[var(--color-brand-text)]">{t('home.upcomingEvents')}</h2>
                         </div>
                         <Link to="/events" className="inline-flex items-center text-[var(--color-brand-secondary)] hover:text-blue-800 font-bold transition-colors bg-[var(--color-brand-secondary)]/5 hover:bg-[var(--color-brand-secondary)]/10 px-5 py-2.5 rounded-xl">
-                            View All <ArrowRight size={20} className="ml-2 rtl:rotate-180" />
+                            {t('home.viewAll')} <ArrowRight size={20} className="ml-2 rtl:rotate-180" />
                         </Link>
                     </div>
 
