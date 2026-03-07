@@ -90,6 +90,8 @@ const GalleryPage = () => {
         setPhotos(prev => prev.map(p => p.id === photoId ? { ...p, likes_count: (p.likes_count || 0) + 1 } : p));
     }
 
+    const HERO_FALLBACK = 'https://images.unsplash.com/photo-1534065406-8d6263567705?q=80&w=2670&auto=format&fit=crop';
+
     return (
         <div className="flex flex-col min-h-screen bg-[var(--color-brand-bg)] relative">
             {/* Hero */}
