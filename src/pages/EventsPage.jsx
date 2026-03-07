@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { QRCodeSVG } from 'qrcode.react';
 import { Calendar, Users, MapPin, Search, CheckCircle, Headphones, QrCode, Accessibility } from 'lucide-react';
 import eventsHeroImage from '../assets/events_hero_image.webp';
 import { supabase } from '../supabaseClient';
@@ -216,17 +217,15 @@ const EventsPage = () => {
                                                     </audio>
                                                 </div>
                                             )}
-                                            {event.qr_code_url && (
-                                                <div className="mt-4 p-3 bg-blue-50 rounded-xl border border-blue-100 flex items-center gap-3">
-                                                    <div className="p-1.5 bg-blue-600 rounded-lg shrink-0">
-                                                        <QrCode size={14} className="text-white" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[10px] font-bold text-blue-700 uppercase">{t('features.qrTitle')}</p>
-                                                        <p className="text-[9px] text-blue-500 font-medium tracking-tight">{t('features.qrDesc')}</p>
-                                                    </div>
+                                            <div className="mt-4 p-3 bg-blue-50 rounded-xl border border-blue-100 flex items-center gap-3">
+                                                <div className="bg-white rounded-lg p-1 shrink-0 border border-blue-100">
+                                                    <QRCodeSVG value={`${window.location.origin}/events`} size={48} />
                                                 </div>
-                                            )}
+                                                <div>
+                                                    <p className="text-[10px] font-bold text-blue-700 uppercase">{t('features.qrTitle')}</p>
+                                                    <p className="text-[9px] text-blue-500 font-medium tracking-tight">{t('features.qrDesc')}</p>
+                                                </div>
+                                            </div>
                                         </div>
 
                                         <button

@@ -28,7 +28,6 @@ const AdminEvents = () => {
         is_solidarity: false,
         is_active: true,
         audio_url: '',
-        qr_code_url: '',
     };
 
     const [form, setForm] = useState(emptyEvent);
@@ -62,7 +61,6 @@ const AdminEvents = () => {
             is_solidarity: form.is_solidarity,
             is_active: form.is_active,
             audio_url: form.audio_url,
-            qr_code_url: form.qr_code_url,
         };
 
         if (editingEvent) {
@@ -102,7 +100,6 @@ const AdminEvents = () => {
             is_solidarity: evt.is_solidarity,
             is_active: evt.is_active,
             audio_url: evt.audio_url || '',
-            qr_code_url: evt.qr_code_url || '',
         });
         setShowModal(true);
     };
@@ -260,40 +257,14 @@ const AdminEvents = () => {
                             </div>
                             <div className="pt-4 border-t border-slate-100 space-y-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">QR Code Image URL (Marketing)</label>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Audio Narration URL (MP3)</label>
                                     <input
                                         type="text"
-                                        value={form.qr_code_url}
-                                        onChange={e => setForm({ ...form, qr_code_url: e.target.value })}
-                                        placeholder="https://.../event-qr.png"
+                                        value={form.audio_url}
+                                        onChange={e => setForm({ ...form, audio_url: e.target.value })}
+                                        placeholder="https://.../narration.mp3"
                                         className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-sky-500"
                                     />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Audio Narration URL (MP3)</label>
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="text"
-                                            value={form.audio_url}
-                                            onChange={e => setForm({ ...form, audio_url: e.target.value })}
-                                            placeholder="https://.../narration.mp3"
-                                            className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-sky-500"
-                                        />
-                                        {editingEvent && (
-                                            <button
-                                                onClick={() => {
-                                                    const url = `https://tourstizbiskra.com/event/${editingEvent.id}`;
-                                                    navigator.clipboard.writeText(url);
-                                                    showToast('Scan URL copied to clipboard!', 'success');
-                                                }}
-                                                type="button"
-                                                className="px-3 py-2 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-200"
-                                                title="Copy the URL to encode in your QR generator"
-                                            >
-                                                Copy Scan URL
-                                            </button>
-                                        )}
-                                    </div>
                                     <p className="text-[10px] text-slate-400 mt-1 italic">Add an audio narration/guide for this event.</p>
                                 </div>
                             </div>

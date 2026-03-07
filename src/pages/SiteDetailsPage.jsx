@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { QRCodeSVG } from 'qrcode.react';
 import { MapPin, Accessibility, Star, ArrowLeft, QrCode, Send, Headphones } from 'lucide-react';
 import fallbackHistorical from '../assets/fallback_image_historical.webp';
 import { supabase } from '../supabaseClient';
@@ -324,27 +325,25 @@ const SiteDetailsPage = () => {
                                 )}
                             </div>
 
-                            {/* QR Code Card — from DB */}
-                            {site.qr_code_url && (
-                                <div className="bg-gradient-to-br from-[var(--color-brand-secondary)] to-blue-900 rounded-3xl p-7 border border-blue-800 shadow-xl overflow-hidden relative">
-                                    <div className="absolute -right-8 -top-8 w-40 h-40 bg-blue-400/20 rounded-full blur-3xl pointer-events-none"></div>
-                                    <div className="flex items-center mb-4 relative z-10">
-                                        <div className="bg-white/20 backdrop-blur-md p-3 rounded-xl mr-4 border border-white/20">
-                                            <QrCode size={28} className="text-white" />
-                                        </div>
-                                        <div>
-                                            <h4 className="font-black text-white text-lg">{t('features.qrTitle')}</h4>
-                                            <p className="text-xs text-blue-200 font-bold uppercase tracking-wider mt-0.5">{t('features.availableIn')} {i18n.language?.toUpperCase()}</p>
-                                        </div>
+                            {/* QR Code Card — auto-generated */}
+                            <div className="bg-gradient-to-br from-[var(--color-brand-secondary)] to-blue-900 rounded-3xl p-7 border border-blue-800 shadow-xl overflow-hidden relative">
+                                <div className="absolute -right-8 -top-8 w-40 h-40 bg-blue-400/20 rounded-full blur-3xl pointer-events-none"></div>
+                                <div className="flex items-center mb-4 relative z-10">
+                                    <div className="bg-white/20 backdrop-blur-md p-3 rounded-xl mr-4 border border-white/20">
+                                        <QrCode size={28} className="text-white" />
                                     </div>
-                                    <p className="text-sm text-blue-100/90 leading-relaxed font-medium relative z-10 mb-4">
-                                        {t('features.qrDesc')}
-                                    </p>
-                                    <div className="bg-white rounded-2xl p-4 inline-block relative z-10">
-                                        <img src={site.qr_code_url} alt="QR Code" className="w-32 h-32 object-contain" />
+                                    <div>
+                                        <h4 className="font-black text-white text-lg">{t('features.qrTitle')}</h4>
+                                        <p className="text-xs text-blue-200 font-bold uppercase tracking-wider mt-0.5">{t('features.availableIn')} {i18n.language?.toUpperCase()}</p>
                                     </div>
                                 </div>
-                            )}
+                                <p className="text-sm text-blue-100/90 leading-relaxed font-medium relative z-10 mb-4">
+                                    {t('features.qrDesc')}
+                                </p>
+                                <div className="bg-white rounded-2xl p-4 inline-block relative z-10">
+                                    <QRCodeSVG value={window.location.href} size={128} />
+                                </div>
+                            </div>
 
                             {/* Audio Guide Card */}
                             {site.audio_url && (
