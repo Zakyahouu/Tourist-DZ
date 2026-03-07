@@ -6,6 +6,7 @@ import galleryHeroImage from '../assets/gallery_hero_image.webp';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useNavigate } from 'react-router-dom';
+import { useCms } from '../context/CmsContext';
 
 const isSafeUrl = (url) => /^https?:\/\//i.test(url);
 
@@ -17,18 +18,36 @@ const GalleryPage = () => {
     const [photos, setPhotos] = useState([]);
     const [filter, setFilter] = useState('all');
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [hasMore, setHasMore] = useState(false);
+    const [page, setPage] = useState(0);
+    const PAGE_SIZE = 24;
     const [showUpload, setShowUpload] = useState(false);
     const [uploadUrl, setUploadUrl] = useState('');
     const [uploadCaption, setUploadCaption] = useState('');
     const [isCompetition, setIsCompetition] = useState(false);
     const [uploading, setUploading] = useState(false);
-    const [cms, setCms] = useState({});
+    const cms = useCms();
     const [likedPhotoIds, setLikedPhotoIds] = useState(new Set());
 
     useEffect(() => {
-        fetchGallery();
-        fetchCms();
+        setPage(0);
+        setPhotos([]);
+        fetchGallery(0, true);
     }, [filter]);
+
+    useEffect(() => {
+        if (user) fetchMyLikes();
+        else setLikedPhotoIds(new Set());
+    }, [user]);
+
+    async function fetchMyLikes() {
+        const { data } = await supabase
+            .from('gallery_likes')
+            .select('photo_id')
+            .eq('user_id', user.id);
+        if (data) setLikedPhotoIds(new Set(data.map(r => r.photo_id)));
+    }
 
     async function fetchCms() {
         try {
@@ -37,26 +56,36 @@ const GalleryPage = () => {
         } catch (e) { console.error('CMS fetch error', e); }
     }
 
-    async function fetchGallery() {
-        setLoading(true);
+    async function fetchGallery(pageNum = 0, replace = false) {
+        pageNum === 0 ? setLoading(true) : setLoadingMore(true);
         try {
             let query = supabase
                 .from('gallery')
                 .select('*, profiles(full_name)')
-                .order('created_at', { ascending: false });
+                .order('created_at', { ascending: false })
+                .range(pageNum * PAGE_SIZE, pageNum * PAGE_SIZE + PAGE_SIZE - 1);
 
             if (filter === 'competition') {
                 query = query.eq('is_competition_entry', true);
             }
 
             const { data } = await query;
-            setPhotos(data || []);
+            const rows = data || [];
+            setHasMore(rows.length === PAGE_SIZE);
+            setPhotos(prev => replace ? rows : [...prev, ...rows]);
         } catch (error) {
             console.error('Error fetching gallery:', error);
         } finally {
             setLoading(false);
+            setLoadingMore(false);
         }
     }
+
+    const handleLoadMore = () => {
+        const next = page + 1;
+        setPage(next);
+        fetchGallery(next);
+    };
 
     const handleUpload = async (e) => {
         e.preventDefault();
@@ -77,7 +106,8 @@ const GalleryPage = () => {
             setUploadCaption('');
             setIsCompetition(false);
             showToast('Photo shared successfully!', 'success');
-            fetchGallery();
+            setPage(0);
+            fetchGallery(0, true);
         } catch (err) {
             console.error(err);
             showToast('Error uploading. Please try again.', 'error');
@@ -88,13 +118,29 @@ const GalleryPage = () => {
 
     async function handleLike(photoId) {
         if (!user) { navigate('/auth', { state: { from: '/gallery' } }); return; }
-        if (likedPhotoIds.has(photoId)) return; // already liked
-        const photo = photos.find(p => p.id === photoId);
-        if (!photo) return;
-        const { error } = await supabase.from('gallery').update({ likes_count: (photo.likes_count || 0) + 1 }).eq('id', photoId);
-        if (error) return;
-        setLikedPhotoIds(prev => new Set([...prev, photoId]));
-        setPhotos(prev => prev.map(p => p.id === photoId ? { ...p, likes_count: (p.likes_count || 0) + 1 } : p));
+        // Optimistic update
+        const alreadyLiked = likedPhotoIds.has(photoId);
+        setLikedPhotoIds(prev => {
+            const next = new Set(prev);
+            alreadyLiked ? next.delete(photoId) : next.add(photoId);
+            return next;
+        });
+        setPhotos(prev => prev.map(p => p.id === photoId
+            ? { ...p, likes_count: Math.max(0, (p.likes_count || 0) + (alreadyLiked ? -1 : 1)) }
+            : p));
+        // Atomic DB call
+        const { error } = await supabase.rpc('toggle_gallery_like', { p_photo_id: photoId });
+        if (error) {
+            // Rollback optimistic update
+            setLikedPhotoIds(prev => {
+                const next = new Set(prev);
+                alreadyLiked ? next.add(photoId) : next.delete(photoId);
+                return next;
+            });
+            setPhotos(prev => prev.map(p => p.id === photoId
+                ? { ...p, likes_count: Math.max(0, (p.likes_count || 0) + (alreadyLiked ? 1 : -1)) }
+                : p));
+        }
     }
 
     const HERO_FALLBACK = galleryHeroImage;
@@ -168,7 +214,7 @@ const GalleryPage = () => {
                                             {photo.profiles?.full_name || 'Anonymous'}
                                         </span>
                                     </div >
-                                    <button onClick={() => handleLike(photo.id)} disabled={likedPhotoIds.has(photo.id)} className={`flex items-center text-sm font-bold text-white backdrop-blur-md px-4 py-2 rounded-xl border border-white/30 transition-all shadow-lg ${likedPhotoIds.has(photo.id) ? 'bg-pink-500 cursor-default' : 'bg-white/20 hover:bg-pink-500'}`}>
+                                    <button onClick={() => handleLike(photo.id)} className={`flex items-center text-sm font-bold text-white backdrop-blur-md px-4 py-2 rounded-xl border border-white/30 transition-all shadow-lg ${likedPhotoIds.has(photo.id) ? 'bg-pink-500' : 'bg-white/20 hover:bg-pink-500'}`}>
                                         <Heart size={16} className="mr-1.5 fill-current" />
                                         {photo.likes_count || 0}
                                     </button>
@@ -176,6 +222,19 @@ const GalleryPage = () => {
                             </div >
                         ))}
                     </div >
+                )}
+
+                {/* Load More */}
+                {hasMore && (
+                    <div className="flex justify-center mt-10">
+                        <button
+                            onClick={handleLoadMore}
+                            disabled={loadingMore}
+                            className="px-8 py-3.5 bg-[var(--color-brand-secondary)] hover:bg-blue-800 text-white font-bold rounded-2xl transition-colors shadow-lg disabled:opacity-60"
+                        >
+                            {loadingMore ? 'Loading...' : 'Load More Photos'}
+                        </button>
+                    </div>
                 )}
             </main >
 

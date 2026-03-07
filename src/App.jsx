@@ -4,6 +4,7 @@ import './i18n/config';
 
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
+import { CmsProvider } from './context/CmsContext';
 import AdminGuard from './components/AdminGuard';
 import AdminLayout from './components/AdminLayout';
 import TopNavbar from './components/TopNavbar';
@@ -51,6 +52,7 @@ function App() {
   return (
     <ToastProvider>
       <AuthProvider>
+        <CmsProvider>
         <Router>
           <Routes>
             {/* Admin Routes — separate layout, guarded by role */}
@@ -97,6 +99,7 @@ function App() {
             </Route>
           </Routes>
         </Router>
+        </CmsProvider>
       </AuthProvider>
     </ToastProvider>
   );

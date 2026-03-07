@@ -181,8 +181,11 @@ const AdminSites = () => {
     };
 
     const handleSetPrimaryImage = async (imageId) => {
-        await supabase.from('site_images').update({ is_primary: false }).eq('site_id', selectedSiteForImages.id);
-        await supabase.from('site_images').update({ is_primary: true }).eq('id', imageId);
+        const { error } = await supabase.rpc('set_primary_site_image', {
+            p_image_id: imageId,
+            p_site_id: selectedSiteForImages.id
+        });
+        if (error) return showToast('Could not set primary image: ' + error.message, 'error');
         fetchSiteImages(selectedSiteForImages.id);
     };
 

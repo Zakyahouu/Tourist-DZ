@@ -130,8 +130,11 @@ const AdminAccommodations = () => {
     };
 
     const handleSetPrimaryImage = async (imageId) => {
-        await supabase.from('accommodation_images').update({ is_primary: false }).eq('accommodation_id', selectedAccForImages.id);
-        await supabase.from('accommodation_images').update({ is_primary: true }).eq('id', imageId);
+        const { error } = await supabase.rpc('set_primary_accommodation_image', {
+            p_image_id: imageId,
+            p_accommodation_id: selectedAccForImages.id
+        });
+        if (error) return showToast('Could not set primary image: ' + error.message, 'error');
         fetchAccImages(selectedAccForImages.id);
     };
 

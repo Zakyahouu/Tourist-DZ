@@ -43,7 +43,7 @@ const MapPage = () => {
     const { t, i18n } = useTranslation();
     const location = useLocation();
     const [sites, setSites] = useState([]);
-    const [cms, setCms] = useState({});
+    const cms = useCms();
     const [filter, setFilter] = useState('all');
     const [searchQuery, setSearchQuery] = useState(location.state?.searchQuery || '');
     const [selectedSite, setSelectedSite] = useState(null);
@@ -88,14 +88,7 @@ const MapPage = () => {
                 setLoading(false);
             }
         }
-        async function fetchCms() {
-            try {
-                const { data } = await supabase.from('site_content').select('key, value');
-                if (data) setCms(Object.fromEntries(data.map(d => [d.key, d.value])));
-            } catch (e) { console.error('CMS fetch error', e); }
-        }
         fetchMapData();
-        fetchCms();
     }, []);
 
     const filteredSites = sites.filter(site => {

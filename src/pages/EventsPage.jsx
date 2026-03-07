@@ -7,6 +7,7 @@ import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useNavigate } from 'react-router-dom';
+import { useCms } from '../context/CmsContext';
 
 const EventsPage = () => {
     const { t, i18n } = useTranslation();
@@ -17,16 +18,10 @@ const EventsPage = () => {
     const [filter, setFilter] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
-    const [cms, setCms] = useState({});
     const [registeredEvents, setRegisteredEvents] = useState(new Set());
     const [registering, setRegistering] = useState(null);
     const lang = i18n.language || 'fr';
-
-    useEffect(() => {
-        supabase.from('site_content').select('key, value').then(({ data }) => {
-            if (data) setCms(Object.fromEntries(data.map(d => [d.key, d.value])));
-        }).catch(() => { });
-    }, []);
+    const cms = useCms();
 
     const fetchEvents = useCallback(async () => {
         try {

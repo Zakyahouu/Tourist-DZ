@@ -9,6 +9,7 @@ import fallbackCultural from '../assets/fallback_image_cultural.webp';
 import fallbackThermal from '../assets/fallback_image_thermal.webp';
 import { Link, useNavigate } from 'react-router-dom';
 import FavoriteButton from '../components/FavoriteButton';
+import { useCms } from '../context/CmsContext';
 
 const HomePage = () => {
     const { t, i18n } = useTranslation();
@@ -17,18 +18,11 @@ const HomePage = () => {
     const [loading, setLoading] = useState(true);
     const [activeCategory, setActiveCategory] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
-    const [cms, setCms] = useState({});
     const [heroSearch, setHeroSearch] = useState('');
     const navigate = useNavigate();
 
     const lang = i18n.language || 'fr';
-
-    // Load CMS content once
-    useEffect(() => {
-        supabase.from('site_content').select('key, value').then(({ data }) => {
-            if (data) setCms(Object.fromEntries(data.map(d => [d.key, d.value])));
-        }).catch(() => { });
-    }, []);
+    const cms = useCms();
 
     // Debounced fetch
     useEffect(() => {

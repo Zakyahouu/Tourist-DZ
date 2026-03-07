@@ -16,7 +16,7 @@ const AdminUsers = () => {
 
     async function fetchUsers() {
         setLoading(true);
-        const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+        const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(500);
         if (!error) setUsers(data || []);
         setLoading(false);
     }

@@ -17,7 +17,8 @@ const AdminGallery = () => {
         const { data, error } = await supabase
             .from('gallery')
             .select('*, profiles(full_name, email)')
-            .order('created_at', { ascending: false });
+            .order('created_at', { ascending: false })
+            .limit(500);
         if (!error) setPhotos(data || []);
         setLoading(false);
     }

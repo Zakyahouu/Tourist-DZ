@@ -14,7 +14,7 @@ const AdminReviews = () => {
 
     async function fetchReviews() {
         setLoading(true);
-        let q = supabase.from('reviews').select('*, profiles(full_name, email), tourist_sites(name)').order('created_at', { ascending: false });
+        let q = supabase.from('reviews').select('*, profiles(full_name, email), tourist_sites(name)').order('created_at', { ascending: false }).limit(500);
         if (filterRating !== 'all') q = q.eq('rating', parseInt(filterRating));
         const { data } = await q;
         setReviews(data || []);

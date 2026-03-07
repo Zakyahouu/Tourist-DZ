@@ -17,7 +17,7 @@ const AdminSolidarity = () => {
 
     async function fetchApps() {
         setLoading(true);
-        let q = supabase.from('solidarity_applications').select('*, profiles(full_name, email)').order('created_at', { ascending: false });
+        let q = supabase.from('solidarity_applications').select('*, profiles(full_name, email)').order('created_at', { ascending: false }).limit(500);
         if (filterStatus !== 'all') q = q.eq('status', filterStatus);
         const { data } = await q;
         setApps(data || []);
