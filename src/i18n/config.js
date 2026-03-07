@@ -32,7 +32,8 @@ const resources = {
                 "historical": "Historical",
                 "natural": "Natural",
                 "cultural": "Cultural",
-                "thermal": "Thermal/Spa"
+                "thermal": "Thermal/Spa",
+                "accommodation": "Accommodation"
             },
             "features": {
                 "audioGuide": "Audio Guide",
@@ -50,7 +51,8 @@ const resources = {
             "details": {
                 "events": "Events & Activities",
                 "registrations": "Registrations",
-                "reviews": "Reviews"
+                "reviews": "Reviews",
+                "accessibility": "Accessibility"
             }
         }
     },
@@ -82,7 +84,8 @@ const resources = {
                 "historical": "Historique",
                 "natural": "Naturel",
                 "cultural": "Culturel",
-                "thermal": "Thermal/Spa"
+                "thermal": "Thermal/Spa",
+                "accommodation": "Hébergement"
             },
             "features": {
                 "audioGuide": "Guide Audio",
@@ -100,7 +103,8 @@ const resources = {
             "details": {
                 "events": "Événements & Activités",
                 "registrations": "Inscriptions",
-                "reviews": "Avis"
+                "reviews": "Avis",
+                "accessibility": "Accessibilité"
             }
         }
     },
@@ -132,7 +136,8 @@ const resources = {
                 "historical": "تاريخي",
                 "natural": "طبيعي",
                 "cultural": "ثقافي",
-                "thermal": "حموي"
+                "thermal": "حموي",
+                "accommodation": "إقامة"
             },
             "features": {
                 "audioGuide": "دليل صوتي",
@@ -150,7 +155,8 @@ const resources = {
             "details": {
                 "events": "الفعاليات والأنشطة",
                 "registrations": "التسجيلات",
-                "reviews": "التقييمات"
+                "reviews": "التقييمات",
+                "accessibility": "إمكانية الوصول"
             }
         }
     }

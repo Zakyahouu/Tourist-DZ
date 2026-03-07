@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 import { Search, Shield, User, Mail, Calendar, Filter, UserCheck, UserX } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
 
 const AdminUsers = () => {
     const { showToast } = useToast();
+    const { user: currentUser } = useAuth();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -101,7 +103,9 @@ const AdminUsers = () => {
                                             <select
                                                 value={u.role}
                                                 onChange={e => updateRole(u.id, e.target.value)}
-                                                className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold bg-white focus:ring-2 focus:ring-sky-500"
+                                                disabled={u.id === currentUser?.id}
+                                                title={u.id === currentUser?.id ? 'Cannot change your own role' : undefined}
+                                                className={`px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold bg-white focus:ring-2 focus:ring-sky-500 ${u.id === currentUser?.id ? 'opacity-40 cursor-not-allowed' : ''}`}
                                             >
                                                 {roles.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
                                             </select>

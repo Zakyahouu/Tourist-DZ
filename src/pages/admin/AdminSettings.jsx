@@ -48,9 +48,14 @@ const AdminSettings = () => {
     async function saveAll() {
         setSaving(true);
         try {
-            for (const item of content) {
-                await supabase.from('site_content').update({ value: item.value, updated_at: new Date().toISOString() }).eq('id', item.id);
-            }
+            const updates = content.map(item => ({
+                id: item.id,
+                key: item.key,
+                value: item.value,
+                updated_at: new Date().toISOString()
+            }));
+            const { error } = await supabase.from('site_content').upsert(updates, { onConflict: 'id' });
+            if (error) throw error;
             setSaved(true);
             setTimeout(() => setSaved(false), 3000);
             showToast('Settings saved successfully!', 'success');

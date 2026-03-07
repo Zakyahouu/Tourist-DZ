@@ -47,6 +47,7 @@ const MapPage = () => {
     const [filter, setFilter] = useState('all');
     const [searchQuery, setSearchQuery] = useState(location.state?.searchQuery || '');
     const [selectedSite, setSelectedSite] = useState(null);
+    const [loading, setLoading] = useState(true);
     const lang = i18n.language || 'fr';
 
     const FALLBACK_IMAGE = fallbackNatural;
@@ -83,6 +84,8 @@ const MapPage = () => {
                 setSites(allSites);
             } catch (err) {
                 console.error("Map fetch error:", err);
+            } finally {
+                setLoading(false);
             }
         }
         async function fetchCms() {
@@ -164,7 +167,20 @@ const MapPage = () => {
 
                 {/* Sidebar Content Area (List or Selected Site Details) */}
                 <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-gray-50/50">
-                    {selectedSite ? (
+                    {loading ? (
+                        <div className="space-y-3">
+                            {[1, 2, 3, 4].map(i => (
+                                <div key={i} className="flex gap-4 p-3 bg-white rounded-2xl border border-gray-100">
+                                    <div className="w-20 h-20 bg-gray-200 animate-pulse rounded-xl flex-shrink-0"></div>
+                                    <div className="flex flex-col flex-1 justify-center gap-2">
+                                        <div className="h-2.5 bg-gray-200 animate-pulse rounded w-1/3"></div>
+                                        <div className="h-4 bg-gray-200 animate-pulse rounded w-3/4"></div>
+                                        <div className="h-3 bg-gray-200 animate-pulse rounded w-1/4"></div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : selectedSite ? (
                         // Detailed View
                         <div className="animate-fade-in bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                             <button
@@ -277,9 +293,9 @@ const MapPage = () => {
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                     />
 
-                    {selectedSite && <MapUpdater center={[selectedSite.latitude, selectedSite.longitude]} />}
+                    {selectedSite && selectedSite.latitude != null && selectedSite.longitude != null && <MapUpdater center={[selectedSite.latitude, selectedSite.longitude]} />}
 
-                    {filteredSites.map((site) => (
+                    {filteredSites.filter(s => s.latitude != null && s.longitude != null).map((site) => (
                         <Marker
                             key={site.id}
                             position={[site.latitude, site.longitude]}

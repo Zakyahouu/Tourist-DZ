@@ -61,7 +61,8 @@ const AdminAccommodations = () => {
     }
 
     async function toggleActive(item) {
-        await supabase.from('accommodations').update({ is_active: !item.is_active }).eq('id', item.id);
+        const { error } = await supabase.from('accommodations').update({ is_active: !item.is_active }).eq('id', item.id);
+        if (error) return showToast('Could not update status: ' + error.message, 'error');
         fetchItems();
     }
 
@@ -116,6 +117,7 @@ const AdminAccommodations = () => {
             if (document.getElementById('file-upload')) {
                 document.getElementById('file-upload').value = '';
             }
+            showToast('Image added successfully!', 'success');
             fetchAccImages(selectedAccForImages.id);
         }
         setUploadingImage(false);

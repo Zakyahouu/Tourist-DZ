@@ -115,7 +115,8 @@ const AdminSites = () => {
     };
 
     const toggleActive = async (site) => {
-        await supabase.from('tourist_sites').update({ is_active: !site.is_active }).eq('id', site.id);
+        const { error } = await supabase.from('tourist_sites').update({ is_active: !site.is_active }).eq('id', site.id);
+        if (error) return showToast('Could not update status: ' + error.message, 'error');
         fetchSites();
     };
 

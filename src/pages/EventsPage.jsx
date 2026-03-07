@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Calendar, Users, MapPin, Search, CheckCircle, Headphones, QrCode, Accessibility } from 'lucide-react';
 import eventsHeroImage from '../assets/events_hero_image.webp';
@@ -27,41 +27,41 @@ const EventsPage = () => {
         }).catch(() => { });
     }, []);
 
-    useEffect(() => {
-        async function fetchEvents() {
-            try {
-                let query = supabase
-                    .from('events')
-                    .select('*')
-                    .eq('is_active', true)
-                    .gte('end_date', new Date().toISOString()) // Only future/current events
-                    .order('start_date', { ascending: true });
+    const fetchEvents = useCallback(async () => {
+        try {
+            let query = supabase
+                .from('events')
+                .select('*')
+                .eq('is_active', true)
+                .gte('end_date', new Date().toISOString())
+                .order('start_date', { ascending: true });
 
-                if (filter !== 'all') {
-                    query = query.eq('type', filter);
-                }
-
-                const { data } = await query;
-                setEvents(data || []);
-
-                if (user) {
-                    const { data: regData } = await supabase
-                        .from('event_registrations')
-                        .select('event_id')
-                        .eq('user_id', user.id);
-                    if (regData) {
-                        setRegisteredEvents(new Set(regData.map(r => r.event_id)));
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching events:', error);
-            } finally {
-                setLoading(false);
+            if (filter !== 'all') {
+                query = query.eq('type', filter);
             }
-        }
 
+            const { data } = await query;
+            setEvents(data || []);
+
+            if (user) {
+                const { data: regData } = await supabase
+                    .from('event_registrations')
+                    .select('event_id')
+                    .eq('user_id', user.id);
+                if (regData) {
+                    setRegisteredEvents(new Set(regData.map(r => r.event_id)));
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching events:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [filter, user]);
+
+    useEffect(() => {
         fetchEvents();
-    }, [filter, lang, user]);
+    }, [fetchEvents]);
 
     const handleRegister = async (eventId) => {
         if (!user) {

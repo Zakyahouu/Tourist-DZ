@@ -4,6 +4,9 @@ import { MapPin, Star, ArrowLeft, Hotel, Phone, Globe, DollarSign } from 'lucide
 import { supabase } from '../supabaseClient';
 import fallbackNatural from '../assets/fallback_image_natural.webp';
 import { useParams, useNavigate } from 'react-router-dom';
+import FavoriteButton from '../components/FavoriteButton';
+
+const isSafeUrl = (url) => /^https?:\/\//i.test(url);
 
 const AccommodationDetailsPage = () => {
     const { id } = useParams();
@@ -77,9 +80,12 @@ const AccommodationDetailsPage = () => {
                     >
                         <ArrowLeft size={18} className="mr-2 rtl:rotate-180 rtl:ml-2 rtl:mr-0" /> Back
                     </button>
-                    <span className="bg-white text-[var(--color-brand-primary)] px-4 py-1.5 text-xs font-black rounded-full uppercase tracking-wider shadow-lg capitalize">
-                        {accommodation.type}
-                    </span>
+                    <div className="flex items-center gap-2">
+                        <FavoriteButton siteId={accommodation.id} size={20} />
+                        <span className="bg-white text-[var(--color-brand-primary)] px-4 py-1.5 text-xs font-black rounded-full uppercase tracking-wider shadow-lg capitalize">
+                            {accommodation.type}
+                        </span>
+                    </div>
                 </div>
 
                 <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 max-w-7xl mx-auto z-10 translate-y-4">
@@ -173,7 +179,7 @@ const AccommodationDetailsPage = () => {
                                     </div>
                                 )}
 
-                                {accommodation.website && (
+                                {isSafeUrl(accommodation.website) && (
                                     <div className="flex gap-4 p-4 rounded-xl bg-gray-50 border border-gray-100">
                                         <div className="bg-white p-2.5 shadow-sm rounded-full text-blue-500 flex-shrink-0 self-start"><Globe size={20} /></div>
                                         <div>

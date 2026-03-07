@@ -17,6 +17,11 @@ const AuthPage = () => {
     const [fullName, setFullName] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [showConfirmMessage, setShowConfirmMessage] = useState(false);
+    const [showForgotPassword, setShowForgotPassword] = useState(false);
+    const [forgotEmail, setForgotEmail] = useState('');
+    const [forgotLoading, setForgotLoading] = useState(false);
+    const [forgotSent, setForgotSent] = useState(false);
 
     // Where to go after login — use the page the user came from, or fallback to home
     const from = location.state?.from || '/';
@@ -50,13 +55,26 @@ const AuthPage = () => {
                     }
                 });
                 if (error) throw error;
-                navigate(from, { replace: true });
+                setShowConfirmMessage(true);
+                return;
             }
         } catch (err) {
             setError(err.message);
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleForgotPassword = async (e) => {
+        e.preventDefault();
+        setForgotLoading(true);
+        setError(null);
+        const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+            redirectTo: `${window.location.origin}/auth`,
+        });
+        setForgotLoading(false);
+        if (error) setError(error.message);
+        else setForgotSent(true);
     };
 
     return (
@@ -106,14 +124,83 @@ const AuthPage = () => {
                         <p className="text-[var(--color-brand-text-muted)] text-base font-medium text-center">{t('app.tagline')}</p>
                     </div>
 
-                    <div className="mb-10 text-center lg:text-left rtl:lg:text-right">
-                        <h2 className="text-4xl font-black text-[var(--color-brand-text)] mb-3 tracking-tight">
-                            {isLogin ? 'Welcome Back' : 'Create an Account'}
-                        </h2>
-                        <p className="text-[var(--color-brand-text-muted)] text-lg font-medium">
-                            {isLogin ? 'Sign in to access your itinerary and favorites.' : 'Sign up to start planning your Biskra journey.'}
-                        </p>
-                    </div>
+                    {/* Email confirmation screen */}
+                    {showConfirmMessage ? (
+                        <div className="text-center">
+                            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <Mail size={36} className="text-emerald-600" />
+                            </div>
+                            <h2 className="text-3xl font-black text-[var(--color-brand-text)] mb-3">Check your inbox</h2>
+                            <p className="text-[var(--color-brand-text-muted)] text-lg mb-6">
+                                We sent a confirmation link to <strong>{email}</strong>. Click it to activate your account then come back to log in.
+                            </p>
+                            <button
+                                onClick={() => { setShowConfirmMessage(false); setIsLogin(true); }}
+                                className="px-6 py-3 bg-[var(--color-brand-primary)] text-white font-bold rounded-2xl hover:bg-orange-500 transition-colors"
+                            >
+                                Back to Login
+                            </button>
+                        </div>
+                    ) : showForgotPassword ? (
+                        /* Forgot password screen */
+                        <div>
+                            <button onClick={() => { setShowForgotPassword(false); setForgotSent(false); setError(null); }} className="flex items-center text-sm font-bold text-gray-500 hover:text-[var(--color-brand-secondary)] mb-8 transition-colors">
+                                <ArrowLeft size={16} className="mr-1.5" /> Back to login
+                            </button>
+                            {forgotSent ? (
+                                <div className="text-center">
+                                    <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <Mail size={36} className="text-blue-600" />
+                                    </div>
+                                    <h2 className="text-3xl font-black text-[var(--color-brand-text)] mb-3">Email sent!</h2>
+                                    <p className="text-[var(--color-brand-text-muted)] text-lg">Check your inbox for a password reset link.</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <h2 className="text-4xl font-black text-[var(--color-brand-text)] mb-3 tracking-tight">Reset Password</h2>
+                                    <p className="text-[var(--color-brand-text-muted)] text-lg font-medium mb-8">Enter your email and we'll send you a reset link.</p>
+                                    {error && (
+                                        <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-xl text-sm font-bold mb-6 flex items-center shadow-sm">
+                                            <div className="w-2 h-2 rounded-full bg-red-500 mr-3 flex-shrink-0"></div>
+                                            {error}
+                                        </div>
+                                    )}
+                                    <form onSubmit={handleForgotPassword} className="space-y-5">
+                                        <div className="relative group">
+                                            <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                                                <Mail size={20} className="text-gray-400 group-focus-within:text-[var(--color-brand-primary)] transition-colors" />
+                                            </div>
+                                            <input
+                                                type="email"
+                                                required
+                                                value={forgotEmail}
+                                                onChange={(e) => setForgotEmail(e.target.value)}
+                                                placeholder="Email Address"
+                                                className="w-full bg-white border border-gray-200 text-[var(--color-brand-text)] font-medium text-base rounded-2xl py-4 pt-5 pl-14 pr-5 focus:outline-none focus:border-[var(--color-brand-primary)] focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm"
+                                            />
+                                        </div>
+                                        <button
+                                            type="submit"
+                                            disabled={forgotLoading}
+                                            className="w-full bg-[var(--color-brand-primary)] hover:bg-[#d6721d] text-white font-black text-lg rounded-2xl py-4 mt-4 shadow-xl shadow-orange-500/30 flex justify-center items-center transition-all disabled:opacity-50"
+                                        >
+                                            {forgotLoading ? <span className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></span> : 'Send Reset Link'}
+                                        </button>
+                                    </form>
+                                </>
+                            )}
+                        </div>
+                    ) : (
+                        /* Normal login / signup form */
+                        <>
+                        <div className="mb-10 text-center lg:text-left rtl:lg:text-right">
+                            <h2 className="text-4xl font-black text-[var(--color-brand-text)] mb-3 tracking-tight">
+                                {isLogin ? 'Welcome Back' : 'Create an Account'}
+                            </h2>
+                            <p className="text-[var(--color-brand-text-muted)] text-lg font-medium">
+                                {isLogin ? 'Sign in to access your itinerary and favorites.' : 'Sign up to start planning your Biskra journey.'}
+                            </p>
+                        </div>
 
                     {/* Auth Mode Toggle */}
                     <div className="flex bg-gray-100 rounded-2xl p-1.5 border border-gray-200 mb-8 shadow-inner">
@@ -191,7 +278,7 @@ const AuthPage = () => {
 
                         {isLogin && (
                             <div className="flex justify-end pt-1">
-                                <button type="button" className="text-sm font-bold text-[var(--color-brand-secondary)] hover:text-blue-800 transition-colors">Forgot password?</button>
+                                <button type="button" onClick={() => { setShowForgotPassword(true); setError(null); }} className="text-sm font-bold text-[var(--color-brand-secondary)] hover:text-blue-800 transition-colors">Forgot password?</button>
                             </div>
                         )}
 
@@ -210,6 +297,8 @@ const AuthPage = () => {
                             )}
                         </button>
                     </form>
+                        </>
+                    )}
                 </div>
             </div>
         </div>

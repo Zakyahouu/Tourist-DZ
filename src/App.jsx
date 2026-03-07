@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Outlet, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import './i18n/config';
 
@@ -84,6 +84,16 @@ function App() {
               <Route path="/site/:id" element={<SiteDetailsPage />} />
               <Route path="/accommodation/:id" element={<AccommodationDetailsPage />} />
               <Route path="/solidarity" element={<SolidarityPage />} />
+              <Route path="*" element={
+                <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+                  <h1 className="text-8xl font-black text-[var(--color-brand-primary)] mb-4">404</h1>
+                  <p className="text-2xl font-bold text-[var(--color-brand-text)] mb-2">Page not found</p>
+                  <p className="text-[var(--color-brand-text-muted)] mb-8">The page you&apos;re looking for doesn&apos;t exist.</p>
+                  <Link to="/" className="px-6 py-3 bg-[var(--color-brand-primary)] text-white font-bold rounded-xl hover:bg-orange-500 transition-colors">
+                    Back to Home
+                  </Link>
+                </div>
+              } />
             </Route>
           </Routes>
         </Router>

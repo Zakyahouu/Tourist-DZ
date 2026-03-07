@@ -24,6 +24,8 @@ const SiteDetailsPage = () => {
     const [hoverRating, setHoverRating] = useState(0);
     const [comment, setComment] = useState('');
     const [submittingReview, setSubmittingReview] = useState(false);
+    const [userAlreadyReviewed, setUserAlreadyReviewed] = useState(false);
+    const [showAllReviews, setShowAllReviews] = useState(false);
 
     useEffect(() => {
         if (!id) { setLoading(false); return; }
@@ -32,12 +34,15 @@ const SiteDetailsPage = () => {
             try {
                 const { data, error } = await supabase
                     .from('tourist_sites')
-                    .select('*, site_images(image_url), reviews(rating, comment, created_at, profiles(full_name, avatar_url))')
+                    .select('*, site_images(image_url), reviews(user_id, rating, comment, created_at, profiles(full_name, avatar_url))')
                     .eq('id', id)
                     .single();
 
                 if (error) throw error;
                 setSite(data);
+                if (user && data?.reviews) {
+                    setUserAlreadyReviewed(data.reviews.some(r => r.user_id === user.id));
+                }
             } catch (error) {
                 console.error('Error fetching details:', error);
             } finally {
@@ -68,9 +73,10 @@ const SiteDetailsPage = () => {
             // Refetch to see new review
             setRating(0);
             setComment('');
+            setUserAlreadyReviewed(true);
             const { data } = await supabase
                 .from('tourist_sites')
-                .select('*, site_images(image_url), reviews(rating, comment, created_at, profiles(full_name, avatar_url))')
+                .select('*, site_images(image_url), reviews(user_id, rating, comment, created_at, profiles(full_name, avatar_url))')
                 .eq('id', id)
                 .single();
             if (data) setSite(data);
@@ -177,10 +183,14 @@ const SiteDetailsPage = () => {
                                 <h2 className="text-2xl font-black text-[var(--color-brand-text)]">Visitor Reviews</h2>
                             </div>
 
-                            {/* Write Review Form */}
+                            {/* Write Review Form — hidden if user already reviewed */}
                             <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-md mb-10">
                                 <h3 className="text-lg font-bold text-[var(--color-brand-text)] mb-4">Leave a Review</h3>
-                                <form onSubmit={handleReviewSubmit}>
+                                {!user ? (
+                                    <p className="text-sm text-gray-500">Please <button onClick={() => navigate('/auth', { state: { from: `/site/${id}` } })} className="text-[var(--color-brand-secondary)] font-bold hover:underline">log in</button> to leave a review.</p>
+                                ) : userAlreadyReviewed ? (
+                                    <p className="text-sm text-emerald-600 font-bold">✓ You've already reviewed this site. Thank you!</p>
+                                ) : (<form onSubmit={handleReviewSubmit}>
                                     <div className="flex items-center mb-4">
                                         {[1, 2, 3, 4, 5].map((star) => (
                                             <button
@@ -213,11 +223,13 @@ const SiteDetailsPage = () => {
                                         </button>
                                     </div>
                                 </form>
+                                    )}
                             </div>
 
                             {site.reviews?.length > 0 ? (
+                                <>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {site.reviews.slice(0, 6).map((review, idx) => (
+                                    {(showAllReviews ? site.reviews : site.reviews.slice(0, 6)).map((review, idx) => (
                                         <div key={idx} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-md">
                                             <div className="flex items-center mb-4">
                                                 <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 font-bold text-xs mr-3 flex-shrink-0">
@@ -236,6 +248,17 @@ const SiteDetailsPage = () => {
                                         </div>
                                     ))}
                                 </div>
+                                {site.reviews.length > 6 && (
+                                    <div className="text-center mt-6">
+                                        <button
+                                            onClick={() => setShowAllReviews(prev => !prev)}
+                                            className="px-6 py-2.5 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+                                        >
+                                            {showAllReviews ? 'Show less' : `Show all ${site.reviews.length} reviews`}
+                                        </button>
+                                    </div>
+                                )}
+                                </>
                             ) : (
                                 <div className="py-12 text-center text-gray-400 bg-white rounded-3xl border border-dashed border-gray-200">
                                     <p className="font-medium">No reviews yet.</p>

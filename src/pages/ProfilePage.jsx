@@ -5,11 +5,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
 import fallbackHistorical from '../assets/fallback_image_historical.webp';
+import { useToast } from '../context/ToastContext';
 
 const ProfilePage = () => {
     const { i18n } = useTranslation();
     const navigate = useNavigate();
     const { user, profile, isAdmin, signOut, loading: authLoading } = useAuth();
+    const { showToast } = useToast();
 
     const [stats, setStats] = useState({ favorites: 0, reviews: 0, events: 0, photos: 0 });
     const [recentReviews, setRecentReviews] = useState([]);
@@ -85,11 +87,14 @@ const ProfilePage = () => {
         if (!confirm('Cancel your registration for this event?')) return;
         setStatsLoading(true);
         try {
-            await supabase.from('event_registrations').delete().eq('id', registrationId);
+            const { error } = await supabase.from('event_registrations').delete().eq('id', registrationId);
+            if (error) throw error;
             setMyEvents(prev => prev.filter(e => e.id !== registrationId));
             setStats(prev => ({ ...prev, events: Math.max(0, prev.events - 1) }));
+            showToast('Registration cancelled.', 'success');
         } catch (err) {
             console.error(err);
+            showToast('Could not cancel registration. Please try again.', 'error');
         } finally {
             setStatsLoading(false);
         }

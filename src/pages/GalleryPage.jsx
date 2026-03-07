@@ -21,6 +21,7 @@ const GalleryPage = () => {
     const [isCompetition, setIsCompetition] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [cms, setCms] = useState({});
+    const [likedPhotoIds, setLikedPhotoIds] = useState(new Set());
 
     useEffect(() => {
         fetchGallery();
@@ -84,10 +85,12 @@ const GalleryPage = () => {
 
     async function handleLike(photoId) {
         if (!user) { navigate('/auth', { state: { from: '/gallery' } }); return; }
-        // Increment likes_count
+        if (likedPhotoIds.has(photoId)) return; // already liked
         const photo = photos.find(p => p.id === photoId);
         if (!photo) return;
-        await supabase.from('gallery').update({ likes_count: (photo.likes_count || 0) + 1 }).eq('id', photoId);
+        const { error } = await supabase.from('gallery').update({ likes_count: (photo.likes_count || 0) + 1 }).eq('id', photoId);
+        if (error) return;
+        setLikedPhotoIds(prev => new Set([...prev, photoId]));
         setPhotos(prev => prev.map(p => p.id === photoId ? { ...p, likes_count: (p.likes_count || 0) + 1 } : p));
     }
 
@@ -104,7 +107,8 @@ const GalleryPage = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-brand-bg)] via-[var(--color-brand-bg)]/40 to-black/50"></div>
                 <div className="relative z-10 text-center px-4 mt-8">
-                    <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-white drop-shadow-lg mb-2" dangerouslySetInnerHTML={{ __html: cms.gallery_hero_title || 'Biskra <span class="text-[var(--color-brand-accent)]">Through Your Lens</span>' }}>
+                    <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-white drop-shadow-lg mb-2">
+                        {cms.gallery_hero_title || <> Biskra <span className="text-[var(--color-brand-accent)]">Through Your Lens</span></>}
                     </h1>
                     <p className="text-gray-100 max-w-xl mx-auto drop-shadow-md font-medium">
                         {cms.gallery_hero_subtitle || 'Share your best shots of the oasis or vote in the latest photo competition.'}
@@ -161,7 +165,7 @@ const GalleryPage = () => {
                                             {photo.profiles?.full_name || 'Anonymous'}
                                         </span>
                                     </div >
-                                    <button onClick={() => handleLike(photo.id)} className="flex items-center text-sm font-bold text-white bg-white/20 hover:bg-pink-500 hover:text-white backdrop-blur-md px-4 py-2 rounded-xl border border-white/30 transition-all shadow-lg">
+                                    <button onClick={() => handleLike(photo.id)} disabled={likedPhotoIds.has(photo.id)} className={`flex items-center text-sm font-bold text-white backdrop-blur-md px-4 py-2 rounded-xl border border-white/30 transition-all shadow-lg ${likedPhotoIds.has(photo.id) ? 'bg-pink-500 cursor-default' : 'bg-white/20 hover:bg-pink-500'}`}>
                                         <Heart size={16} className="mr-1.5 fill-current" />
                                         {photo.likes_count || 0}
                                     </button>

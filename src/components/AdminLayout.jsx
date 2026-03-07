@@ -21,7 +21,7 @@ import { useAuth } from '../context/AuthContext';
 const AdminLayout = () => {
     const navigate = useNavigate();
     const { signOut, profile } = useAuth();
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const handleLogout = async () => {
         await signOut();
@@ -153,7 +153,6 @@ const AdminLayout = () => {
                     <div className="flex items-center space-x-4">
                         <button className="text-slate-400 hover:text-slate-600 relative">
                             <Bell className="h-5 w-5" />
-                            <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
                         </button>
                         <div className="h-8 w-8 rounded-full bg-sky-600 text-white flex items-center justify-center font-bold shadow-md text-sm">
                             {profile?.full_name?.[0] || 'A'}
