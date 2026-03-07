@@ -18,8 +18,6 @@ const AdminSites = () => {
     const [loadingImages, setLoadingImages] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploadingImage, setUploadingImage] = useState(false);
-    const [newImageUrl, setNewImageUrl] = useState(''); // Define this to avoid ReferenceError, though we use files now
-
     const emptySite = {
         name: { ar: '', fr: '', en: '' },
         description: { ar: '', fr: '', en: '' },

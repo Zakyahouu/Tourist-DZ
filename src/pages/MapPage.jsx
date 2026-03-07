@@ -206,7 +206,7 @@ const MapPage = () => {
                             </div>
 
                             <h2 className="text-2xl font-black text-[var(--color-brand-text)] mb-3 leading-tight">
-                                {selectedSite.name[lang] || selectedSite.name.fr}
+                                {selectedSite.name?.[lang] || selectedSite.name?.fr}
                             </h2>
 
                             <div className="flex items-center text-sm text-[var(--color-brand-text-muted)] mb-5 font-medium">
@@ -265,7 +265,7 @@ const MapPage = () => {
                                                 {t(`categories.${site.category}`)}
                                             </div>
                                             <h3 className="font-bold text-[var(--color-brand-text)] text-sm leading-tight mb-1.5 group-hover:text-[var(--color-brand-secondary)] transition-colors">
-                                                {site.name[lang] || site.name.fr}
+                                                {site.name?.[lang] || site.name?.fr}
                                             </h3>
                                             <div className="flex items-center text-xs font-bold text-[var(--color-brand-text-muted)]">
                                                 <Star size={12} className="text-yellow-500 mr-1" /> {site.avg_rating?.toFixed(1) || '0.0'}

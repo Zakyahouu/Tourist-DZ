@@ -25,8 +25,8 @@ const Footer = () => {
                 <div>
                     <h3 className="text-[var(--color-brand-text)] font-bold mb-4 uppercase tracking-wider text-sm">Legal</h3>
                     <ul className="space-y-2 text-[var(--color-brand-text-muted)] text-sm font-medium">
-                        <li><span className="cursor-default">Privacy Policy</span></li>
-                        <li><span className="cursor-default">Terms of Service</span></li>
+                        <li><span className="opacity-50 cursor-default">Privacy Policy <span className="italic text-xs">(Coming Soon)</span></span></li>
+                        <li><span className="opacity-50 cursor-default">Terms of Service <span className="italic text-xs">(Coming Soon)</span></span></li>
                         <li><a href="mailto:contact@touristdz.dz" className="hover:text-[var(--color-brand-secondary)] transition-colors">Contact Us</a></li>
                     </ul>
                 </div>

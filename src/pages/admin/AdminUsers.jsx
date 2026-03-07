@@ -22,6 +22,7 @@ const AdminUsers = () => {
     }
 
     const updateRole = async (userId, newRole) => {
+        if (!confirm(`Change this user's role to "${newRole}"?`)) return;
         const { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', userId);
         if (error) return showToast(error.message, 'error');
         showToast('User role updated successfully', 'success');

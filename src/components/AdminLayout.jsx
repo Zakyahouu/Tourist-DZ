@@ -9,7 +9,6 @@ import {
     LogOut,
     Menu,
     X,
-    Bell,
     ArrowLeft,
     Hotel,
     HeartHandshake,
@@ -151,9 +150,6 @@ const AdminLayout = () => {
                         </h1>
                     </div>
                     <div className="flex items-center space-x-4">
-                        <button className="text-slate-400 hover:text-slate-600 relative">
-                            <Bell className="h-5 w-5" />
-                        </button>
                         <div className="h-8 w-8 rounded-full bg-sky-600 text-white flex items-center justify-center font-bold shadow-md text-sm">
                             {profile?.full_name?.[0] || 'A'}
                         </div>

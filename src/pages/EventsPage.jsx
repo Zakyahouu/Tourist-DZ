@@ -79,7 +79,8 @@ const EventsPage = () => {
 
             if (error) throw error;
 
-            showToast('Successfully registered for ' + (events.find(e => e.id === eventId)?.title[lang] || events.find(e => e.id === eventId)?.title.fr), 'success');
+            const registered = events.find(e => e.id === eventId);
+            showToast('Successfully registered for ' + (registered?.title?.[lang] || registered?.title?.fr || ''), 'success');
             fetchEvents(); // Refresh counts
         } catch (error) {
             console.error('Registration error:', error);
@@ -155,13 +156,13 @@ const EventsPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {[1, 2, 3].map(i => <div key={i} className="h-48 bg-gray-200 animate-pulse rounded-3xl"></div>)}
                     </div>
-                ) : events.filter(e => !searchQuery || e.title?.fr?.toLowerCase().includes(searchQuery.toLowerCase()) || e.title?.en?.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 ? (
+                ) : events.filter(e => !searchQuery || e.title?.fr?.toLowerCase().includes(searchQuery.toLowerCase()) || e.title?.en?.toLowerCase().includes(searchQuery.toLowerCase()) || e.title?.ar?.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 ? (
                     <div className="text-center py-20 text-gray-500 bg-white rounded-3xl border border-dashed border-gray-300 shadow-sm">
                         No events found. Check back later or adjust filters.
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {events.filter(e => !searchQuery || e.title?.fr?.toLowerCase().includes(searchQuery.toLowerCase()) || e.title?.en?.toLowerCase().includes(searchQuery.toLowerCase())).map((event) => {
+                        {events.filter(e => !searchQuery || e.title?.fr?.toLowerCase().includes(searchQuery.toLowerCase()) || e.title?.en?.toLowerCase().includes(searchQuery.toLowerCase()) || e.title?.ar?.toLowerCase().includes(searchQuery.toLowerCase())).map((event) => {
                             const date = new Date(event.start_date);
                             const day = date.getDate();
                             const month = date.toLocaleString(lang, { month: 'short' });

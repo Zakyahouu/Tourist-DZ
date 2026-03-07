@@ -24,7 +24,9 @@ const AuthPage = () => {
     const [forgotSent, setForgotSent] = useState(false);
 
     // Where to go after login — use the page the user came from, or fallback to home
-    const from = location.state?.from || '/';
+    // Sanitize: only allow internal relative paths, not external URLs
+    const rawFrom = location.state?.from;
+    const from = (rawFrom && rawFrom.startsWith('/') && !rawFrom.startsWith('//')) ? rawFrom : '/';
 
     // If already logged in, redirect away
     useEffect(() => {

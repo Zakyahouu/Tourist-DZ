@@ -33,6 +33,7 @@ const SolidarityPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (formData.preferred_trip_types.length === 0) return showToast('Please select at least one trip type.', 'info');
         setLoading(true);
 
         try {

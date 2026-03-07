@@ -9,8 +9,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         autoRefreshToken: true,
         detectSessionInUrl: true,
         storageKey: 'toursticdz-auth',
-        // Bypass Web Locks API to prevent AbortError in React Strict Mode
-        // while still calling the session callback correctly
-        lock: async (name, acquireTimeout, fn) => await fn()
+        // In dev (React Strict Mode), bypass Web Locks to prevent AbortError
+        ...(import.meta.env.DEV && { lock: async (_name, _acquireTimeout, fn) => await fn() }),
     }
 })

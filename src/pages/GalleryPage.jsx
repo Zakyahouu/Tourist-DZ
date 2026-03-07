@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Camera, Heart, Trophy, X, Upload } from 'lucide-react';
+import { Camera, Heart, Trophy, X } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import galleryHeroImage from '../assets/gallery_hero_image.webp';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useNavigate } from 'react-router-dom';
+
+const isSafeUrl = (url) => /^https?:\/\//i.test(url);
 
 const GalleryPage = () => {
     const { t, i18n } = useTranslation();
@@ -59,6 +61,7 @@ const GalleryPage = () => {
     const handleUpload = async (e) => {
         e.preventDefault();
         if (!uploadUrl.trim()) return showToast('Please enter an image URL.', 'info');
+        if (!isSafeUrl(uploadUrl.trim())) return showToast('Please enter a valid https:// image URL.', 'error');
 
         setUploading(true);
         try {
@@ -159,7 +162,7 @@ const GalleryPage = () => {
                                 <div className="absolute bottom-0 left-0 right-0 p-5 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex justify-between items-end pb-5 pt-12">
                                     <div className="flex items-center">
                                         <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden border-2 border-white mr-3 rtl:ml-3 rtl:mr-0 shadow-sm">
-                                            <img src={`https://ui-avatars.com/api/?name=${photo.profiles?.full_name || 'U'}&background=random&color=555`} className="w-full h-full" alt="User" />
+                                            <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(photo.profiles?.full_name || 'U')}&background=random&color=555`} className="w-full h-full" alt="User" />
                                         </div >
                                         <span className="text-sm font-bold text-white shadow-sm drop-shadow-md">
                                             {photo.profiles?.full_name || 'Anonymous'}

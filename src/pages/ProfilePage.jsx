@@ -112,7 +112,7 @@ const ProfilePage = () => {
 
     const safeProfile = profile || {};
     const displayName = safeProfile.full_name || user.email?.split('@')[0] || 'Explorer';
-    const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    const initials = displayName.split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
     const statCards = [
         { label: 'Favorites', value: stats.favorites, icon: Heart, color: 'text-pink-500 bg-pink-50' },
