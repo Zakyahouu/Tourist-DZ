@@ -9,10 +9,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         autoRefreshToken: true,
         detectSessionInUrl: true,
         storageKey: 'toursticdz-auth',
-        // Disable the lock to prevent AbortError: Lock broken by another request
-        // in rapid re-render environments like React Strict Mode
-        lock: () => ({
-            acquire: async () => ({ release: () => { } }),
-        })
+        // Bypass Web Locks API to prevent AbortError in React Strict Mode
+        // while still calling the session callback correctly
+        lock: async (name, acquireTimeout, fn) => await fn()
     }
 })
