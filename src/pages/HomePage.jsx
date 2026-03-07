@@ -98,16 +98,19 @@ const HomePage = () => {
                     <img
                         src={cms.home_hero_image || HERO_FALLBACK}
                         alt="Biskra Oasis"
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover transition-opacity duration-500"
+                        onLoad={(e) => e.target.style.opacity = 1}
+                        style={{ opacity: 0 }}
                         onError={(e) => {
                             if (e.target.src !== HERO_FALLBACK) {
                                 e.target.src = HERO_FALLBACK;
                             } else {
-                                e.target.style.display = 'none'; // Prevent infinite loop if fallback also fails
+                                e.target.parentElement.style.background = 'linear-gradient(to bottom, #2c3e50, #000000)'; // Final emergency background
+                                e.target.style.display = 'none';
                             }
                         }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-brand-bg)] via-[var(--color-brand-bg)]/20 to-black/30"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-brand-bg)] via-[var(--color-brand-bg)]/40 to-black/50"></div>
                 </div>
 
                 <div className="relative z-10 text-center px-4 w-full max-w-4xl mx-auto mt-16 md:mt-0">

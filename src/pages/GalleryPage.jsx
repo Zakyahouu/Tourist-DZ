@@ -95,19 +95,21 @@ const GalleryPage = () => {
             {/* Hero */}
             <div className="relative w-full h-[25vh] lg:h-[35vh] bg-black overflow-hidden flex flex-col items-center justify-center">
                 <img
-                    src={cms.gallery_hero_image || 'https://images.unsplash.com/photo-1534065406-8d6263567705?q=80&w=2670&auto=format&fit=crop'}
-                    alt="Gallery Banner"
-                    className="absolute inset-0 w-full h-full object-cover opacity-60"
+                    src={cms.gallery_hero_image || HERO_FALLBACK}
+                    alt="Biskra Gallery"
+                    className="w-full h-full object-cover transition-opacity duration-500"
+                    onLoad={(e) => e.target.style.opacity = 1}
+                    style={{ opacity: 0 }}
                     onError={(e) => {
-                        const fallback = 'https://images.unsplash.com/photo-1534065406-8d6263567705?q=80&w=2670&auto=format&fit=crop';
-                        if (e.target.src !== fallback) {
-                            e.target.src = fallback;
+                        if (e.target.src !== HERO_FALLBACK) {
+                            e.target.src = HERO_FALLBACK;
                         } else {
+                            e.target.parentElement.style.background = 'linear-gradient(to bottom, #434343, #000000)'; // Dark professional fallback
                             e.target.style.display = 'none';
                         }
                     }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-brand-bg)] to-transparent opacity-80"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-brand-bg)] via-[var(--color-brand-bg)]/40 to-black/50"></div>
                 <div className="relative z-10 text-center px-4 mt-8">
                     <h1 className="text-4xl md:text-5xl font-black text-white drop-shadow-lg mb-2" dangerouslySetInnerHTML={{ __html: cms.gallery_hero_title || 'Biskra <span class="text-[var(--color-brand-accent)]">Through Your Lens</span>' }}>
                     </h1>

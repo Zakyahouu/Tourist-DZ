@@ -46,6 +46,11 @@ const resources = {
             "accessibility": {
                 "accessible": "Wheelchair Accessible",
                 "limited": "Limited Access"
+            },
+            "details": {
+                "events": "Events & Activities",
+                "registrations": "Registrations",
+                "reviews": "Reviews"
             }
         }
     },
@@ -91,6 +96,11 @@ const resources = {
             "accessibility": {
                 "accessible": "Accessible aux fauteuils",
                 "limited": "Accès limité"
+            },
+            "details": {
+                "events": "Événements & Activités",
+                "registrations": "Inscriptions",
+                "reviews": "Avis"
             }
         }
     },
@@ -136,6 +146,11 @@ const resources = {
             "accessibility": {
                 "accessible": "مناسب للكراسي المتحركة",
                 "limited": "وصول محدود"
+            },
+            "details": {
+                "events": "الفعاليات والأنشطة",
+                "registrations": "التسجيلات",
+                "reviews": "التقييمات"
             }
         }
     }

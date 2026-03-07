@@ -105,17 +105,20 @@ const EventsPage = () => {
             <div className="relative w-full h-[30vh] lg:h-[40vh] bg-gray-100 overflow-hidden flex items-center justify-center">
                 <img
                     src={cms.events_hero_image || HERO_FALLBACK}
-                    alt="Events Banner"
-                    className="absolute inset-0 w-full h-full object-cover opacity-80"
+                    alt="Biskra Events"
+                    className="w-full h-full object-cover transition-opacity duration-500"
+                    onLoad={(e) => e.target.style.opacity = 1}
+                    style={{ opacity: 0 }}
                     onError={(e) => {
                         if (e.target.src !== HERO_FALLBACK) {
                             e.target.src = HERO_FALLBACK;
                         } else {
+                            e.target.parentElement.style.background = 'linear-gradient(to bottom, #1a2a6c, #b21f1f, #fdbb2d)'; // Cool sunset fallback
                             e.target.style.display = 'none';
                         }
                     }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-brand-bg)] via-[var(--color-brand-bg)]/40 to-black/50"></div>
                 <div className="relative z-10 text-center px-4 mt-8">
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white drop-shadow-lg mb-4">
                         {cms.events_hero_title || 'Discover &'} <span className="text-[var(--color-brand-accent)]">Experience</span>

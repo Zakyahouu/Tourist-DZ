@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
 
 const AuthContext = createContext(null);
@@ -18,33 +18,17 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Get initial session
-        supabase.auth.getSession()
-            .then(({ data, error }) => {
-                if (error) {
-                    console.error('Session error:', error);
-                    setLoading(false);
-                    return;
-                }
-                const session = data?.session;
-                setSession(session);
-                setUser(session?.user ?? null);
-                if (session?.user) {
-                    fetchProfile(session.user.id);
-                } else {
-                    setLoading(false);
-                }
-            })
-            .catch(err => {
-                console.error('getSession exception:', err);
-                setLoading(false);
-            });
+        let mounted = true;
 
-        // Listen for auth changes
+        // Listen for auth changes - this also emits an initial event on mount
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (_event, session) => {
+            async (event, session) => {
+                if (!mounted) return;
+
+                // Handle the session state
                 setSession(session);
                 setUser(session?.user ?? null);
+
                 if (session?.user) {
                     await fetchProfile(session.user.id);
                 } else {
@@ -54,10 +38,22 @@ export const AuthProvider = ({ children }) => {
             }
         );
 
-        return () => subscription.unsubscribe();
+        // Fallback: If no event fires for some reason, ensure we stop loading
+        const timer = setTimeout(() => {
+            if (mounted && loading) {
+                setLoading(false);
+            }
+        }, 5000);
+
+        return () => {
+            mounted = false;
+            subscription.unsubscribe();
+            clearTimeout(timer);
+        };
     }, []);
 
     const fetchProfile = async (userId) => {
+        if (!userId) return;
         try {
             const { data, error } = await supabase
                 .from('profiles')
@@ -65,10 +61,14 @@ export const AuthProvider = ({ children }) => {
                 .eq('id', userId)
                 .single();
 
-            if (error) throw error;
-            setProfile(data);
+            if (error) {
+                console.warn('Profile fetch error (might not exist yet):', error.message);
+                setProfile(null);
+            } else {
+                setProfile(data);
+            }
         } catch (error) {
-            console.error('Error fetching profile:', error);
+            console.error('Error in fetchProfile:', error);
             setProfile(null);
         } finally {
             setLoading(false);
@@ -84,14 +84,14 @@ export const AuthProvider = ({ children }) => {
 
     const isAdmin = profile?.role === 'admin';
 
-    const value = {
+    const value = useMemo(() => ({
         session,
         user,
         profile,
         loading,
         isAdmin,
         signOut,
-    };
+    }), [session, user, profile, loading, isAdmin]);
 
     return (
         <AuthContext.Provider value={value}>
