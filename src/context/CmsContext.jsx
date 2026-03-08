@@ -12,9 +12,14 @@ export const CmsProvider = ({ children }) => {
         supabase
             .from('site_content')
             .select('key, value')
-            .then(({ data }) => {
+            .then(({ data, error }) => {
+                if (error) {
+                    console.error('CMS fetch error:', error);
+                    return;
+                }
                 if (data) setCms(Object.fromEntries(data.map(d => [d.key, d.value])));
-            });
+            })
+            .catch(err => console.error('CMS fetch exception:', err));
     }, []);
 
     return <CmsContext.Provider value={cms}>{children}</CmsContext.Provider>;
