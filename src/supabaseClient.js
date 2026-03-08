@@ -12,7 +12,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
-        storageKey: 'toursticdz-auth',
+        storageKey: 'touristdz-auth',
         // In dev (React Strict Mode), bypass Web Locks to prevent AbortError
         ...(import.meta.env.DEV && { lock: async (_name, _acquireTimeout, fn) => await fn() }),
     }
