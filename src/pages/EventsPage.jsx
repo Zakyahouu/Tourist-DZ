@@ -4,6 +4,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Calendar, Users, MapPin, Search, CheckCircle, Headphones, QrCode, Accessibility } from 'lucide-react';
 import eventsHeroImage from '../assets/events_hero_image.webp';
 import { supabase } from '../supabaseClient';
+import logger from '../utils/logger';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useNavigate } from 'react-router-dom';
@@ -49,7 +50,7 @@ const EventsPage = () => {
                 }
             }
         } catch (error) {
-            console.error('Error fetching events:', error);
+            logger.error('Error fetching events:', error);
         } finally {
             setLoading(false);
         }
@@ -78,7 +79,7 @@ const EventsPage = () => {
             showToast('Successfully registered for ' + (registered?.title?.[lang] || registered?.title?.fr || ''), 'success');
             fetchEvents(); // Refresh counts
         } catch (error) {
-            console.error('Registration error:', error);
+            logger.error('Registration error:', error);
             showToast('Could not register. Please try again.', 'error');
         } finally {
             setRegistering(null);
@@ -87,10 +88,10 @@ const EventsPage = () => {
 
     const categories = [
         { id: 'all', label: t('categories.all') },
-        { id: 'tour', label: 'Tours' },
-        { id: 'camp', label: 'Camps' },
-        { id: 'competition', label: 'Competitions' },
-        { id: 'volunteer', label: 'Volunteer' },
+        { id: 'tour', label: t('events.types.tour') },
+        { id: 'camp', label: t('events.types.camp') },
+        { id: 'competition', label: t('events.types.competition') },
+        { id: 'volunteer', label: t('events.types.volunteer') },
         { id: 'cultural', label: t('categories.cultural') },
     ];
 

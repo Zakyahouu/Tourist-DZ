@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapPin, Star, ArrowLeft, Hotel, Phone, Globe, DollarSign } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import logger from '../utils/logger';
 import fallbackNatural from '../assets/fallback_image_natural.webp';
 import { useParams, useNavigate } from 'react-router-dom';
 import FavoriteButton from '../components/FavoriteButton';
@@ -31,7 +32,7 @@ const AccommodationDetailsPage = () => {
                 if (error) throw error;
                 setAccommodation(data);
             } catch (error) {
-                console.error('Error fetching accommodation details:', error);
+                logger.error('Error fetching accommodation details:', error);
             } finally {
                 setLoading(false);
             }

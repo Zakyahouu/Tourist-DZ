@@ -4,6 +4,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { MapPin, Accessibility, Star, ArrowLeft, QrCode, Send, Headphones } from 'lucide-react';
 import fallbackHistorical from '../assets/fallback_image_historical.webp';
 import { supabase } from '../supabaseClient';
+import logger from '../utils/logger';
 import { useParams, useNavigate } from 'react-router-dom';
 import FavoriteButton from '../components/FavoriteButton';
 import { useAuth } from '../context/AuthContext';
@@ -45,7 +46,7 @@ const SiteDetailsPage = () => {
                     setUserAlreadyReviewed(data.reviews.some(r => r.user_id === user.id));
                 }
             } catch (error) {
-                console.error('Error fetching details:', error);
+                logger.error('Error fetching details:', error);
             } finally {
                 setLoading(false);
             }
@@ -82,7 +83,7 @@ const SiteDetailsPage = () => {
                 .single();
             if (data) setSite(data);
         } catch (error) {
-            console.error('Error submitting review:', error);
+            logger.error('Error submitting review:', error);
             showToast('Could not submit review. Please try again.', 'error');
         } finally {
             setSubmittingReview(false);
@@ -98,8 +99,8 @@ const SiteDetailsPage = () => {
     if (!site) return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--color-brand-bg)] text-gray-500 p-8">
             <MapPin size={48} className="text-gray-300 mb-4" />
-            <p className="text-lg font-bold mb-4">Site not found.</p>
-            <button onClick={() => navigate('/')} className="text-[var(--color-brand-secondary)] font-bold hover:underline">Go back home</button>
+            <p className="text-lg font-bold mb-4">{t('site.notFound')}</p>
+            <button onClick={() => navigate('/')} className="text-[var(--color-brand-secondary)] font-bold hover:underline">{t('site.goHome')}</button>
         </div>
     );
 
@@ -120,7 +121,7 @@ const SiteDetailsPage = () => {
 
                 <div className="absolute top-20 left-6 right-6 flex justify-between items-center z-10">
                     <button onClick={() => navigate(-1)} className="flex items-center text-[var(--color-brand-text)] font-bold bg-white/90 hover:bg-white backdrop-blur-md px-5 py-2.5 rounded-full transition-colors shadow-sm">
-                        <ArrowLeft size={18} className="mr-2 rtl:rotate-180 rtl:ml-2 rtl:mr-0" /> Back
+                        <ArrowLeft size={18} className="mr-2 rtl:rotate-180 rtl:ml-2 rtl:mr-0" /> {t('site.back')}
                     </button>
                     {/* Real Favorite Button */}
                     <FavoriteButton siteId={site.id} size={20} />
@@ -156,7 +157,7 @@ const SiteDetailsPage = () => {
                         {(site.description?.[lang] || site.description?.fr) && (
                             <section className="bg-white p-8 md:p-10 rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/50">
                                 <h2 className="text-2xl font-black text-[var(--color-brand-text)] mb-5 flex items-center">
-                                    <span className="w-8 h-1.5 bg-[var(--color-brand-primary)] mr-3 rounded-full"></span> About
+                                    <span className="w-8 h-1.5 bg-[var(--color-brand-primary)] mr-3 rounded-full"></span> {t('site.about')}
                                 </h2>
                                 <p className="text-lg text-gray-600 leading-relaxed font-medium">
                                     {site.description[lang] || site.description.fr}
@@ -167,7 +168,7 @@ const SiteDetailsPage = () => {
                         {/* Gallery — real images only */}
                         {images.length > 1 && (
                             <section>
-                                <h2 className="text-2xl font-black text-[var(--color-brand-text)] mb-6">Gallery</h2>
+                                <h2 className="text-2xl font-black text-[var(--color-brand-text)] mb-6">{t('site.gallery')}</h2>
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                     {images.map((url, idx) => (
                                         <div key={idx} className="h-48 rounded-2xl bg-gray-200 overflow-hidden shadow-sm">
@@ -181,12 +182,12 @@ const SiteDetailsPage = () => {
                         {/* Reviews — real data */}
                         <section>
                             <div className="flex justify-between items-end mb-8 border-b border-gray-200 pb-4">
-                                <h2 className="text-2xl font-black text-[var(--color-brand-text)]">Visitor Reviews</h2>
+                                <h2 className="text-2xl font-black text-[var(--color-brand-text)]">{t('site.visitorReviews')}</h2>
                             </div>
 
                             {/* Write Review Form — hidden if user already reviewed */}
                             <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-md mb-10">
-                                <h3 className="text-lg font-bold text-[var(--color-brand-text)] mb-4">Leave a Review</h3>
+                                <h3 className="text-lg font-bold text-[var(--color-brand-text)] mb-4">{t('site.leaveReview')}</h3>
                                 {!user ? (
                                     <p className="text-sm text-gray-500">Please <button onClick={() => navigate('/auth', { state: { from: `/site/${id}` } })} className="text-[var(--color-brand-secondary)] font-bold hover:underline">log in</button> to leave a review.</p>
                                 ) : userAlreadyReviewed ? (
@@ -262,7 +263,7 @@ const SiteDetailsPage = () => {
                                 </>
                             ) : (
                                 <div className="py-12 text-center text-gray-400 bg-white rounded-3xl border border-dashed border-gray-200">
-                                    <p className="font-medium">No reviews yet.</p>
+                                    <p className="font-medium">{t('site.noReviews')}</p>
                                 </div>
                             )}
                         </section>
@@ -273,7 +274,7 @@ const SiteDetailsPage = () => {
                         <div className="sticky top-28 space-y-6">
                             {/* Info Card */}
                             <div className="bg-white rounded-3xl p-7 border border-gray-100 shadow-xl shadow-gray-200/50">
-                                <h3 className="text-lg font-black text-[var(--color-brand-text)] mb-5 border-b border-gray-100 pb-3">Information</h3>
+                                <h3 className="text-lg font-black text-[var(--color-brand-text)] mb-5 border-b border-gray-100 pb-3">{t('site.information')}</h3>
                                 <ul className="space-y-5">
                                     {site.address && (
                                         <li className="flex items-start">
@@ -319,7 +320,7 @@ const SiteDetailsPage = () => {
                                             rel="noopener noreferrer"
                                             className="w-full bg-[var(--color-brand-primary)] hover:bg-[#d6721d] text-white py-3.5 rounded-2xl font-bold flex justify-center items-center transition-colors shadow-lg shadow-orange-500/20 text-sm"
                                         >
-                                            <MapPin size={16} className="mr-2" /> Get Directions
+                                            <MapPin size={16} className="mr-2" /> {t('site.getDirections')}
                                         </a>
                                     </div>
                                 )}

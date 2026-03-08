@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
+import logger from '../utils/logger';
 import { useNavigate } from 'react-router-dom';
 
 /**
@@ -45,7 +46,7 @@ const FavoriteButton = ({ siteId, className = '', size = 20 }) => {
                 setIsFav(true);
             }
         } catch (err) {
-            console.error('Favorite toggle error:', err);
+            logger.error('Favorite toggle error:', err);
         } finally {
             setLoading(false);
         }

@@ -5,6 +5,7 @@ import './i18n/config';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { CmsProvider } from './context/CmsContext';
+import ErrorBoundary from './components/ErrorBoundary';
 import AdminGuard from './components/AdminGuard';
 import AdminLayout from './components/AdminLayout';
 import TopNavbar from './components/TopNavbar';
@@ -48,8 +49,24 @@ const PublicLayout = () => {
   );
 };
 
+// 404 page — translated
+const NotFoundPage = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+      <h1 className="text-8xl font-black text-[var(--color-brand-primary)] mb-4">404</h1>
+      <p className="text-2xl font-bold text-[var(--color-brand-text)] mb-2">{t('page.notFound')}</p>
+      <p className="text-[var(--color-brand-text-muted)] mb-8">{t('page.notFoundDesc')}</p>
+      <Link to="/" className="px-6 py-3 bg-[var(--color-brand-primary)] text-white font-bold rounded-xl hover:bg-orange-500 transition-colors">
+        {t('page.backHome')}
+      </Link>
+    </div>
+  );
+};
+
 function App() {
   return (
+    <ErrorBoundary>
     <ToastProvider>
       <AuthProvider>
         <CmsProvider>
@@ -86,22 +103,14 @@ function App() {
               <Route path="/site/:id" element={<SiteDetailsPage />} />
               <Route path="/accommodation/:id" element={<AccommodationDetailsPage />} />
               <Route path="/solidarity" element={<SolidarityPage />} />
-              <Route path="*" element={
-                <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-                  <h1 className="text-8xl font-black text-[var(--color-brand-primary)] mb-4">404</h1>
-                  <p className="text-2xl font-bold text-[var(--color-brand-text)] mb-2">Page not found</p>
-                  <p className="text-[var(--color-brand-text-muted)] mb-8">The page you&apos;re looking for doesn&apos;t exist.</p>
-                  <Link to="/" className="px-6 py-3 bg-[var(--color-brand-primary)] text-white font-bold rounded-xl hover:bg-orange-500 transition-colors">
-                    Back to Home
-                  </Link>
-                </div>
-              } />
+              <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Routes>
         </Router>
         </CmsProvider>
       </AuthProvider>
     </ToastProvider>
+    </ErrorBoundary>
   );
 }
 

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search, MapPin, Calendar as CalendarIcon, ArrowRight, Star, Globe, Landmark, Leaf, Palette, Flame } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import logger from '../utils/logger';
 import heroImage from '../assets/home_hero_image.webp';
 import fallbackNatural from '../assets/fallback_image_natural.webp';
 import fallbackHistorical from '../assets/fallback_image_historical.webp';
@@ -62,7 +63,7 @@ const HomePage = () => {
             setFeaturedSites(sitesData || []);
             setEvents(eventsData || []);
         } catch (error) {
-            console.error('Error fetching data:', error);
+            logger.error('Error fetching data:', error);
         } finally {
             setLoading(false);
         }

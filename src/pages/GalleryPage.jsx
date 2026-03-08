@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Camera, Heart, Trophy, X } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import logger from '../utils/logger';
 import galleryHeroImage from '../assets/gallery_hero_image.webp';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -53,7 +54,7 @@ const GalleryPage = () => {
         try {
             const { data } = await supabase.from('site_content').select('key, value');
             if (data) setCms(Object.fromEntries(data.map(d => [d.key, d.value])));
-        } catch (e) { console.error('CMS fetch error', e); }
+        } catch (e) { logger.error('CMS fetch error', e); }
     }
 
     async function fetchGallery(pageNum = 0, replace = false) {
@@ -74,7 +75,7 @@ const GalleryPage = () => {
             setHasMore(rows.length === PAGE_SIZE);
             setPhotos(prev => replace ? rows : [...prev, ...rows]);
         } catch (error) {
-            console.error('Error fetching gallery:', error);
+            logger.error('Error fetching gallery:', error);
         } finally {
             setLoading(false);
             setLoadingMore(false);
@@ -109,7 +110,7 @@ const GalleryPage = () => {
             setPage(0);
             fetchGallery(0, true);
         } catch (err) {
-            console.error(err);
+            logger.error(err);
             showToast('Error uploading. Please try again.', 'error');
         } finally {
             setUploading(false);

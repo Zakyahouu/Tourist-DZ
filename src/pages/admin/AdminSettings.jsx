@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
+import logger from '../../utils/logger';
 import { useToast } from '../../context/ToastContext';
 import { Save, Type, FileText, CheckCircle } from 'lucide-react';
 
@@ -60,7 +61,7 @@ const AdminSettings = () => {
             setTimeout(() => setSaved(false), 3000);
             showToast('Settings saved successfully!', 'success');
         } catch (err) {
-            console.error('Save error:', err);
+            logger.error('Save error:', err);
             showToast('Error saving. Check console.', 'error');
         } finally {
             setSaving(false);

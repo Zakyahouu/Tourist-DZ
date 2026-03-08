@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
+import logger from '../../utils/logger';
 import { useAuth } from '../../context/AuthContext';
 import {
     Users,
@@ -97,7 +98,7 @@ const AdminDashboard = () => {
                 setRecentApplications(apps || []);
 
             } catch (error) {
-                console.error('Error fetching dashboard data:', error);
+                logger.error('Error fetching dashboard data:', error);
             } finally {
                 setLoading(false);
             }

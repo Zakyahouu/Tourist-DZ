@@ -4,11 +4,12 @@ import { Heart, Star, Calendar, LogOut, MapPin, Image as ImageIcon, Shield } fro
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
+import logger from '../utils/logger';
 import fallbackHistorical from '../assets/fallback_image_historical.webp';
 import { useToast } from '../context/ToastContext';
 
 const ProfilePage = () => {
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const { user, profile, isAdmin, signOut, loading: authLoading } = useAuth();
     const { showToast } = useToast();
@@ -68,7 +69,7 @@ const ProfilePage = () => {
                 setMyEvents(events || []);
 
             } catch (error) {
-                console.error('Error fetching profile stats:', error);
+                logger.error('Error fetching profile stats:', error);
             } finally {
                 setStatsLoading(false);
             }
@@ -93,7 +94,7 @@ const ProfilePage = () => {
             setStats(prev => ({ ...prev, events: Math.max(0, prev.events - 1) }));
             showToast('Registration cancelled.', 'success');
         } catch (err) {
-            console.error(err);
+            logger.error(err);
             showToast('Could not cancel registration. Please try again.', 'error');
         } finally {
             setStatsLoading(false);
@@ -115,10 +116,10 @@ const ProfilePage = () => {
     const initials = displayName.split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
     const statCards = [
-        { label: 'Favorites', value: stats.favorites, icon: Heart, color: 'text-pink-500 bg-pink-50' },
-        { label: 'Events', value: stats.events, icon: Calendar, color: 'text-blue-500 bg-blue-50' },
-        { label: 'Reviews', value: stats.reviews, icon: Star, color: 'text-yellow-600 bg-yellow-50' },
-        { label: 'Photos', value: stats.photos, icon: ImageIcon, color: 'text-purple-500 bg-purple-50' },
+        { label: t('profile.favorites'), value: stats.favorites, icon: Heart, color: 'text-pink-500 bg-pink-50' },
+        { label: t('profile.events'), value: stats.events, icon: Calendar, color: 'text-blue-500 bg-blue-50' },
+        { label: t('profile.reviews'), value: stats.reviews, icon: Star, color: 'text-yellow-600 bg-yellow-50' },
+        { label: t('profile.photos'), value: stats.photos, icon: ImageIcon, color: 'text-purple-500 bg-purple-50' },
     ];
 
     return (
@@ -193,7 +194,7 @@ const ProfilePage = () => {
                             {statCards.map(stat => (
                                 <div key={stat.label} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm text-center hover:shadow-md transition-shadow">
                                     <div className={`w-10 h-10 rounded-full ${stat.color} flex items-center justify-center mx-auto mb-3`}>
-                                        <stat.icon size={18} className={stat.label === 'Reviews' ? 'fill-current' : ''} />
+                                        <stat.icon size={18} className={stat.icon === Star ? 'fill-current' : ''} />
                                     </div>
                                     <div className="text-2xl font-black text-gray-800">{statsLoading ? '—' : stat.value}</div>
                                     <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mt-1">{stat.label}</div>

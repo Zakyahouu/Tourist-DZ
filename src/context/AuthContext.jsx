@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
+import logger from '../utils/logger';
 
 const AuthContext = createContext(null);
 
@@ -68,7 +69,7 @@ export const AuthProvider = ({ children }) => {
                 setProfile(data);
             }
         } catch (error) {
-            console.error('Error in fetchProfile:', error);
+            logger.error('Error in fetchProfile:', error);
             setProfile(null);
         } finally {
             setLoading(false);

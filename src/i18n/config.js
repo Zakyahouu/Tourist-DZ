@@ -53,6 +53,49 @@ const resources = {
                 "registrations": "Registrations",
                 "reviews": "Reviews",
                 "accessibility": "Accessibility"
+            },
+            "events": {
+                "types": {
+                    "tour": "Tours",
+                    "camp": "Camps",
+                    "competition": "Competitions",
+                    "volunteer": "Volunteer"
+                }
+            },
+            "site": {
+                "about": "About",
+                "gallery": "Gallery",
+                "visitorReviews": "Visitor Reviews",
+                "leaveReview": "Leave a Review",
+                "information": "Information",
+                "getDirections": "Get Directions",
+                "noReviews": "No reviews yet.",
+                "back": "Back",
+                "notFound": "Site not found.",
+                "goHome": "Go back home"
+            },
+            "profile": {
+                "favorites": "Favorites",
+                "events": "Events",
+                "reviews": "Reviews",
+                "photos": "Photos"
+            },
+            "footer": {
+                "tagline": "Discover the breathtaking oasis of Biskra. Connect with local culture, explore historical monuments, and participate in community-driven solidarity tourism.",
+                "quickLinks": "Quick Links",
+                "interactiveMap": "Interactive Map",
+                "upcomingEvents": "Upcoming Events",
+                "solidarityTrips": "Solidarity Trips",
+                "legal": "Legal",
+                "privacyPolicy": "Privacy Policy",
+                "termsOfService": "Terms of Service",
+                "contactUs": "Contact Us",
+                "copyright": "Built for Biskra. All rights reserved."
+            },
+            "page": {
+                "notFound": "Page not found",
+                "notFoundDesc": "The page you're looking for doesn't exist.",
+                "backHome": "Back to Home"
             }
         }
     },
@@ -105,6 +148,49 @@ const resources = {
                 "registrations": "Inscriptions",
                 "reviews": "Avis",
                 "accessibility": "Accessibilité"
+            },
+            "events": {
+                "types": {
+                    "tour": "Randonnées",
+                    "camp": "Camps",
+                    "competition": "Compétitions",
+                    "volunteer": "Bénévolat"
+                }
+            },
+            "site": {
+                "about": "À propos",
+                "gallery": "Galerie",
+                "visitorReviews": "Avis des visiteurs",
+                "leaveReview": "Laisser un avis",
+                "information": "Informations",
+                "getDirections": "Obtenir l'itinéraire",
+                "noReviews": "Aucun avis pour le moment.",
+                "back": "Retour",
+                "notFound": "Site introuvable.",
+                "goHome": "Retour à l'accueil"
+            },
+            "profile": {
+                "favorites": "Favoris",
+                "events": "Événements",
+                "reviews": "Avis",
+                "photos": "Photos"
+            },
+            "footer": {
+                "tagline": "Découvrez la splendide oasis de Biskra. Connectez-vous à la culture locale, explorez des monuments historiques et participez au tourisme solidaire.",
+                "quickLinks": "Liens rapides",
+                "interactiveMap": "Carte interactive",
+                "upcomingEvents": "Événements à venir",
+                "solidarityTrips": "Voyages solidaires",
+                "legal": "Légal",
+                "privacyPolicy": "Politique de confidentialité",
+                "termsOfService": "Conditions d'utilisation",
+                "contactUs": "Nous contacter",
+                "copyright": "Construit pour Biskra. Tous droits réservés."
+            },
+            "page": {
+                "notFound": "Page introuvable",
+                "notFoundDesc": "La page que vous recherchez n'existe pas.",
+                "backHome": "Retour à l'accueil"
             }
         }
     },
@@ -157,6 +243,49 @@ const resources = {
                 "registrations": "التسجيلات",
                 "reviews": "التقييمات",
                 "accessibility": "إمكانية الوصول"
+            },
+            "events": {
+                "types": {
+                    "tour": "جولات",
+                    "camp": "مخيمات",
+                    "competition": "مسابقات",
+                    "volunteer": "تطوع"
+                }
+            },
+            "site": {
+                "about": "نبذة",
+                "gallery": "معرض الصور",
+                "visitorReviews": "آراء الزوار",
+                "leaveReview": "أضف تقييمك",
+                "information": "معلومات",
+                "getDirections": "احصل على الاتجاهات",
+                "noReviews": "لا توجد تقييمات بعد.",
+                "back": "رجوع",
+                "notFound": "الموقع غير موجود.",
+                "goHome": "العودة للرئيسية"
+            },
+            "profile": {
+                "favorites": "المفضلة",
+                "events": "الفعاليات",
+                "reviews": "التقييمات",
+                "photos": "الصور"
+            },
+            "footer": {
+                "tagline": "اكتشف واحة بسكرة الرائعة. تواصل مع الثقافة المحلية، واستكشف المعالم التاريخية، وشارك في السياحة التضامنية.",
+                "quickLinks": "روابط سريعة",
+                "interactiveMap": "خريطة تفاعلية",
+                "upcomingEvents": "الفعاليات القادمة",
+                "solidarityTrips": "رحلات التضامن",
+                "legal": "قانوني",
+                "privacyPolicy": "سياسة الخصوصية",
+                "termsOfService": "شروط الخدمة",
+                "contactUs": "اتصل بنا",
+                "copyright": "صُنع لبسكرة. جميع الحقوق محفوظة."
+            },
+            "page": {
+                "notFound": "الصفحة غير موجودة",
+                "notFoundDesc": "الصفحة التي تبحث عنها غير موجودة.",
+                "backHome": "العودة للرئيسية"
             }
         }
     }

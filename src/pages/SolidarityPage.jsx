@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../context/ToastContext';
 import { supabase } from '../supabaseClient';
+import logger from '../utils/logger';
 import { Accessibility, Users, Calendar, ArrowRight, CheckCircle, HeartHandshake, Map, Headset } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -52,7 +53,7 @@ const SolidarityPage = () => {
             setSuccess(true);
             showToast('Application submitted successfully!', 'success');
         } catch (error) {
-            console.error('Error submitting solidarity request:', error);
+            logger.error('Error submitting solidarity request:', error);
             showToast('Error submitting request. Please try again.', 'error');
         } finally {
             setLoading(false);
