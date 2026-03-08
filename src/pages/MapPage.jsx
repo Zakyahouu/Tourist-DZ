@@ -118,7 +118,7 @@ const MapPage = () => {
         { id: 'natural', label: t('categories.natural') || 'Natural' },
         { id: 'cultural', label: t('categories.cultural') || 'Cultural' },
         { id: 'thermal', label: t('categories.thermal') || 'Thermal' },
-        { id: 'accommodation', label: 'Accommodation' },
+        { id: 'accommodation', label: t('categories.accommodation') || 'Accommodation & Dining' },
     ];
 
     return (
@@ -229,7 +229,7 @@ const MapPage = () => {
                                     to={`/accommodation/${selectedSite.id}`}
                                     className="w-full block text-center bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-xl font-bold transition-all shadow-lg shadow-emerald-900/20"
                                 >
-                                    View Hotel Details
+                                    View Details
                                 </Link>
                             )}
                         </div>

@@ -33,7 +33,17 @@ const resources = {
                 "natural": "Natural",
                 "cultural": "Cultural",
                 "thermal": "Thermal/Spa",
-                "accommodation": "Accommodation"
+                "accommodation": "Accommodation & Dining"
+            },
+            "accommodationTypes": {
+                "hotel": "Hotel",
+                "guesthouse": "Guesthouse",
+                "hostel": "Hostel",
+                "restaurant": "Restaurant",
+                "cafe": "Café",
+                "riad": "Riad",
+                "apartment": "Apartment",
+                "camping": "Camping"
             },
             "features": {
                 "audioGuide": "Audio Guide",
@@ -128,7 +138,17 @@ const resources = {
                 "natural": "Naturel",
                 "cultural": "Culturel",
                 "thermal": "Thermal/Spa",
-                "accommodation": "Hébergement"
+                "accommodation": "Hébergement & Restauration"
+            },
+            "accommodationTypes": {
+                "hotel": "Hôtel",
+                "guesthouse": "Maison d'hôtes",
+                "hostel": "Auberge",
+                "restaurant": "Restaurant",
+                "cafe": "Café",
+                "riad": "Riad",
+                "apartment": "Appartement",
+                "camping": "Camping"
             },
             "features": {
                 "audioGuide": "Guide Audio",
@@ -223,7 +243,17 @@ const resources = {
                 "natural": "طبيعي",
                 "cultural": "ثقافي",
                 "thermal": "حموي",
-                "accommodation": "إقامة"
+                "accommodation": "إقامة ومطاعم"
+            },
+            "accommodationTypes": {
+                "hotel": "فندق",
+                "guesthouse": "دار ضيافة",
+                "hostel": "نزل",
+                "restaurant": "مطعم",
+                "cafe": "مقهى",
+                "riad": "رياض",
+                "apartment": "شقة",
+                "camping": "تخييم"
             },
             "features": {
                 "audioGuide": "دليل صوتي",

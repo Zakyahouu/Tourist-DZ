@@ -3,7 +3,7 @@ import { supabase } from '../../supabaseClient';
 import { Search, Plus, Edit2, Trash2, X, Hotel, Phone, Globe, DollarSign, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 
-const TYPES = ['hotel', 'guesthouse', 'hostel'];
+const TYPES = ['hotel', 'guesthouse', 'hostel', 'restaurant', 'cafe', 'riad', 'apartment', 'camping'];
 
 const AdminAccommodations = () => {
     const { showToast } = useToast();
@@ -143,7 +143,7 @@ const AdminAccommodations = () => {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-slate-800">Accommodations</h2>
-                    <p className="text-sm text-slate-500">Manage hotels, guesthouses, and hostels.</p>
+                    <p className="text-sm text-slate-500">Manage hotels, restaurants, guesthouses, and more.</p>
                 </div>
                 <button onClick={() => setModal({ mode: 'create', data: { ...emptyForm } })} className="flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 rounded-lg font-semibold text-sm transition-colors shadow-sm">
                     <Plus size={18} /> Add Accommodation

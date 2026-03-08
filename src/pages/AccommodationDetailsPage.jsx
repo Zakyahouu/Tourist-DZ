@@ -84,7 +84,7 @@ const AccommodationDetailsPage = () => {
                     <div className="flex items-center gap-2">
                         <FavoriteButton siteId={accommodation.id} size={20} />
                         <span className="bg-white text-[var(--color-brand-primary)] px-4 py-1.5 text-xs font-black rounded-full uppercase tracking-wider shadow-lg capitalize">
-                            {accommodation.type}
+                            {t(`accommodationTypes.${accommodation.type}`) || accommodation.type}
                         </span>
                     </div>
                 </div>
