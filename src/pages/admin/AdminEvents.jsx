@@ -40,7 +40,8 @@ const AdminEvents = () => {
             .from('events')
             .select('*, event_registrations(count)')
             .order('start_date', { ascending: false });
-        if (!error) setEvents(data || []);
+        if (error) showToast('Failed to load events: ' + error.message, 'error');
+        else setEvents(data || []);
         setLoading(false);
     }
 

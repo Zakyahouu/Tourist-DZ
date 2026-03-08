@@ -18,13 +18,15 @@ const FavoriteButton = ({ siteId, className = '', size = 20 }) => {
     // Check if already favorited
     useEffect(() => {
         if (!user || !siteId) return;
+        let cancelled = false;
         supabase
             .from('favorites')
             .select('id')
             .eq('user_id', user.id)
             .eq('site_id', siteId)
             .maybeSingle()
-            .then(({ data }) => setIsFav(!!data));
+            .then(({ data }) => { if (!cancelled) setIsFav(!!data); });
+        return () => { cancelled = true; };
     }, [user, siteId]);
 
     const toggle = async (e) => {

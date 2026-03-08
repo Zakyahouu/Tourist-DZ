@@ -40,7 +40,8 @@ const AdminSites = () => {
     async function fetchSites() {
         setLoading(true);
         const { data, error } = await supabase.from('tourist_sites').select('*').order('created_at', { ascending: false });
-        if (!error) setSites(data || []);
+        if (error) showToast('Failed to load sites: ' + error.message, 'error');
+        else setSites(data || []);
         setLoading(false);
     }
 

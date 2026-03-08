@@ -17,7 +17,8 @@ const AdminUsers = () => {
     async function fetchUsers() {
         setLoading(true);
         const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(500);
-        if (!error) setUsers(data || []);
+        if (error) showToast('Failed to load users: ' + error.message, 'error');
+        else setUsers(data || []);
         setLoading(false);
     }
 

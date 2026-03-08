@@ -16,8 +16,9 @@ const AdminReviews = () => {
         setLoading(true);
         let q = supabase.from('reviews').select('*, profiles(full_name, email), tourist_sites(name)').order('created_at', { ascending: false }).limit(500);
         if (filterRating !== 'all') q = q.eq('rating', parseInt(filterRating));
-        const { data } = await q;
-        setReviews(data || []);
+        const { data, error } = await q;
+        if (error) showToast('Failed to load reviews: ' + error.message, 'error');
+        else setReviews(data || []);
         setLoading(false);
     }
 

@@ -94,7 +94,7 @@ const TopNavbar = () => {
                             </Link>
                         ) : (
                             <Link to="/auth" className="flex items-center px-5 py-2.5 rounded-full bg-[var(--color-brand-primary)] text-white font-bold text-sm hover:bg-[#d6721d] transition-colors shadow-lg shadow-orange-500/20 hover:-translate-y-0.5 transform">
-                                Login
+                                {t('app.login')}
                             </Link>
                         )}
                     </div>
@@ -148,7 +148,7 @@ const TopNavbar = () => {
                                 </Link>
                             ) : (
                                 <Link to="/auth" onClick={() => setIsMenuOpen(false)} className="text-white bg-[var(--color-brand-primary)] px-5 py-3 rounded-full shadow-lg font-bold text-sm">
-                                    Login
+                                    {t('app.login')}
                                 </Link>
                             )}
                         </div>

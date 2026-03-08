@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard,
@@ -23,8 +23,11 @@ const AdminLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const handleLogout = async () => {
-        await signOut();
-        navigate('/');
+        try {
+            await signOut();
+        } finally {
+            navigate('/');
+        }
     };
 
     const navItems = [
@@ -158,7 +161,9 @@ const AdminLayout = () => {
 
                 {/* Main scrollable area */}
                 <main className="flex-1 overflow-y-auto p-4 lg:p-8">
-                    <Outlet />
+                    <Suspense fallback={<div className="flex items-center justify-center min-h-[40vh]"><div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-slate-900"></div></div>}>
+                        <Outlet />
+                    </Suspense>
                 </main>
             </div>
         </div>

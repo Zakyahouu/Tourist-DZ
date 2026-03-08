@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, Outlet, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { lazy, Suspense } from 'react';
 import './i18n/config';
 
 import { AuthProvider } from './context/AuthContext';
@@ -11,24 +12,32 @@ import AdminLayout from './components/AdminLayout';
 import TopNavbar from './components/TopNavbar';
 import Footer from './components/Footer';
 
-import HomePage from './pages/HomePage';
-import MapPage from './pages/MapPage';
-import EventsPage from './pages/EventsPage';
-import GalleryPage from './pages/GalleryPage';
-import ProfilePage from './pages/ProfilePage';
-import AuthPage from './pages/AuthPage';
-import SiteDetailsPage from './pages/SiteDetailsPage';
-import AccommodationDetailsPage from './pages/AccommodationDetailsPage';
-import SolidarityPage from './pages/SolidarityPage';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminSites from './pages/admin/AdminSites';
-import AdminEvents from './pages/admin/AdminEvents';
-import AdminUsers from './pages/admin/AdminUsers';
-import AdminGallery from './pages/admin/AdminGallery';
-import AdminAccommodations from './pages/admin/AdminAccommodations';
-import AdminSolidarity from './pages/admin/AdminSolidarity';
-import AdminReviews from './pages/admin/AdminReviews';
-import AdminSettings from './pages/admin/AdminSettings';
+// Lazy-load pages for code splitting
+const HomePage = lazy(() => import('./pages/HomePage'));
+const MapPage = lazy(() => import('./pages/MapPage'));
+const EventsPage = lazy(() => import('./pages/EventsPage'));
+const GalleryPage = lazy(() => import('./pages/GalleryPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const AuthPage = lazy(() => import('./pages/AuthPage'));
+const SiteDetailsPage = lazy(() => import('./pages/SiteDetailsPage'));
+const AccommodationDetailsPage = lazy(() => import('./pages/AccommodationDetailsPage'));
+const SolidarityPage = lazy(() => import('./pages/SolidarityPage'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminSites = lazy(() => import('./pages/admin/AdminSites'));
+const AdminEvents = lazy(() => import('./pages/admin/AdminEvents'));
+const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
+const AdminGallery = lazy(() => import('./pages/admin/AdminGallery'));
+const AdminAccommodations = lazy(() => import('./pages/admin/AdminAccommodations'));
+const AdminSolidarity = lazy(() => import('./pages/admin/AdminSolidarity'));
+const AdminReviews = lazy(() => import('./pages/admin/AdminReviews'));
+const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
+
+// Loading spinner for lazy chunks
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-[60vh]">
+    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[var(--color-brand-primary)]"></div>
+  </div>
+);
 
 // Public Layout — shows/hides TopNavbar and Footer based on route
 const PublicLayout = () => {
@@ -42,7 +51,9 @@ const PublicLayout = () => {
     <div dir={isRTL ? 'rtl' : 'ltr'} className="min-h-screen flex flex-col bg-[var(--color-brand-bg)] text-[var(--color-brand-text)] font-sans">
       {!hideChrome && <TopNavbar />}
       <main className="flex-grow w-full">
-        <Outlet />
+        <Suspense fallback={<PageLoader />}>
+          <Outlet />
+        </Suspense>
       </main>
       {!hideChrome && <Footer />}
     </div>

@@ -28,8 +28,9 @@ const AdminAccommodations = () => {
         setLoading(true);
         let q = supabase.from('accommodations').select('*').order('created_at', { ascending: false });
         if (filterType !== 'all') q = q.eq('type', filterType);
-        const { data } = await q;
-        setItems(data || []);
+        const { data, error } = await q;
+        if (error) showToast('Failed to load accommodations: ' + error.message, 'error');
+        else setItems(data || []);
         setLoading(false);
     }
 

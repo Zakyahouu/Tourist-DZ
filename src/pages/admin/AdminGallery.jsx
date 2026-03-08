@@ -19,7 +19,8 @@ const AdminGallery = () => {
             .select('*, profiles(full_name, email)')
             .order('created_at', { ascending: false })
             .limit(500);
-        if (!error) setPhotos(data || []);
+        if (error) showToast('Failed to load photos: ' + error.message, 'error');
+        else setPhotos(data || []);
         setLoading(false);
     }
 
