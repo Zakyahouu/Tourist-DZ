@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Camera, Heart, Trophy, X } from 'lucide-react';
+import { Camera, Heart, Trophy, X, Upload } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import logger from '../utils/logger';
-import galleryHeroImage from '../assets/gallery_hero_image.webp';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useNavigate } from 'react-router-dom';
@@ -137,103 +136,103 @@ const GalleryPage = () => {
         }
     }
 
-    const HERO_FALLBACK = galleryHeroImage;
-
     return (
-        <div className="flex flex-col min-h-screen bg-[var(--color-brand-bg)] relative">
-            {/* Hero */}
-            <div className="relative w-full h-[42vh] lg:h-[52vh] bg-black overflow-hidden flex flex-col items-center justify-center">
-                <img
-                    src={galleryHeroImage}
-                    alt="Biskra Gallery"
-                    className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-brand-bg)] via-[var(--color-brand-bg)]/40 to-black/50"></div>
-                <div className="relative z-10 text-center px-4 mt-8">
-                    <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-white drop-shadow-lg mb-2">
-                        {cms.gallery_hero_title || <> Biskra <span className="text-[var(--color-brand-accent)]">Through Your Lens</span></>}
-                    </h1>
-                    <p className="text-gray-100 max-w-xl mx-auto drop-shadow-md font-medium">
-                        {cms.gallery_hero_subtitle || 'Share your best shots of the oasis or vote in the latest photo competition.'}
-                    </p>
-                </div>
-            </div>
+        <div className="flex flex-col min-h-screen bg-[var(--color-brand-bg)]">
 
-            <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 -mt-6 relative z-20 pb-20">
-                {/* Controls */}
-                <div className="flex flex-col md:flex-row justify-between items-center mb-12 bg-white/90 backdrop-blur-md p-4 rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/50">
-                    <div className="flex space-x-2 bg-gray-50 rounded-2xl p-1.5 border border-gray-200 w-full md:w-auto mb-4 md:mb-0">
-                        <button onClick={() => setFilter('all')} className={`flex-1 md:flex-none px-6 py-2.5 text-sm font-bold rounded-xl transition-all ${filter === 'all' ? 'bg-white text-[var(--color-brand-secondary)] shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}>
-                            All Discoveries
-                        </button>
-                        <button onClick={() => setFilter('competition')} className={`flex-1 md:flex-none px-6 py-2.5 text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 ${filter === 'competition' ? 'bg-white text-[var(--color-brand-secondary)] shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}>
-                            <Trophy size={14} /> Competition
-                        </button>
+            {/* Page Header — clean, no hero image */}
+            <div className="pt-28 pb-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+                    <div>
+                        <span className="text-[var(--color-brand-primary)] font-bold tracking-widest uppercase text-xs mb-2 block">
+                            {t('nav.gallery')}
+                        </span>
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-[var(--color-brand-text)] leading-tight">
+                            Biskra <span className="text-[var(--color-brand-primary)]">Through Your Lens</span>
+                        </h1>
+                        <p className="text-[var(--color-brand-text-muted)] mt-2 max-w-lg text-sm sm:text-base">
+                            Share your best shots or vote in the latest photo competition.
+                        </p>
                     </div>
-                    <button onClick={() => user ? setShowUpload(true) : navigate('/auth', { state: { from: '/gallery' } })} className="w-full md:w-auto flex items-center justify-center px-8 py-3.5 bg-[var(--color-brand-primary)] hover:bg-orange-500 text-white font-bold rounded-2xl transition-colors shadow-lg shadow-orange-500/30">
+                    <button
+                        onClick={() => user ? setShowUpload(true) : navigate('/auth', { state: { from: '/gallery' } })}
+                        className="flex-shrink-0 flex items-center justify-center px-6 py-3 bg-[var(--color-brand-primary)] hover:bg-orange-600 text-white font-bold rounded-xl transition-colors shadow-lg shadow-orange-500/20 text-sm"
+                    >
                         <Camera size={18} className="mr-2" /> Upload Photo
                     </button>
                 </div>
 
-                {/* Gallery Grid */}
+                {/* Filter tabs */}
+                <div className="flex space-x-2 bg-gray-100 rounded-xl p-1 w-fit">
+                    <button onClick={() => setFilter('all')} className={`px-5 py-2 text-sm font-bold rounded-lg transition-all ${filter === 'all' ? 'bg-white text-[var(--color-brand-text)] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+                        All Photos
+                    </button>
+                    <button onClick={() => setFilter('competition')} className={`px-5 py-2 text-sm font-bold rounded-lg transition-all flex items-center gap-1.5 ${filter === 'competition' ? 'bg-white text-[var(--color-brand-text)] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+                        <Trophy size={14} /> Competition
+                    </button>
+                </div>
+            </div>
+
+            <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pb-20">
+
+                {/* Gallery Grid — proper CSS grid, no masonry */}
                 {loading ? (
-                    <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
-                        {[1, 2, 3, 4].map(i => <div key={i} className="h-64 bg-gray-200 animate-pulse rounded-3xl break-inside-avoid"></div>)}
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                            <div key={i} className="aspect-square bg-gray-200 animate-pulse rounded-2xl"></div>
+                        ))}
                     </div>
                 ) : photos.length === 0 ? (
-                    <div className="text-center py-24 text-gray-400 bg-white rounded-3xl border border-dashed border-gray-300 shadow-sm">
+                    <div className="text-center py-24 text-gray-400 bg-white rounded-2xl border border-dashed border-gray-300">
                         <Camera size={48} className="mx-auto text-gray-300 mb-4" />
-                        <p className="font-bold text-lg mb-2">No photos yet.</p>
+                        <p className="font-bold text-lg mb-1">No photos yet.</p>
                         <p className="text-sm">Be the first to share a photo of Biskra!</p>
                     </div>
                 ) : (
-                    <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {photos.map((photo) => (
-                            <div key={photo.id} className="relative rounded-2xl overflow-hidden shadow-md border border-gray-100 break-inside-avoid group cursor-pointer">
-                                <img src={photo.image_url} alt={photo.caption || 'Gallery item'} className="w-full object-cover transition-transform duration-700 group-hover:scale-105 block" />
+                            <div key={photo.id} className="relative aspect-square rounded-2xl overflow-hidden group cursor-pointer bg-gray-100">
+                                <img
+                                    src={photo.image_url}
+                                    alt={photo.caption || 'Gallery item'}
+                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                />
 
-                                {/* Always-visible bottom gradient */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent pointer-events-none"></div>
+                                {/* Gradient overlay */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
 
-                                {/* Extra dimming on hover */}
-                                <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-
+                                {/* Competition badge */}
                                 {photo.is_competition_entry && (
-                                    <div className="absolute top-3 left-3 bg-yellow-400 text-yellow-900 text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 shadow-lg uppercase tracking-wider z-10">
+                                    <div className="absolute top-2.5 left-2.5 bg-yellow-400 text-yellow-900 text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 shadow uppercase tracking-wider z-10">
                                         <Trophy size={10} /> {photo.likes_count > 200 ? 'Winner' : 'Entry'}
                                     </div>
                                 )}
 
-                                {/* Bottom bar — always visible */}
-                                <div className="absolute bottom-0 left-0 right-0 p-3 flex justify-between items-end gap-2">
-                                    <div className="flex-1 min-w-0">
+                                {/* Bottom info — always visible */}
+                                <div className="absolute bottom-0 inset-x-0 p-3 flex items-end justify-between gap-2">
+                                    <div className="min-w-0 flex-1">
                                         {photo.caption && (
-                                            <p className="text-white/90 text-xs leading-snug line-clamp-2 mb-1.5 drop-shadow font-medium">
+                                            <p className="text-white text-xs line-clamp-1 drop-shadow font-medium mb-0.5">
                                                 {photo.caption}
                                             </p>
                                         )}
-                                        <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                            <img
-                                                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(photo.profiles?.full_name || 'U')}&background=random&color=555`}
-                                                className="w-5 h-5 rounded-full border border-white/60 shadow-sm flex-shrink-0"
-                                                alt="User"
-                                            />
-                                            <span className="text-xs font-bold text-white drop-shadow truncate">
-                                                {photo.profiles?.full_name || 'Anonymous'}
-                                            </span>
-                                        </div>
+                                        <p className="text-white/70 text-[11px] drop-shadow truncate">
+                                            {photo.profiles?.full_name || 'Anonymous'}
+                                        </p>
                                     </div>
                                     <button
-                                        onClick={() => handleLike(photo.id)}
-                                        className={`flex items-center gap-1 text-xs font-bold text-white backdrop-blur-sm px-3 py-1.5 rounded-xl border border-white/30 transition-all shadow-md flex-shrink-0 ${likedPhotoIds.has(photo.id) ? 'bg-pink-500 border-pink-400' : 'bg-black/30 hover:bg-pink-500'}`}
+                                        onClick={(e) => { e.stopPropagation(); handleLike(photo.id); }}
+                                        className={`flex items-center gap-1 text-xs font-bold text-white px-2.5 py-1.5 rounded-lg transition-all flex-shrink-0 ${likedPhotoIds.has(photo.id)
+                                            ? 'bg-pink-500'
+                                            : 'bg-black/30 backdrop-blur-sm hover:bg-pink-500'
+                                            }`}
                                     >
-                                        <Heart size={13} className="fill-current" />
+                                        <Heart size={12} className="fill-current" />
                                         {photo.likes_count || 0}
                                     </button>
                                 </div>
                             </div>
                         ))}
-                    </div >
+                    </div>
                 )}
 
                 {/* Load More */}
@@ -242,13 +241,13 @@ const GalleryPage = () => {
                         <button
                             onClick={handleLoadMore}
                             disabled={loadingMore}
-                            className="px-8 py-3.5 bg-[var(--color-brand-secondary)] hover:bg-blue-800 text-white font-bold rounded-2xl transition-colors shadow-lg disabled:opacity-60"
+                            className="px-8 py-3 bg-[var(--color-brand-secondary)] hover:bg-blue-800 text-white font-bold rounded-xl transition-colors shadow-lg disabled:opacity-60 text-sm"
                         >
                             {loadingMore ? 'Loading...' : 'Load More Photos'}
                         </button>
                     </div>
                 )}
-            </main >
+            </main>
 
             {/* Upload Modal */}
             {

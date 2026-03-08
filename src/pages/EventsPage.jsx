@@ -97,21 +97,23 @@ const EventsPage = () => {
     return (
         <div className="flex flex-col min-h-screen bg-[var(--color-brand-bg)]">
 
-            {/* Desktop Hero Section */}
-            <div className="relative w-full h-[42vh] lg:h-[52vh] bg-gray-100 overflow-hidden flex items-center justify-center">
+            {/* Hero Section */}
+            <div className="relative w-full h-[42vh] lg:h-[52vh] bg-gray-900 overflow-hidden">
                 <img
                     src={eventsHeroImage}
                     alt="Biskra Events"
-                    className="w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-brand-bg)] via-[var(--color-brand-bg)]/40 to-black/50"></div>
-                <div className="relative z-10 text-center px-4 mt-8">
-                    <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white drop-shadow-lg mb-4">
-                        {cms.events_hero_title || 'Discover &'} <span className="text-[var(--color-brand-accent)]">Experience</span>
-                    </h1>
-                    <p className="text-sm sm:text-lg md:text-xl text-gray-200 max-w-2xl mx-auto drop-shadow-md">
-                        {cms.events_hero_subtitle || 'Join local festivals, guided tours, and community solidarity camps in Biskra.'}
-                    </p>
+                <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-brand-bg)] via-black/40 to-black/50"></div>
+                <div className="absolute inset-0 flex items-center justify-center px-4">
+                    <div className="text-center max-w-3xl">
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white drop-shadow-lg mb-4">
+                            {cms.events_hero_title || <>Discover &amp; <span className="text-[var(--color-brand-accent)]">Experience</span></>}
+                        </h1>
+                        <p className="text-sm sm:text-lg md:text-xl text-gray-200 max-w-2xl mx-auto drop-shadow-md">
+                            {cms.events_hero_subtitle || 'Join local festivals, guided tours, and community solidarity camps in Biskra.'}
+                        </p>
+                    </div>
                 </div>
             </div>
 
