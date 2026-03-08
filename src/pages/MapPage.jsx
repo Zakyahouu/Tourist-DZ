@@ -4,6 +4,7 @@ import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import { Search, Filter, Image as ImageIcon, MapPin, Star, ArrowLeft } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import logger from '../utils/logger';
+import { useCms } from '../context/CmsContext';
 import { Link, useLocation } from 'react-router-dom';
 import fallbackNatural from '../assets/fallback_image_natural.webp';
 import 'leaflet/dist/leaflet.css';
