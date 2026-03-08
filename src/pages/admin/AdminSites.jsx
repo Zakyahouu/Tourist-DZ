@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../supabaseClient';
-import { Plus, Pencil, Trash2, X, Search, MapPin, Eye, EyeOff, Image, Upload } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Search, MapPin, Eye, EyeOff, Image, Upload, QrCode, Download } from 'lucide-react';
+import { QRCodeCanvas } from 'qrcode.react';
 import { useToast } from '../../context/ToastContext';
 
 const AdminSites = () => {
@@ -14,6 +15,8 @@ const AdminSites = () => {
 
     const [showImageModal, setShowImageModal] = useState(false);
     const [selectedSiteForImages, setSelectedSiteForImages] = useState(null);
+    const [qrSite, setQrSite] = useState(null);
+    const qrCanvasRef = useRef(null);
     const [siteImages, setSiteImages] = useState([]);
     const [loadingImages, setLoadingImages] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
@@ -112,6 +115,57 @@ const AdminSites = () => {
         const { error } = await supabase.from('tourist_sites').update({ is_active: !site.is_active }).eq('id', site.id);
         if (error) return showToast('Could not update status: ' + error.message, 'error');
         fetchSites();
+    };
+
+    const downloadQr = () => {
+        const qrCanvas = qrCanvasRef.current?.querySelector('canvas');
+        if (!qrCanvas) return;
+
+        const padding = 36;
+        const qrSize = 320;
+        const titleHeight = 64;
+        const footerHeight = 80;
+        const totalW = qrSize + padding * 2;
+        const totalH = qrSize + titleHeight + footerHeight + padding * 2;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = totalW;
+        canvas.height = totalH;
+        const ctx = canvas.getContext('2d');
+
+        // White background
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, totalW, totalH);
+
+        // Thin top accent bar
+        ctx.fillStyle = '#f97316';
+        ctx.fillRect(0, 0, totalW, 6);
+
+        // Site name
+        const siteName = qrSite.name?.fr || qrSite.name?.en || 'Tourist DZ';
+        ctx.fillStyle = '#1e293b';
+        ctx.font = 'bold 20px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(siteName, totalW / 2, padding + 36);
+
+        // QR image
+        ctx.drawImage(qrCanvas, padding, padding + titleHeight, qrSize, qrSize);
+
+        // URL
+        const siteUrl = `${window.location.origin}/site/${qrSite.id}`;
+        ctx.fillStyle = '#64748b';
+        ctx.font = '12px monospace';
+        ctx.fillText(siteUrl, totalW / 2, padding + titleHeight + qrSize + 26);
+
+        // Branding
+        ctx.fillStyle = '#f97316';
+        ctx.font = 'bold 15px sans-serif';
+        ctx.fillText('Tourist DZ — Biskra, Algeria', totalW / 2, padding + titleHeight + qrSize + 54);
+
+        const link = document.createElement('a');
+        link.download = `qr-${siteName.replace(/\s+/g, '-').toLowerCase()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
     };
 
     const openImages = async (site) => {
@@ -276,6 +330,7 @@ const AdminSites = () => {
                                             </button>
                                         </td>
                                         <td className="px-6 py-4 text-right space-x-2 whitespace-nowrap">
+                                            <button onClick={() => setQrSite(site)} className="text-slate-400 hover:text-orange-500 transition-colors p-1.5 hover:bg-orange-50 rounded-lg" title="Download QR Code"><QrCode size={16} /></button>
                                             <button onClick={() => openImages(site)} className="text-slate-400 hover:text-emerald-600 transition-colors p-1.5 hover:bg-emerald-50 rounded-lg" title="Manage Images"><Image size={16} /></button>
                                             <button onClick={() => openEdit(site)} className="text-slate-400 hover:text-sky-600 transition-colors p-1.5 hover:bg-sky-50 rounded-lg"><Pencil size={16} /></button>
                                             <button onClick={() => handleDelete(site.id)} className="text-slate-400 hover:text-red-600 transition-colors p-1.5 hover:bg-red-50 rounded-lg"><Trash2 size={16} /></button>
@@ -459,6 +514,46 @@ const AdminSites = () => {
                                 </div>
                             )}
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* QR Code Download Modal */}
+            {qrSite && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setQrSite(null)}>
+                    <div className="bg-white rounded-3xl shadow-2xl p-8 flex flex-col items-center gap-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between w-full">
+                            <div>
+                                <h3 className="text-lg font-black text-slate-800">QR Code</h3>
+                                <p className="text-sm text-slate-400 mt-0.5">{qrSite.name?.fr || qrSite.name?.en}</p>
+                            </div>
+                            <button onClick={() => setQrSite(null)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"><X size={18} /></button>
+                        </div>
+
+                        {/* Preview — border + site name */}
+                        <div className="flex flex-col items-center gap-3 bg-slate-50 rounded-2xl p-6 w-full border border-slate-100">
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Scan to visit</p>
+                            <div ref={qrCanvasRef} className="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
+                                <QRCodeCanvas
+                                    value={`${window.location.origin}/site/${qrSite.id}`}
+                                    size={200}
+                                    level="H"
+                                    includeMargin={false}
+                                />
+                            </div>
+                            <p className="text-sm font-bold text-slate-700 text-center">{qrSite.name?.fr || qrSite.name?.en}</p>
+                            <p className="text-[10px] text-slate-400 font-mono break-all text-center">{window.location.origin}/site/{qrSite.id}</p>
+                        </div>
+
+                        <button
+                            onClick={downloadQr}
+                            className="w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-2xl transition-colors shadow-lg shadow-orange-200"
+                        >
+                            <Download size={18} /> Download PNG
+                        </button>
+                        <p className="text-xs text-slate-400 text-center -mt-2">
+                            High-resolution • Ready to print
+                        </p>
                     </div>
                 </div>
             )}
