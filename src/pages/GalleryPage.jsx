@@ -29,6 +29,7 @@ const GalleryPage = () => {
     const [uploading, setUploading] = useState(false);
     const cms = useCms();
     const [likedPhotoIds, setLikedPhotoIds] = useState(new Set());
+    const [selectedPhoto, setSelectedPhoto] = useState(null);
 
     useEffect(() => {
         setPage(0);
@@ -190,7 +191,7 @@ const GalleryPage = () => {
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {photos.map((photo) => (
-                            <div key={photo.id} className="relative aspect-square rounded-2xl overflow-hidden group cursor-pointer bg-gray-100">
+                            <div key={photo.id} className="relative aspect-square rounded-2xl overflow-hidden group cursor-pointer bg-gray-100" onClick={() => setSelectedPhoto(photo)}>
                                 <img
                                     src={photo.image_url}
                                     alt={photo.caption || 'Gallery item'}
@@ -248,6 +249,46 @@ const GalleryPage = () => {
                     </div>
                 )}
             </main>
+
+            {/* Upload Modal */}
+            {selectedPhoto && (
+                <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setSelectedPhoto(null)}>
+                    <div className="relative max-w-5xl w-full max-h-[90vh] flex flex-col items-center" onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setSelectedPhoto(null)} className="absolute top-2 right-2 z-10 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white transition-colors">
+                            <X size={22} />
+                        </button>
+                        <img
+                            src={selectedPhoto.image_url}
+                            alt={selectedPhoto.caption || 'Gallery photo'}
+                            className="max-w-full max-h-[75vh] object-contain rounded-xl"
+                        />
+                        <div className="w-full mt-4 px-2 flex items-center justify-between">
+                            <div className="min-w-0 flex-1">
+                                {selectedPhoto.caption && (
+                                    <p className="text-white font-semibold text-sm mb-1">{selectedPhoto.caption}</p>
+                                )}
+                                <p className="text-white/60 text-xs">
+                                    {selectedPhoto.profiles?.full_name || 'Anonymous'}
+                                    {selectedPhoto.is_competition_entry && (
+                                        <span className="ml-2 inline-flex items-center gap-1 text-yellow-400 font-bold"><Trophy size={12} /> Competition Entry</span>
+                                    )}
+                                </p>
+                            </div>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); handleLike(selectedPhoto.id); }}
+                                className={`flex items-center gap-1.5 text-sm font-bold text-white px-4 py-2 rounded-xl transition-all flex-shrink-0 ${
+                                    likedPhotoIds.has(selectedPhoto.id)
+                                        ? 'bg-pink-500'
+                                        : 'bg-white/20 hover:bg-pink-500'
+                                }`}
+                            >
+                                <Heart size={16} className="fill-current" />
+                                {photos.find(p => p.id === selectedPhoto.id)?.likes_count || selectedPhoto.likes_count || 0}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Upload Modal */}
             {
