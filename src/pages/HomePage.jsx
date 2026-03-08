@@ -188,8 +188,8 @@ const HomePage = () => {
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {featuredSites.map((site) => (
-                                <Link to={`/site/${site.id}`} key={site.id} className="group flex flex-col rounded-3xl overflow-hidden bg-white shadow-lg shadow-gray-200/50 border border-gray-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
-                                    <div className="h-56 bg-gray-200 relative w-full overflow-hidden">
+                                <Link to={`/site/${site.id}`} key={site.id} className="group flex flex-col rounded-3xl overflow-hidden bg-white shadow-lg shadow-gray-200/50 border border-gray-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+                                    <div className="aspect-[4/3] bg-gray-200 relative w-full overflow-hidden">
                                         <img
                                             src={getSiteImage(site)}
                                             alt={site.name?.[lang] || site.name?.fr || ''}
@@ -206,19 +206,25 @@ const HomePage = () => {
                                             </div>
                                         )}
                                     </div>
-                                    <div className="p-6 flex-grow flex flex-col justify-between">
+                                    <div className="p-5 flex flex-col gap-3">
                                         <div>
-                                            <div className="text-[10px] uppercase tracking-wider font-bold text-[var(--color-brand-primary)] mb-2 capitalize">
+                                            <div className="inline-flex items-center text-[10px] uppercase tracking-wider font-bold text-[var(--color-brand-primary)] bg-[var(--color-brand-primary)]/8 px-2 py-0.5 rounded mb-2 capitalize">
                                                 {site.category}
                                             </div>
-                                            <h3 className="font-bold text-xl text-[var(--color-brand-text)] mb-2 line-clamp-1 group-hover:text-[var(--color-brand-primary)] transition-colors">
+                                            <h3 className="font-bold text-lg text-[var(--color-brand-text)] line-clamp-2 leading-snug group-hover:text-[var(--color-brand-primary)] transition-colors">
                                                 {site.name?.[lang] || site.name?.fr || 'Unnamed Site'}
                                             </h3>
-                                            {site.address && (
-                                                <p className="text-sm text-[var(--color-brand-text-muted)] flex items-center">
-                                                    <MapPin size={14} className="mr-1 text-[var(--color-brand-secondary)] flex-shrink-0" /> {site.address}
+                                        </div>
+                                        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                                            {site.address ? (
+                                                <p className="text-xs text-[var(--color-brand-text-muted)] flex items-center min-w-0 mr-2">
+                                                    <MapPin size={12} className="mr-1 text-[var(--color-brand-secondary)] flex-shrink-0" />
+                                                    <span className="truncate">{site.address}</span>
                                                 </p>
-                                            )}
+                                            ) : <span />}
+                                            <span className="text-xs font-bold text-[var(--color-brand-secondary)] flex items-center gap-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all">
+                                                View <ArrowRight size={13} />
+                                            </span>
                                         </div>
                                     </div>
                                 </Link>

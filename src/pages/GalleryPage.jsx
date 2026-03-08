@@ -142,7 +142,7 @@ const GalleryPage = () => {
     return (
         <div className="flex flex-col min-h-screen bg-[var(--color-brand-bg)] relative">
             {/* Hero */}
-            <div className="relative w-full h-[25vh] lg:h-[35vh] bg-black overflow-hidden flex flex-col items-center justify-center">
+            <div className="relative w-full h-[42vh] lg:h-[52vh] bg-black overflow-hidden flex flex-col items-center justify-center">
                 <img
                     src={galleryHeroImage}
                     alt="Biskra Gallery"
@@ -189,31 +189,49 @@ const GalleryPage = () => {
                 ) : (
                     <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
                         {photos.map((photo) => (
-                            <div key={photo.id} className="relative rounded-3xl overflow-hidden shadow-lg border border-gray-100 break-inside-avoid group cursor-pointer bg-white">
-                                <img src={photo.image_url} alt={photo.caption || 'Gallery item'} className="w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <div key={photo.id} className="relative rounded-2xl overflow-hidden shadow-md border border-gray-100 break-inside-avoid group cursor-pointer">
+                                <img src={photo.image_url} alt={photo.caption || 'Gallery item'} className="w-full object-cover transition-transform duration-700 group-hover:scale-105 block" />
 
-                                {photo.is_competition_entry && photo.likes_count > 200 && (
-                                    <div className="absolute top-4 right-4 bg-yellow-400 text-yellow-900 text-[10px] font-black px-3 py-1.5 rounded-full flex items-center shadow-lg uppercase tracking-wider z-10">
-                                        <Trophy size={12} className="mr-1.5" /> Winner
+                                {/* Always-visible bottom gradient */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent pointer-events-none"></div>
+
+                                {/* Extra dimming on hover */}
+                                <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+
+                                {photo.is_competition_entry && (
+                                    <div className="absolute top-3 left-3 bg-yellow-400 text-yellow-900 text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 shadow-lg uppercase tracking-wider z-10">
+                                        <Trophy size={10} /> {photo.likes_count > 200 ? 'Winner' : 'Entry'}
                                     </div>
                                 )}
 
-                                <div className="absolute bottom-0 left-0 right-0 p-5 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex justify-between items-end pb-5 pt-12">
-                                    <div className="flex items-center">
-                                        <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden border-2 border-white mr-3 rtl:ml-3 rtl:mr-0 shadow-sm">
-                                            <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(photo.profiles?.full_name || 'U')}&background=random&color=555`} className="w-full h-full" alt="User" />
-                                        </div >
-                                        <span className="text-sm font-bold text-white shadow-sm drop-shadow-md">
-                                            {photo.profiles?.full_name || 'Anonymous'}
-                                        </span>
-                                    </div >
-                                    <button onClick={() => handleLike(photo.id)} className={`flex items-center text-sm font-bold text-white backdrop-blur-md px-4 py-2 rounded-xl border border-white/30 transition-all shadow-lg ${likedPhotoIds.has(photo.id) ? 'bg-pink-500' : 'bg-white/20 hover:bg-pink-500'}`}>
-                                        <Heart size={16} className="mr-1.5 fill-current" />
+                                {/* Bottom bar — always visible */}
+                                <div className="absolute bottom-0 left-0 right-0 p-3 flex justify-between items-end gap-2">
+                                    <div className="flex-1 min-w-0">
+                                        {photo.caption && (
+                                            <p className="text-white/90 text-xs leading-snug line-clamp-2 mb-1.5 drop-shadow font-medium">
+                                                {photo.caption}
+                                            </p>
+                                        )}
+                                        <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                            <img
+                                                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(photo.profiles?.full_name || 'U')}&background=random&color=555`}
+                                                className="w-5 h-5 rounded-full border border-white/60 shadow-sm flex-shrink-0"
+                                                alt="User"
+                                            />
+                                            <span className="text-xs font-bold text-white drop-shadow truncate">
+                                                {photo.profiles?.full_name || 'Anonymous'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => handleLike(photo.id)}
+                                        className={`flex items-center gap-1 text-xs font-bold text-white backdrop-blur-sm px-3 py-1.5 rounded-xl border border-white/30 transition-all shadow-md flex-shrink-0 ${likedPhotoIds.has(photo.id) ? 'bg-pink-500 border-pink-400' : 'bg-black/30 hover:bg-pink-500'}`}
+                                    >
+                                        <Heart size={13} className="fill-current" />
                                         {photo.likes_count || 0}
                                     </button>
-                                </div >
-                            </div >
+                                </div>
+                            </div>
                         ))}
                     </div >
                 )}

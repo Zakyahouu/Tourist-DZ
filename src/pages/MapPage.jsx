@@ -213,8 +213,8 @@ const MapPage = () => {
                                 </span>
                             </div>
 
-                            <p className="text-sm text-gray-600 leading-relaxed mb-6 bg-gray-50 p-4 rounded-xl border border-gray-100 italic">
-                                "{selectedSite.description?.[lang] || selectedSite.description?.fr || 'Discover the wonders of this beautiful location in the heart of Biskra oasis.'}"
+                            <p className="text-sm text-gray-600 leading-relaxed mb-6">
+                                {selectedSite.description?.[lang] || selectedSite.description?.fr || 'Discover the wonders of this beautiful location in the heart of Biskra oasis.'}
                             </p>
 
                             {!selectedSite.is_accommodation ? (
@@ -245,9 +245,9 @@ const MapPage = () => {
                                     <div
                                         key={site.id}
                                         onClick={() => setSelectedSite(site)}
-                                        className="flex gap-4 p-3 bg-white hover:bg-gray-50 rounded-2xl cursor-pointer transition-all border border-gray-100 hover:border-[var(--color-brand-secondary)]/30 hover:shadow-md group"
+                                        className="flex gap-3 p-3 bg-white hover:bg-gray-50 rounded-2xl cursor-pointer transition-all border border-gray-100 hover:border-[var(--color-brand-secondary)]/30 hover:shadow-md group"
                                     >
-                                        <div className="w-20 h-20 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0 shadow-sm border border-gray-200">
+                                        <div className="w-[72px] h-[72px] bg-gray-100 rounded-xl overflow-hidden flex-shrink-0 shadow-sm">
                                             <img
                                                 src={site.site_images?.[0]?.image_url || cms.home_hero_image || FALLBACK_IMAGE}
                                                 onError={(e) => { e.target.src = FALLBACK_IMAGE }}
@@ -255,15 +255,17 @@ const MapPage = () => {
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                             />
                                         </div>
-                                        <div className="flex flex-col flex-1 justify-center">
-                                            <div className="text-[10px] uppercase font-black text-[var(--color-brand-primary)] mb-1 tracking-wider">
+                                        <div className="flex flex-col flex-1 justify-center min-w-0">
+                                            <div className="text-[10px] uppercase font-black text-[var(--color-brand-primary)] mb-0.5 tracking-wider">
                                                 {t(`categories.${site.category}`)}
                                             </div>
-                                            <h3 className="font-bold text-[var(--color-brand-text)] text-sm leading-tight mb-1.5 group-hover:text-[var(--color-brand-secondary)] transition-colors">
+                                            <h3 className="font-bold text-[var(--color-brand-text)] text-sm leading-tight mb-1 group-hover:text-[var(--color-brand-secondary)] transition-colors truncate">
                                                 {site.name?.[lang] || site.name?.fr}
                                             </h3>
-                                            <div className="flex items-center text-xs font-bold text-[var(--color-brand-text-muted)]">
-                                                <Star size={12} className="text-yellow-500 mr-1" /> {site.avg_rating?.toFixed(1) || '0.0'}
+                                            <div className="flex items-center gap-1.5 text-xs">
+                                                <Star size={11} className="text-yellow-500 fill-yellow-500 flex-shrink-0" />
+                                                <span className="font-bold text-gray-700">{site.avg_rating?.toFixed(1) || '—'}</span>
+                                                {site.address && <span className="text-gray-400 truncate">· {site.address}</span>}
                                             </div>
                                         </div>
                                     </div>

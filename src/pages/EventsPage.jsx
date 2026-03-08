@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { QRCodeSVG } from 'qrcode.react';
-import { Calendar, Users, MapPin, Search, CheckCircle, Headphones, QrCode, Accessibility } from 'lucide-react';
+import { Calendar, Users, MapPin, Search, CheckCircle, Headphones, Accessibility, Clock } from 'lucide-react';
 import eventsHeroImage from '../assets/events_hero_image.webp';
 import { supabase } from '../supabaseClient';
 import logger from '../utils/logger';
@@ -99,7 +98,7 @@ const EventsPage = () => {
         <div className="flex flex-col min-h-screen bg-[var(--color-brand-bg)]">
 
             {/* Desktop Hero Section */}
-            <div className="relative w-full h-[30vh] lg:h-[40vh] bg-gray-100 overflow-hidden flex items-center justify-center">
+            <div className="relative w-full h-[42vh] lg:h-[52vh] bg-gray-100 overflow-hidden flex items-center justify-center">
                 <img
                     src={eventsHeroImage}
                     alt="Biskra Events"
@@ -192,45 +191,45 @@ const EventsPage = () => {
                                     </div>
 
                                     {/* Event Details */}
-                                    <div className="mt-auto pt-4 border-t border-gray-100">
-                                        <div className="flex justify-between items-center mb-6">
-                                            <div className="flex items-center text-sm text-[var(--color-brand-text-muted)] font-medium">
-                                                <MapPin size={16} className="mr-2 text-[var(--color-brand-secondary)]" />
-                                                <span className="truncate max-w-[150px]">{event.location}</span>
+                                    <div className="mt-auto pt-4 border-t border-gray-100 space-y-3">
+                                        {/* Location + Capacity row */}
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div className="flex items-center text-sm text-[var(--color-brand-text-muted)] font-medium min-w-0">
+                                                <MapPin size={14} className="mr-1.5 text-[var(--color-brand-secondary)] flex-shrink-0" />
+                                                <span className="truncate">{event.location}</span>
                                             </div>
-                                            {event.max_participants && (
-                                                <div className="flex items-center text-xs text-gray-500 font-bold">
-                                                    <Users size={14} className="mr-2 text-[var(--color-brand-primary)]" />
-                                                    {event.max_participants} places
-                                                </div>
-                                            )}
-                                            {event.audio_url && (
-                                                <div className="mt-4 p-3 bg-orange-50 rounded-xl border border-orange-100">
-                                                    <p className="text-[10px] font-bold text-orange-600 uppercase mb-2 flex items-center">
-                                                        <Headphones size={12} className="mr-1" /> {t('features.audioGuide')}
-                                                    </p>
-                                                    <audio controls className="w-full h-8 scale-90 -ml-2">
-                                                        <source src={event.audio_url} type="audio/mpeg" />
-                                                    </audio>
-                                                </div>
-                                            )}
-                                            <div className="mt-4 p-3 bg-blue-50 rounded-xl border border-blue-100 flex items-center gap-3">
-                                                <div className="bg-white rounded-lg p-1 shrink-0 border border-blue-100">
-                                                    <QRCodeSVG value={`${window.location.origin}/events`} size={48} />
-                                                </div>
-                                                <div>
-                                                    <p className="text-[10px] font-bold text-blue-700 uppercase">{t('features.qrTitle')}</p>
-                                                    <p className="text-[9px] text-blue-500 font-medium tracking-tight">{t('features.qrDesc')}</p>
+                                            <div className="flex items-center gap-2 flex-shrink-0">
+                                                {event.max_participants && (
+                                                    <div className="flex items-center text-xs text-gray-500 font-bold bg-gray-50 border border-gray-200 px-2.5 py-1.5 rounded-lg">
+                                                        <Users size={12} className="mr-1 text-[var(--color-brand-primary)]" />
+                                                        {event.max_participants}
+                                                    </div>
+                                                )}
+                                                <div className="flex items-center text-xs text-gray-500 font-bold bg-gray-50 border border-gray-200 px-2.5 py-1.5 rounded-lg">
+                                                    <Clock size={12} className="mr-1 text-[var(--color-brand-secondary)]" />
+                                                    {new Date(event.start_date).toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' })}
                                                 </div>
                                             </div>
                                         </div>
 
+                                        {/* Audio guide — only visible when event has audio */}
+                                        {event.audio_url && (
+                                            <div className="p-3 bg-orange-50 rounded-xl border border-orange-100">
+                                                <p className="text-[10px] font-bold text-orange-600 uppercase mb-1.5 flex items-center gap-1">
+                                                    <Headphones size={11} /> {t('features.audioGuide')}
+                                                </p>
+                                                <audio controls className="w-full h-8">
+                                                    <source src={event.audio_url} type="audio/mpeg" />
+                                                </audio>
+                                            </div>
+                                        )}
+
                                         <button
                                             onClick={() => handleRegister(event.id)}
                                             disabled={registeredEvents.has(event.id) || registering === event.id}
-                                            className={`w-full px-4 py-3 rounded-xl text-sm font-bold transition-all border ${registeredEvents.has(event.id)
-                                                ? 'bg-emerald-50 text-emerald-600 border-emerald-200 cursor-default flex items-center justify-center'
-                                                : 'bg-gray-50 hover:bg-[var(--color-brand-primary)] text-gray-700 hover:text-white border-gray-200 hover:border-transparent hover:shadow-md'
+                                            className={`w-full px-4 py-3 rounded-xl text-sm font-bold transition-all ${registeredEvents.has(event.id)
+                                                ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 cursor-default flex items-center justify-center'
+                                                : 'bg-[var(--color-brand-primary)] hover:bg-orange-600 text-white shadow-md shadow-orange-500/20 hover:shadow-orange-500/30'
                                                 }`}>
                                             {registering === event.id ? 'Registering...' :
                                                 registeredEvents.has(event.id) ? <><CheckCircle size={16} className="mr-2" /> Registered</> : 'Register for Event'}
