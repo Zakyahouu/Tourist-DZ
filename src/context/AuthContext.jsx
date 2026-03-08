@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
                 .single();
 
             if (error) {
-                console.warn('Profile fetch error (might not exist yet):', error.message);
+                logger.warn('Profile fetch error (might not exist yet):', error.message);
                 setProfile(null);
             } else {
                 setProfile(data);

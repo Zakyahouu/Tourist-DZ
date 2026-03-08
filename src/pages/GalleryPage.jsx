@@ -50,13 +50,6 @@ const GalleryPage = () => {
         if (data) setLikedPhotoIds(new Set(data.map(r => r.photo_id)));
     }
 
-    async function fetchCms() {
-        try {
-            const { data } = await supabase.from('site_content').select('key, value');
-            if (data) setCms(Object.fromEntries(data.map(d => [d.key, d.value])));
-        } catch (e) { logger.error('CMS fetch error', e); }
-    }
-
     async function fetchGallery(pageNum = 0, replace = false) {
         pageNum === 0 ? setLoading(true) : setLoadingMore(true);
         try {
