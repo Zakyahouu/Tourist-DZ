@@ -13,7 +13,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         autoRefreshToken: true,
         detectSessionInUrl: true,
         storageKey: 'touristdz-auth',
-        // In dev (React Strict Mode), bypass Web Locks to prevent AbortError
-        ...(import.meta.env.DEV && { lock: async (_name, _acquireTimeout, fn) => await fn() }),
+        // Bypass Web Locks entirely — token refresh holding the lock was causing
+        // signOut() to hang indefinitely (deadlock) in production.
+        lock: async (_name, _acquireTimeout, fn) => await fn(),
     }
 })

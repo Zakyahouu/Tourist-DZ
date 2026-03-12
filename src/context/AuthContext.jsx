@@ -26,9 +26,11 @@ export const AuthProvider = ({ children }) => {
         const fetchProfile = async (userId) => {
             if (!userId) return;
             const MAX_ATTEMPTS = 3;
+            console.log(`[TDZ Auth] fetchProfile called for userId=${userId}`);
 
             for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
                 if (!mounted) return;
+                console.log(`[TDZ Auth] Profile fetch attempt ${attempt}/${MAX_ATTEMPTS}`);
                 try {
                     const { data, error } = await supabase
                         .from('profiles')
@@ -39,26 +41,28 @@ export const AuthProvider = ({ children }) => {
                     if (!mounted) return;
 
                     if (error) {
+                        console.warn(`[TDZ Auth] Profile fetch error (attempt ${attempt}):`, error.code, error.message);
                         // Retry only on initial load (no profile loaded yet) and within limit
                         if (attempt < MAX_ATTEMPTS && !lastFetchedUserId.current) {
-                            logger.warn(`Profile fetch attempt ${attempt} failed, retrying...`);
+                            console.log(`[TDZ Auth] Retrying profile fetch in ${attempt * 800}ms...`);
                             await new Promise(r => setTimeout(r, attempt * 800));
                             continue;
                         }
-                        logger.warn('Profile fetch error:', error.message);
+                        console.warn('[TDZ Auth] Profile fetch failed — keeping existing profile. Current profile:', lastFetchedUserId.current ? 'exists' : 'none');
                         // Keep existing profile — don't wipe admin state
                         break;
                     }
 
+                    console.log(`[TDZ Auth] Profile fetched OK → id=${data?.id} role=${data?.role} full_name=${data?.full_name}`);
                     setProfile(data);
                     lastFetchedUserId.current = userId;
                     break; // success
                 } catch (err) {
+                    console.error(`[TDZ Auth] fetchProfile threw (attempt ${attempt}):`, err);
                     if (attempt < MAX_ATTEMPTS && !lastFetchedUserId.current) {
                         await new Promise(r => setTimeout(r, attempt * 800));
                         continue;
                     }
-                    logger.error('Error in fetchProfile:', err);
                     break;
                 }
             }
@@ -70,6 +74,8 @@ export const AuthProvider = ({ children }) => {
             async (event, session) => {
                 if (!mounted) return;
 
+                console.log(`[TDZ Auth] onAuthStateChange → event=${event} | userId=${session?.user?.id ?? 'none'} | sessionExpiry=${session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : 'n/a'}`);
+
                 setSession(session);
                 setUser(session?.user ?? null);
 
@@ -78,12 +84,16 @@ export const AuthProvider = ({ children }) => {
                     // TOKEN_REFRESHED, USER_UPDATED etc. don't change the profile row —
                     // re-fetching on those events was wiping admin state on errors.
                     const isNewUser = session.user.id !== lastFetchedUserId.current;
-                    if (isNewUser || event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+                    const shouldFetch = isNewUser || event === 'SIGNED_IN' || event === 'INITIAL_SESSION';
+                    console.log(`[TDZ Auth] isNewUser=${isNewUser} shouldFetch=${shouldFetch} lastFetchedUser=${lastFetchedUserId.current ?? 'none'}`);
+                    if (shouldFetch) {
                         await fetchProfile(session.user.id);
                     } else {
+                        console.log('[TDZ Auth] Skipping profile re-fetch (same user, non-login event)');
                         setLoading(false);
                     }
                 } else {
+                    console.log('[TDZ Auth] No session → clearing profile and user state');
                     setProfile(null);
                     lastFetchedUserId.current = null;
                     setLoading(false);
@@ -93,7 +103,10 @@ export const AuthProvider = ({ children }) => {
 
         // Fallback: ensure we stop loading if no event fires within 5s
         const timer = setTimeout(() => {
-            if (mounted) setLoading(false);
+            if (mounted) {
+                console.warn('[TDZ Auth] 5s timeout hit — forcing loading=false. No auth event fired?');
+                setLoading(false);
+            }
         }, 5000);
 
         return () => {
@@ -104,11 +117,24 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const signOut = useCallback(async () => {
-        await supabase.auth.signOut();
+        console.log('[TDZ Auth] signOut initiated');
+        // Always clear local state first so the UI responds immediately,
+        // even if the API call hangs or fails.
         setSession(null);
         setUser(null);
         setProfile(null);
         lastFetchedUserId.current = null;
+        try {
+            // Race the server call against a 5s timeout so we never hang
+            await Promise.race([
+                supabase.auth.signOut(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('signOut timeout')), 5000)),
+            ]);
+            console.log('[TDZ Auth] signOut: server call completed');
+        } catch (err) {
+            // State was already cleared above — this only affects the server-side revocation
+            console.warn('[TDZ Auth] signOut: server call failed or timed out:', err.message);
+        }
     }, []);
 
     const isAdmin = profile?.role === 'admin';

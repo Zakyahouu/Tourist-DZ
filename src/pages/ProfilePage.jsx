@@ -80,7 +80,13 @@ const ProfilePage = () => {
     const changeLanguage = (lng) => i18n.changeLanguage(lng);
 
     const handleSignOut = async () => {
-        await signOut();
+        console.log('[TDZ Profile] Logout button clicked');
+        try {
+            await signOut();
+            console.log('[TDZ Profile] signOut resolved, navigating to /');
+        } catch (err) {
+            console.error('[TDZ Profile] signOut threw unexpectedly:', err);
+        }
         navigate('/');
     };
 
