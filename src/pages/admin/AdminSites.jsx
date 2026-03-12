@@ -21,6 +21,8 @@ const AdminSites = () => {
     const [loadingImages, setLoadingImages] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploadingImage, setUploadingImage] = useState(false);
+    const [uploadingAudio, setUploadingAudio] = useState(false);
+    const audioInputRef = useRef(null);
     const emptySite = {
         name: { ar: '', fr: '', en: '' },
         description: { ar: '', fr: '', en: '' },
@@ -104,6 +106,28 @@ const AdminSites = () => {
             audio_url: site.audio_url || ''
         });
         setShowModal(true);
+    };
+
+    const handleAudioUpload = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const allowed = ['audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/wav', 'audio/aac', 'audio/x-m4a', 'audio/mp4', 'audio/webm'];
+        if (!allowed.includes(file.type) && !/\.(mp3|ogg|wav|aac|m4a|webm)$/i.test(file.name)) {
+            return showToast('Unsupported audio format. Use MP3, OGG, WAV, AAC, or M4A.', 'error');
+        }
+        setUploadingAudio(true);
+        const ext = file.name.split('.').pop();
+        const filePath = `audio-${Date.now()}.${ext}`;
+        const { error: uploadError } = await supabase.storage.from('audio-guides').upload(filePath, file);
+        if (uploadError) {
+            showToast('Audio upload failed: ' + uploadError.message, 'error');
+            setUploadingAudio(false);
+            return;
+        }
+        const { data: { publicUrl } } = supabase.storage.from('audio-guides').getPublicUrl(filePath);
+        setForm(prev => ({ ...prev, audio_url: publicUrl }));
+        showToast('Audio uploaded successfully.', 'success');
+        setUploadingAudio(false);
     };
 
     const openCreate = () => {
@@ -407,19 +431,41 @@ const AdminSites = () => {
                                     <input type="number" step="any" value={form.longitude} onChange={e => setForm({ ...form, longitude: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-sky-500" />
                                 </div>
                             </div>
-                            {/* Audio Logic */}
-                            <div className="pt-4 border-t border-slate-100 space-y-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Audio Guide URL (MP3)</label>
-                                    <input
-                                        type="text"
-                                        value={form.audio_url}
-                                        onChange={e => setForm({ ...form, audio_url: e.target.value })}
-                                        placeholder="https://.../guide.mp3"
-                                        className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-sky-500"
-                                    />
-                                    <p className="text-[10px] text-slate-400 mt-1 italic">Link to an MP3 file that will be playable in the app.</p>
-                                </div>
+                            {/* Audio Guide Upload */}
+                            <div className="pt-4 border-t border-slate-100 space-y-3">
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Audio Guide</label>
+                                {form.audio_url ? (
+                                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                                        <audio controls className="flex-1 h-9" src={form.audio_url} />
+                                        <button
+                                            type="button"
+                                            onClick={() => setForm(prev => ({ ...prev, audio_url: '' }))}
+                                            className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                            title="Remove audio"
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-slate-400 italic">No audio guide uploaded yet.</p>
+                                )}
+                                <input
+                                    ref={audioInputRef}
+                                    type="file"
+                                    accept="audio/mp3,audio/mpeg,audio/ogg,audio/wav,audio/aac,audio/x-m4a,audio/mp4,audio/webm"
+                                    className="hidden"
+                                    onChange={handleAudioUpload}
+                                />
+                                <button
+                                    type="button"
+                                    disabled={uploadingAudio}
+                                    onClick={() => audioInputRef.current?.click()}
+                                    className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-sky-600 border border-sky-200 rounded-xl hover:bg-sky-50 transition-colors disabled:opacity-60"
+                                >
+                                    <Upload size={15} />
+                                    {uploadingAudio ? 'Uploading...' : 'Upload Audio File'}
+                                </button>
+                                <p className="text-[10px] text-slate-400 italic">Supported formats: MP3, OGG, WAV, AAC, M4A</p>
                             </div>
 
                             {/* Toggles */}

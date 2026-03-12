@@ -62,7 +62,7 @@ const AdminSettings = () => {
             showToast('Settings saved successfully!', 'success');
         } catch (err) {
             logger.error('Save error:', err);
-            showToast('Error saving. Check console.', 'error');
+            showToast('Error saving: ' + (err?.message || 'Unknown error'), 'error');
         } finally {
             setSaving(false);
         }

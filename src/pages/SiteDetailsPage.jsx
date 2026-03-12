@@ -189,9 +189,9 @@ const SiteDetailsPage = () => {
                             <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-md mb-10">
                                 <h3 className="text-lg font-bold text-[var(--color-brand-text)] mb-4">{t('site.leaveReview')}</h3>
                                 {!user ? (
-                                    <p className="text-sm text-gray-500">Please <button onClick={() => navigate('/auth', { state: { from: `/site/${id}` } })} className="text-[var(--color-brand-secondary)] font-bold hover:underline">log in</button> to leave a review.</p>
+                                    <p className="text-sm text-gray-500">{t('site.loginToReview')} <button onClick={() => navigate('/auth', { state: { from: `/site/${id}` } })} className="text-[var(--color-brand-secondary)] font-bold hover:underline">{t('app.login')}</button></p>
                                 ) : userAlreadyReviewed ? (
-                                    <p className="text-sm text-emerald-600 font-bold">✓ You've already reviewed this site. Thank you!</p>
+                                    <p className="text-sm text-emerald-600 font-bold">{t('site.alreadyReviewed')}</p>
                                 ) : (<form onSubmit={handleReviewSubmit}>
                                     <div className="flex items-center mb-4">
                                         {[1, 2, 3, 4, 5].map((star) => (
@@ -206,13 +206,13 @@ const SiteDetailsPage = () => {
                                             </button>
                                         ))}
                                         <span className="ml-4 text-sm font-bold text-gray-400">
-                                            {rating > 0 ? `${rating} Stars` : 'Select Rating'}
+                                            {rating > 0 ? t('site.stars', { count: rating }) : t('site.selectRating')}
                                         </span>
                                     </div>
                                     <textarea
                                         value={comment}
                                         onChange={(e) => setComment(e.target.value)}
-                                        placeholder="Share details of your own experience at this place"
+                                        placeholder={t('site.reviewPlaceholder')}
                                         className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-secondary)] focus:border-transparent resize-none min-h-[100px] mb-4"
                                     />
                                     <div className="flex justify-end">
@@ -221,7 +221,7 @@ const SiteDetailsPage = () => {
                                             disabled={submittingReview || rating === 0}
                                             className="flex items-center bg-[var(--color-brand-secondary)] hover:bg-blue-800 text-white font-bold py-2.5 px-6 rounded-xl transition-all disabled:opacity-50 shadow-md shadow-blue-900/20"
                                         >
-                                            {submittingReview ? 'Submitting...' : <><Send size={16} className="mr-2 rtl:ml-2 rtl:mr-0" /> Submit Review</>}
+                                            {submittingReview ? t('site.submitting') : <><Send size={16} className="mr-2 rtl:ml-2 rtl:mr-0" /> {t('site.submitReview')}</>}
                                         </button>
                                     </div>
                                 </form>
@@ -238,7 +238,7 @@ const SiteDetailsPage = () => {
                                                     {review.profiles?.full_name?.charAt(0)?.toUpperCase() || '?'}
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-bold text-sm text-[var(--color-brand-text)]">{review.profiles?.full_name || 'Anonymous'}</h4>
+                                                    <h4 className="font-bold text-sm text-[var(--color-brand-text)]">{review.profiles?.full_name || t('site.anonymous')}</h4>
                                                     <div className="flex mt-0.5">
                                                         {[...Array(5)].map((_, i) => (
                                                             <Star key={i} size={12} className={i < review.rating ? "fill-yellow-500 text-yellow-500" : "text-gray-300"} />
@@ -256,7 +256,7 @@ const SiteDetailsPage = () => {
                                             onClick={() => setShowAllReviews(prev => !prev)}
                                             className="px-6 py-2.5 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
                                         >
-                                            {showAllReviews ? 'Show less' : `Show all ${site.reviews.length} reviews`}
+                                            {showAllReviews ? t('site.showLess') : t('site.showAllReviews', { count: site.reviews.length })}
                                         </button>
                                     </div>
                                 )}
@@ -282,7 +282,7 @@ const SiteDetailsPage = () => {
                                                 <MapPin size={18} />
                                             </div>
                                             <div>
-                                                <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-0.5">Location</p>
+                                                <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-0.5">{t('site.locationLabel')}</p>
                                                 <p className="text-sm text-[var(--color-brand-text)] font-semibold">{site.address}</p>
                                             </div>
                                         </li>
@@ -303,9 +303,9 @@ const SiteDetailsPage = () => {
                                             <Star size={18} />
                                         </div>
                                         <div>
-                                            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-0.5">Rating</p>
+                                            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-0.5">{t('site.ratingLabel')}</p>
                                             <p className="text-sm text-[var(--color-brand-text)] font-semibold">
-                                                {site.avg_rating > 0 ? `${site.avg_rating.toFixed(1)} / 5 (${site.review_count || 0} reviews)` : 'No ratings yet'}
+                                                {site.avg_rating > 0 ? `${site.avg_rating.toFixed(1)} / 5 (${t('site.reviewsCount', { count: site.review_count || 0 })})` : t('site.noRatingsYet')}
                                             </p>
                                         </div>
                                     </li>
@@ -356,8 +356,8 @@ const SiteDetailsPage = () => {
                                         <h3 className="text-lg font-black text-[var(--color-brand-text)]">{t('features.audioGuide')}</h3>
                                     </div>
                                     <audio controls className="w-full">
-                                        <source src={site.audio_url} type="audio/mpeg" />
-                                        Your browser does not support the audio element.
+                                        <source src={site.audio_url} type={site.audio_url?.endsWith('.ogg') ? 'audio/ogg' : site.audio_url?.endsWith('.wav') ? 'audio/wav' : site.audio_url?.endsWith('.aac') || site.audio_url?.endsWith('.m4a') ? 'audio/aac' : 'audio/mpeg'} />
+                                        {t('site.audioNotSupported')}
                                     </audio>
                                     <p className="text-xs text-slate-400 mt-4 leading-relaxed italic">
                                         {t('features.audioGuideDesc')}
