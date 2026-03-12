@@ -74,7 +74,9 @@ export const AuthProvider = ({ children }) => {
             async (event, session) => {
                 if (!mounted) return;
 
-                console.log(`[TDZ Auth] onAuthStateChange → event=${event} | userId=${session?.user?.id ?? 'none'} | sessionExpiry=${session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : 'n/a'}`);
+                const refreshToken = session?.refresh_token ? `(${session.refresh_token.slice(0, 20)}...)` : 'none';
+                const accessToken = session?.access_token ? `(${session.access_token.slice(0, 20)}...)` : 'none';
+                console.log(`[TDZ Auth] onAuthStateChange → event=${event} | userId=${session?.user?.id ?? 'none'} | accessToken=${accessToken} | refreshToken=${refreshToken} | sessionExpiry=${session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : 'n/a'}`);
 
                 setSession(session);
                 setUser(session?.user ?? null);
@@ -124,6 +126,11 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
         setProfile(null);
         lastFetchedUserId.current = null;
+        
+        // Log storage before
+        const storageKeyBefore = localStorage.getItem('touristdz-auth');
+        console.log('[TDZ Auth] localStorage before signOut:', storageKeyBefore ? `(${storageKeyBefore.length} chars)` : 'empty');
+        
         try {
             // Race the server call against a 5s timeout so we never hang
             await Promise.race([
@@ -134,6 +141,17 @@ export const AuthProvider = ({ children }) => {
         } catch (err) {
             // State was already cleared above — this only affects the server-side revocation
             console.warn('[TDZ Auth] signOut: server call failed or timed out:', err.message);
+        }
+        
+        // Log storage after
+        const storageKeyAfter = localStorage.getItem('touristdz-auth');
+        console.log('[TDZ Auth] localStorage after signOut:', storageKeyAfter ? `(${storageKeyAfter.length} chars)` : 'empty');
+        
+        // Emergency: if localStorage still has a session after signOut, wipe it manually
+        if (storageKeyAfter) {
+            console.warn('[TDZ Auth] WARNING: localStorage still has session after signOut! Manually clearing...');
+            localStorage.removeItem('touristdz-auth');
+            console.log('[TDZ Auth] localStorage manually cleared');
         }
     }, []);
 
