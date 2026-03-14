@@ -1,16 +1,154 @@
-# React + Vite
+# TouristDZ Web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+TouristDZ Web is the React and Vite web application for the TouristDZ platform. It powers the public tourism website for Biskra, Algeria, and the admin dashboard used to manage sites, events, reviews, gallery content, settings, and related platform data.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- React 19
+- Vite 7
+- Supabase
+- React Router
+- Tailwind CSS 4
+- i18next
+- Recharts
+- Leaflet
 
-## React Compiler
+## Main Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Public tourism website
+- Tourist sites listing and detail pages
+- Interactive map experience
+- Events pages
+- Public gallery
+- User profile and favorites
+- Authentication with Supabase
+- Admin dashboard
+- Content management for sites, events, reviews, users, settings, gallery, solidarity data, and accommodations
+- Audio guide support for tourist sites
+- Multi-language support
 
-## Expanding the ESLint configuration
+## Project Structure
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- `src/pages/`
+	- public pages such as home, map, events, gallery, profile, and site details
+	- `admin/` dashboard pages
+- `src/components/`
+	- shared UI and layout components
+- `src/context/`
+	- auth and toast providers
+- `src/i18n/`
+	- translation configuration
+- `src/utils/`
+	- helper utilities including logging
+- `src/supabaseClient.js`
+	- Supabase client configuration
+
+## Requirements
+
+- Node.js 18 or newer
+- npm
+
+## Environment Variables
+
+Create a `.env` file in the `web` folder:
+
+```env
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+## Installation
+
+```bash
+npm install
+```
+
+## Available Scripts
+
+```bash
+npm run dev
+npm run build
+npm run preview
+npm run lint
+```
+
+## Development
+
+Start the local development server:
+
+```bash
+npm run dev
+```
+
+Create a production build:
+
+```bash
+npm run build
+```
+
+Preview the production build locally:
+
+```bash
+npm run preview
+```
+
+Lint the project:
+
+```bash
+npm run lint
+```
+
+## Supabase Usage
+
+The web app uses Supabase for:
+
+- authentication
+- profiles and roles
+- tourist sites
+- events
+- favorites
+- reviews
+- gallery data
+- storage buckets for site images and audio guides
+
+The client is configured in `src/supabaseClient.js`.
+
+## Admin Area
+
+The admin section includes management pages for:
+
+- dashboard
+- users
+- sites
+- events
+- reviews
+- gallery
+- settings
+- solidarity content
+- accommodations
+
+Admin access depends on the authenticated user profile role stored in Supabase.
+
+## Deployment
+
+The app is configured as a single-page application and includes a rewrite to `index.html` through `vercel.json`.
+
+Security-related headers configured for deployment include:
+
+- `X-Content-Type-Options`
+- `X-Frame-Options`
+- `Referrer-Policy`
+- `Permissions-Policy`
+- `Strict-Transport-Security`
+
+## Notes
+
+- The project uses React Router for navigation
+- i18n is configured for multilingual content
+- Charts in the admin area are powered by Recharts
+- Map functionality uses Leaflet and React Leaflet
+- Browser-side Supabase auth session persistence is enabled
+
+## License
+
+Private project.
