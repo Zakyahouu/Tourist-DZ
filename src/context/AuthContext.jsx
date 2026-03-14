@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { supabase } from '../supabaseClient';
-import logger from '../utils/logger';
 
 const AuthContext = createContext(null);
 
@@ -19,9 +18,11 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     // Track the user ID we last fetched a profile for to avoid redundant fetches
     const lastFetchedUserId = useRef(null);
+    const currentSessionRef = useRef(null);
 
     useEffect(() => {
         let mounted = true;
+        let eventSeen = false;
 
         const fetchProfile = async (userId) => {
             if (!userId) return;
@@ -74,10 +75,13 @@ export const AuthProvider = ({ children }) => {
             async (event, session) => {
                 if (!mounted) return;
 
+                eventSeen = true;
+
                 const refreshToken = session?.refresh_token ? `(${session.refresh_token.slice(0, 20)}...)` : 'none';
                 const accessToken = session?.access_token ? `(${session.access_token.slice(0, 20)}...)` : 'none';
                 console.log(`[TDZ Auth] onAuthStateChange → event=${event} | userId=${session?.user?.id ?? 'none'} | accessToken=${accessToken} | refreshToken=${refreshToken} | sessionExpiry=${session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : 'n/a'}`);
 
+                currentSessionRef.current = session;
                 setSession(session);
                 setUser(session?.user ?? null);
 
@@ -103,9 +107,24 @@ export const AuthProvider = ({ children }) => {
             }
         );
 
+        // Listen for cross-tab logout: if another tab clears localStorage, 
+        // this tab should also logout (prevents re-sync from other tabs)
+        const handleStorageChange = (e) => {
+            // If touristdz-auth key is removed and we have a session, another tab logged out
+            if (e.key === 'touristdz-auth' && e.newValue === null && currentSessionRef.current) {
+                console.warn('[TDZ Auth] CROSS-TAB LOGOUT DETECTED: Another tab logged out. Forcing logout here too.');
+                setSession(null);
+                setUser(null);
+                setProfile(null);
+                lastFetchedUserId.current = null;
+                currentSessionRef.current = null;
+            }
+        };
+        window.addEventListener('storage', handleStorageChange);
+
         // Fallback: ensure we stop loading if no event fires within 5s
         const timer = setTimeout(() => {
-            if (mounted) {
+            if (mounted && !eventSeen) {
                 console.warn('[TDZ Auth] 5s timeout hit — forcing loading=false. No auth event fired?');
                 setLoading(false);
             }
@@ -114,6 +133,7 @@ export const AuthProvider = ({ children }) => {
         return () => {
             mounted = false;
             subscription.unsubscribe();
+            window.removeEventListener('storage', handleStorageChange);
             clearTimeout(timer);
         };
     }, []);
@@ -126,6 +146,7 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
         setProfile(null);
         lastFetchedUserId.current = null;
+        currentSessionRef.current = null;
         
         // Log storage before
         const storageKeyBefore = localStorage.getItem('touristdz-auth');

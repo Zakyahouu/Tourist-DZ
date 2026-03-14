@@ -157,7 +157,7 @@ const AdminDashboard = () => {
                         <p className="text-sm text-slate-400 py-16 text-center">No review data available yet.</p>
                     ) : (
                         <div className="h-64 w-full">
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height="100%" minWidth={280} minHeight={220}>
                                 <BarChart data={reviewsByMonth} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
@@ -181,7 +181,7 @@ const AdminDashboard = () => {
                     ) : (
                         <>
                             <div className="h-48 w-full">
-                                <ResponsiveContainer width="100%" height="100%">
+                                <ResponsiveContainer width="100%" height="100%" minWidth={220} minHeight={180}>
                                     <PieChart>
                                         <Pie
                                             data={categoryData}
