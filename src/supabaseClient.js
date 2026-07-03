@@ -12,7 +12,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
-        storageKey: 'touristdz-auth',
+        storageKey: 'zibango-auth',
         // Bypass Web Locks entirely — token refresh holding the lock was causing
         // signOut() to hang indefinitely (deadlock) in production.
         lock: async (_name, _acquireTimeout, fn) => await fn(),

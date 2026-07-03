@@ -1,13 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, MapPin, Calendar as CalendarIcon, ArrowRight, Star, Globe, Landmark, Leaf, Palette, Flame } from 'lucide-react';
+import { Search, MapPin, Calendar as CalendarIcon, ArrowRight, Star, Globe } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import logger from '../utils/logger';
 import heroImage from '../assets/home_hero_image.webp';
 import fallbackNatural from '../assets/fallback_image_natural.webp';
-import fallbackHistorical from '../assets/fallback_image_historical.webp';
-import fallbackCultural from '../assets/fallback_image_cultural.webp';
-import fallbackThermal from '../assets/fallback_image_thermal.webp';
 import { Link, useNavigate } from 'react-router-dom';
 import FavoriteButton from '../components/FavoriteButton';
 import { useCms } from '../context/CmsContext';
@@ -16,14 +13,24 @@ const HomePage = () => {
     const { t, i18n } = useTranslation();
     const [featuredSites, setFeaturedSites] = useState([]);
     const [events, setEvents] = useState([]);
+    const [siteCategories, setSiteCategories] = useState([]);
+    const [eventCategories, setEventCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeCategory, setActiveCategory] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
-    const [heroSearch, setHeroSearch] = useState('');
     const navigate = useNavigate();
 
     const lang = i18n.language || 'fr';
     const cms = useCms();
+
+    useEffect(() => {
+        supabase.from('site_categories').select('*').order('sort_order').then(({ data }) => {
+            if (data) setSiteCategories(data);
+        });
+        supabase.from('event_categories').select('*').order('sort_order').then(({ data }) => {
+            if (data) setEventCategories(data);
+        });
+    }, []);
 
     // Debounced fetch
     useEffect(() => {
@@ -36,12 +43,12 @@ const HomePage = () => {
         try {
             let sitesQuery = supabase
                 .from('tourist_sites')
-                .select('id, name, category, avg_rating, address, site_images(image_url)')
+                .select('id, name, category_id, avg_rating, address, site_images(image_url)')
                 .eq('is_active', true)
                 .limit(6);
 
             if (activeCategory !== 'all') {
-                sitesQuery = sitesQuery.eq('category', activeCategory);
+                sitesQuery = sitesQuery.eq('category_id', activeCategory);
             }
 
             // Real search: uses Supabase text search on the JSONB name field
@@ -54,7 +61,7 @@ const HomePage = () => {
 
             const { data: eventsData } = await supabase
                 .from('events')
-                .select('id, title, start_date, type, location')
+                .select('id, title, start_date, category_id, location')
                 .eq('is_active', true)
                 .gte('start_date', new Date().toISOString())
                 .order('start_date', { ascending: true })
@@ -71,21 +78,22 @@ const HomePage = () => {
 
     const categories = [
         { id: 'all', label: t('categories.all'), Icon: Globe },
-        { id: 'historical', label: t('categories.historical'), Icon: Landmark },
-        { id: 'natural', label: t('categories.natural'), Icon: Leaf },
-        { id: 'cultural', label: t('categories.cultural'), Icon: Palette },
-        { id: 'thermal', label: t('categories.thermal'), Icon: Flame },
+        ...siteCategories.map(c => ({ id: c.id, label: c[`name_${lang}`] || c.name_en, Icon: Globe })),
     ];
+
+    const siteCatName = (site) => {
+        const c = siteCategories.find(c => c.id === site.category_id);
+        return c?.[`name_${lang}`] || c?.name_en || '—';
+    };
+
+    const eventCatName = (evt) => {
+        const c = eventCategories.find(c => c.id === evt.category_id);
+        return c?.[`name_${lang}`] || c?.name_en || '—';
+    };
 
     const getSiteImage = (site) => {
         if (site.site_images?.[0]?.image_url) return site.site_images[0].image_url;
-        const fallbacks = {
-            natural: fallbackNatural,
-            historical: fallbackHistorical,
-            cultural: fallbackCultural,
-            thermal: fallbackThermal,
-        };
-        return fallbacks[site.category] || fallbackNatural;
+        return fallbackNatural;
     };
 
     return (
@@ -209,7 +217,7 @@ const HomePage = () => {
                                     <div className="p-5 flex flex-col gap-3">
                                         <div>
                                             <div className="inline-flex items-center text-[10px] uppercase tracking-wider font-bold text-[var(--color-brand-primary)] bg-[var(--color-brand-primary)]/8 px-2 py-0.5 rounded mb-2 capitalize">
-                                                {site.category}
+                                                {siteCatName(site)}
                                             </div>
                                             <h3 className="font-bold text-lg text-[var(--color-brand-text)] line-clamp-2 leading-snug group-hover:text-[var(--color-brand-primary)] transition-colors">
                                                 {site.name?.[lang] || site.name?.fr || 'Unnamed Site'}
@@ -269,7 +277,7 @@ const HomePage = () => {
                                         </div>
                                         <div className="p-5 md:p-6 flex-1 flex flex-col justify-center">
                                             <div className="flex items-center text-xs text-[var(--color-brand-text-muted)] mb-1.5 uppercase tracking-wider font-bold">
-                                                <CalendarIcon size={12} className="mr-1.5" /> {event.type}
+                                                <CalendarIcon size={12} className="mr-1.5" /> {eventCatName(event)}
                                             </div>
                                             <h3 className="font-bold text-lg text-[var(--color-brand-text)] line-clamp-1 group-hover:text-[var(--color-brand-secondary)] transition-colors">
                                                 {event.title?.[lang] || event.title?.fr || 'Untitled Event'}

@@ -1,6 +1,6 @@
-# TouristDZ Web
+# ZibanGo Web
 
-TouristDZ Web is the React and Vite web application for the TouristDZ platform. It powers the public tourism website for Biskra, Algeria, and the admin dashboard used to manage sites, events, reviews, gallery content, settings, and related platform data.
+ZibanGo Web is the React and Vite web application for the ZibanGo platform. It powers the public tourism website for Biskra, Algeria, and the admin dashboard used to manage sites, events, reviews, gallery content, settings, and related platform data.
 
 ## Tech Stack
 

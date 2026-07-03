@@ -19,6 +19,7 @@ const SiteDetailsPage = () => {
 
     const { user } = useAuth();
     const [site, setSite] = useState(null);
+    const [siteCategories, setSiteCategories] = useState([]);
     const [loading, setLoading] = useState(true);
 
     // Review form state
@@ -34,16 +35,20 @@ const SiteDetailsPage = () => {
 
         async function fetchDetails() {
             try {
-                const { data, error } = await supabase
-                    .from('tourist_sites')
-                    .select('*, site_images(image_url), reviews(user_id, rating, comment, created_at, profiles(full_name, avatar_url))')
-                    .eq('id', id)
-                    .single();
+                const [siteRes, catRes] = await Promise.all([
+                    supabase
+                        .from('tourist_sites')
+                        .select('*, site_images(image_url), reviews(user_id, rating, comment, created_at, profiles(full_name, avatar_url))')
+                        .eq('id', id)
+                        .single(),
+                    supabase.from('site_categories').select('*').order('sort_order'),
+                ]);
 
-                if (error) throw error;
-                setSite(data);
-                if (user && data?.reviews) {
-                    setUserAlreadyReviewed(data.reviews.some(r => r.user_id === user.id));
+                if (siteRes.error) throw siteRes.error;
+                setSite(siteRes.data);
+                if (catRes.data) setSiteCategories(catRes.data);
+                if (user && siteRes.data?.reviews) {
+                    setUserAlreadyReviewed(siteRes.data.reviews.some(r => r.user_id === user.id));
                 }
             } catch (error) {
                 logger.error('Error fetching details:', error);
@@ -130,7 +135,7 @@ const SiteDetailsPage = () => {
                 <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 max-w-7xl mx-auto z-10 translate-y-4">
                     <div className="flex items-center mb-4 gap-3">
                         <span className="bg-white text-[var(--color-brand-primary)] px-4 py-1.5 text-xs font-black rounded-full uppercase tracking-wider shadow-lg capitalize">
-                            {site.category}
+                            {siteCategories.find(c => c.id === site.category_id)?.[`name_${lang}`] || siteCategories.find(c => c.id === site.category_id)?.name_en || site.category_id || '—'}
                         </span>
                         {site.avg_rating > 0 && (
                             <div className="flex items-center text-sm font-bold text-gray-800 bg-white/90 backdrop-blur px-4 py-1.5 rounded-full shadow-lg">

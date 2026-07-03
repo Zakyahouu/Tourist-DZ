@@ -93,13 +93,13 @@ const AuthPage = () => {
 
                 <div className="relative z-10 w-full max-w-lg">
                     <div className="mb-8 inline-flex items-center justify-center w-20 h-20 bg-white rounded-3xl shadow-2xl">
-                        <span className="text-4xl font-black text-[var(--color-brand-primary)]">DZ</span>
+                        <span className="text-3xl font-black text-[var(--color-brand-primary)]">ZG</span>
                     </div>
                     <h1 className="text-5xl xl:text-6xl font-black text-white leading-tight mb-6 drop-shadow-md">
                         {t('app.tagline')}
                     </h1>
                     <p className="text-xl text-blue-100 font-medium leading-relaxed">
-                        Join Tourist DZ to unlock hidden gems, organize your itinerary, and connect with the community.
+                        Join ZibanGo to unlock hidden gems, organize your itinerary, and connect with the community.
                     </p>
                 </div>
             </div>

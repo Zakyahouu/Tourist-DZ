@@ -25,6 +25,7 @@ const AdminDashboard = () => {
     const [reviewsByMonth, setReviewsByMonth] = useState([]);
     const [recentApplications, setRecentApplications] = useState([]);
     const [topSites, setTopSites] = useState([]);
+    const [siteCategories, setSiteCategories] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -47,14 +48,18 @@ const AdminDashboard = () => {
                 });
 
                 // 2. Real category breakdown (for pie chart)
-                const { data: allSites } = await supabase.from('tourist_sites').select('category');
-                if (allSites) {
+                const { data: allSites } = await supabase.from('tourist_sites').select('category_id');
+                const { data: siteCats } = await supabase.from('site_categories').select('*').order('sort_order');
+                if (siteCats) setSiteCategories(siteCats);
+                if (allSites && siteCats) {
+                    const catMap = {};
+                    siteCats.forEach(c => { catMap[c.id] = c.name_en || c.id; });
                     const counts = {};
-                    allSites.forEach(s => { counts[s.category] = (counts[s.category] || 0) + 1; });
-                    setCategoryData(Object.entries(counts).map(([name, value]) => ({
-                        name: name.charAt(0).toUpperCase() + name.slice(1),
-                        value
-                    })));
+                    allSites.forEach(s => {
+                        const name = catMap[s.category_id] || s.category_id || 'Unknown';
+                        counts[name] = (counts[name] || 0) + 1;
+                    });
+                    setCategoryData(Object.entries(counts).map(([name, value]) => ({ name, value })));
                 }
 
                 // 3. Real reviews by month (for bar chart — last 6 months)
@@ -84,7 +89,7 @@ const AdminDashboard = () => {
                 // 4. Top rated sites
                 const { data: topRated } = await supabase
                     .from('tourist_sites')
-                    .select('name, avg_rating, review_count, category')
+                    .select('name, avg_rating, review_count, category_id')
                     .order('avg_rating', { ascending: false })
                     .limit(5);
                 setTopSites(topRated || []);
@@ -230,7 +235,7 @@ const AdminDashboard = () => {
                                         <span className="text-sm font-black text-slate-300 w-6">#{idx + 1}</span>
                                         <div>
                                             <p className="text-sm font-bold text-slate-800">{site.name?.fr || site.name?.en || '—'}</p>
-                                            <p className="text-xs text-slate-400 capitalize">{site.category}</p>
+                                            <p className="text-xs text-slate-400 capitalize">{(siteCategories.find(c => c.id === site.category_id)?.name_en || site.category_id || '—')}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-1.5 text-sm font-bold text-slate-700">

@@ -9,7 +9,7 @@ const Footer = () => {
                 <div>
                     <Link to="/" className="inline-block">
                         <span className="text-2xl font-black tracking-tight text-[var(--color-brand-secondary)]">
-                            Tourist <span className="text-[var(--color-brand-primary)]">DZ</span>
+                            Ziban<span className="text-[var(--color-brand-primary)]">Go</span>
                         </span>
                     </Link>
                     <p className="mt-4 text-[var(--color-brand-text-muted)] text-sm leading-relaxed max-w-sm mx-auto md:mx-0">
@@ -29,12 +29,12 @@ const Footer = () => {
                     <ul className="space-y-2 text-[var(--color-brand-text-muted)] text-sm font-medium">
                         <li><span className="opacity-50 cursor-default">{t('footer.privacyPolicy')} <span className="italic text-xs">(Coming Soon)</span></span></li>
                         <li><span className="opacity-50 cursor-default">{t('footer.termsOfService')} <span className="italic text-xs">(Coming Soon)</span></span></li>
-                        <li><a href="mailto:contact@touristdz.dz" className="hover:text-[var(--color-brand-secondary)] transition-colors">{t('footer.contactUs')}</a></li>
+                        <li><a href="mailto:contact@zibango.dz" className="hover:text-[var(--color-brand-secondary)] transition-colors">{t('footer.contactUs')}</a></li>
                     </ul>
                 </div>
             </div>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-8 border-t border-gray-100 text-center text-gray-400 text-sm font-medium">
-                &copy; {new Date().getFullYear()} Tourist DZ. {t('footer.copyright')}
+                &copy; {new Date().getFullYear()} ZibanGo. {t('footer.copyright')}
             </div>
         </footer>
     );

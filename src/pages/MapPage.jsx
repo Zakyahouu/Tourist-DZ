@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
-import { Search, Filter, Image as ImageIcon, MapPin, Star, ArrowLeft } from 'lucide-react';
+import { Search, Filter, MapPin, Star, ArrowLeft } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import logger from '../utils/logger';
 import { useCms } from '../context/CmsContext';
@@ -22,7 +22,8 @@ L.Icon.Default.mergeOptions({
     shadowUrl: markerShadow,
 });
 
-// Custom colored icons for categories
+const MARKER_COLORS = ['#eab308', '#22c55e', '#a855f7', '#3b82f6', '#ec4899', '#14b8a6', '#f97316', '#6366f1'];
+
 const createIcon = (color) => {
     return new L.DivIcon({
         className: 'custom-icon',
@@ -32,19 +33,11 @@ const createIcon = (color) => {
     });
 };
 
-const colors = {
-    historical: '#eab308', // Gold
-    natural: '#22c55e',    // Green
-    cultural: '#a855f7',   // Purple
-    thermal: '#3b82f6',    // Blue
-    accommodation: '#ef4444', // Red
-    default: '#e67e22'     // Terracotta
-};
-
 const MapPage = () => {
     const { t, i18n } = useTranslation();
     const location = useLocation();
     const [sites, setSites] = useState([]);
+    const [siteCategories, setSiteCategories] = useState([]);
     const cms = useCms();
     const [filter, setFilter] = useState('all');
     const [searchQuery, setSearchQuery] = useState(location.state?.searchQuery || '');
@@ -57,20 +50,17 @@ const MapPage = () => {
     useEffect(() => {
         async function fetchMapData() {
             try {
-                const { data: sitesData } = await supabase
-                    .from('tourist_sites')
-                    .select('*, site_images(image_url)')
-                    .eq('is_active', true);
-
-                const { data: accData } = await supabase
-                    .from('accommodations')
-                    .select('*, accommodation_images(image_url)')
-                    .eq('is_active', true);
+                const [scRes, { data: sitesData }, { data: accData }] = await Promise.all([
+                    supabase.from('site_categories').select('*').order('sort_order'),
+                    supabase.from('tourist_sites').select('*, site_images(image_url)').eq('is_active', true),
+                    supabase.from('accommodations').select('*, accommodation_images(image_url)').eq('is_active', true),
+                ]);
+                if (scRes.data) setSiteCategories(scRes.data);
 
                 const mappedAccs = (accData || []).map(acc => ({
                     id: acc.id,
                     name: acc.name,
-                    category: 'accommodation',
+                    category_id: acc.category_id,
                     address: acc.address || '',
                     description: acc.description || { fr: '', en: '', ar: '' },
                     latitude: acc.latitude,
@@ -79,7 +69,6 @@ const MapPage = () => {
                     is_active: acc.is_active,
                     site_images: acc.accommodation_images || [],
                     is_accommodation: true,
-                    type: acc.type
                 }));
 
                 const allSites = [...(sitesData || []), ...mappedAccs];
@@ -93,8 +82,22 @@ const MapPage = () => {
         fetchMapData();
     }, []);
 
+    const getCatName = (site) => {
+        if (site.is_accommodation) return t('categories.accommodation') || 'Accommodation';
+        const c = siteCategories.find(c => c.id === site.category_id);
+        return c?.[`name_${lang}`] || c?.name_en || site.category_id || '—';
+    };
+
+    const getCatColor = (site) => {
+        if (site.is_accommodation) return '#ef4444';
+        const idx = siteCategories.findIndex(c => c.id === site.category_id);
+        return MARKER_COLORS[idx >= 0 ? idx % MARKER_COLORS.length : MARKER_COLORS.length - 1];
+    };
+
     const filteredSites = sites.filter(site => {
-        const matchesCategory = filter === 'all' || site.category === filter;
+        const matchesCategory = filter === 'all'
+            || (filter === 'accommodation' && site.is_accommodation)
+            || (!site.is_accommodation && site.category_id === filter);
         const searchLower = searchQuery.toLowerCase();
         const matchesSearch = !searchQuery ||
             (site.name?.fr?.toLowerCase().includes(searchLower)) ||
@@ -103,7 +106,6 @@ const MapPage = () => {
         return matchesCategory && matchesSearch;
     });
 
-    // Focus component to re-center map
     const MapUpdater = ({ center }) => {
         const map = useMap();
         useEffect(() => {
@@ -114,10 +116,7 @@ const MapPage = () => {
 
     const categories = [
         { id: 'all', label: t('categories.all') || 'All' },
-        { id: 'historical', label: t('categories.historical') || 'Historical' },
-        { id: 'natural', label: t('categories.natural') || 'Natural' },
-        { id: 'cultural', label: t('categories.cultural') || 'Cultural' },
-        { id: 'thermal', label: t('categories.thermal') || 'Thermal' },
+        ...siteCategories.map(c => ({ id: c.id, label: c[`name_${lang}`] || c.name_en })),
         { id: 'accommodation', label: t('categories.accommodation') || 'Accommodation & Dining' },
     ];
 
@@ -196,7 +195,7 @@ const MapPage = () => {
                                     />
                                 )}
                                 <div className="absolute top-3 right-3 bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg text-xs font-black text-[var(--color-brand-primary)] uppercase tracking-wider shadow-sm">
-                                    {selectedSite.category}
+                                    {getCatName(selectedSite)}
                                 </div>
                             </div>
 
@@ -257,7 +256,7 @@ const MapPage = () => {
                                         </div>
                                         <div className="flex flex-col flex-1 justify-center min-w-0">
                                             <div className="text-[10px] uppercase font-black text-[var(--color-brand-primary)] mb-0.5 tracking-wider">
-                                                {t(`categories.${site.category}`)}
+                                                {getCatName(site)}
                                             </div>
                                             <h3 className="font-bold text-[var(--color-brand-text)] text-sm leading-tight mb-1 group-hover:text-[var(--color-brand-secondary)] transition-colors truncate">
                                                 {site.name?.[lang] || site.name?.fr}
@@ -296,7 +295,7 @@ const MapPage = () => {
                         <Marker
                             key={site.id}
                             position={[site.latitude, site.longitude]}
-                            icon={createIcon(colors[site.category] || colors.default)}
+                            icon={createIcon(getCatColor(site))}
                             eventHandlers={{
                                 click: () => setSelectedSite(site),
                             }}

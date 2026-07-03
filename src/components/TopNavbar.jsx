@@ -24,7 +24,7 @@ const TopNavbar = () => {
     };
 
     const navItems = [
-        { path: '/', label: t('nav.home') },
+        { path: '/explore', label: t('nav.home') },
         { path: '/map', label: t('nav.map') },
         { path: '/events', label: t('nav.events') },
         { path: '/gallery', label: t('nav.gallery') },
@@ -42,7 +42,7 @@ const TopNavbar = () => {
                     <div className="flex items-center flex-shrink-0 z-10 basis-1/4">
                         <Link to="/" className="flex items-center">
                             <span className={`text-2xl font-black tracking-tight transition-colors ${scrolled ? 'text-gray-900' : 'text-gray-900 drop-shadow-sm'}`}>
-                                Tourist <span className="text-[var(--color-brand-primary)]">DZ</span>
+                                Ziban<span className="text-[var(--color-brand-primary)]">Go</span>
                             </span>
                         </Link>
                     </div>

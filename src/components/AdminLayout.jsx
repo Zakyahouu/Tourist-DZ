@@ -49,7 +49,7 @@ const AdminLayout = () => {
             <aside className={`bg-slate-900 text-white w-64 flex-shrink-0 transition-all duration-300 z-20 hidden md:flex flex-col`}>
                 <div className="h-16 flex items-center justify-center border-b border-slate-800">
                     <span className="text-xl font-bold tracking-wider">
-                        ADMIN<span className="text-sky-500">DZ</span>
+                        ADMIN<span className="text-sky-500">GO</span>
                     </span>
                 </div>
 
@@ -98,7 +98,7 @@ const AdminLayout = () => {
                     <aside className="w-64 h-full bg-slate-900 flex flex-col" onClick={e => e.stopPropagation()}>
                         <div className="h-16 flex items-center justify-between px-6 border-b border-slate-800 text-white">
                             <span className="text-xl font-bold tracking-wider">
-                                ADMIN<span className="text-sky-500">DZ</span>
+                        Ziban<span className="text-sky-500">Go</span>
                             </span>
                             <button onClick={() => setIsSidebarOpen(false)}><X size={20} /></button>
                         </div>

@@ -110,8 +110,8 @@ export const AuthProvider = ({ children }) => {
         // Listen for cross-tab logout: if another tab clears localStorage, 
         // this tab should also logout (prevents re-sync from other tabs)
         const handleStorageChange = (e) => {
-            // If touristdz-auth key is removed and we have a session, another tab logged out
-            if (e.key === 'touristdz-auth' && e.newValue === null && currentSessionRef.current) {
+            // If zibango-auth key is removed and we have a session, another tab logged out
+            if (e.key === 'zibango-auth' && e.newValue === null && currentSessionRef.current) {
                 console.warn('[TDZ Auth] CROSS-TAB LOGOUT DETECTED: Another tab logged out. Forcing logout here too.');
                 setSession(null);
                 setUser(null);
@@ -149,7 +149,7 @@ export const AuthProvider = ({ children }) => {
         currentSessionRef.current = null;
         
         // Log storage before
-        const storageKeyBefore = localStorage.getItem('touristdz-auth');
+        const storageKeyBefore = localStorage.getItem('zibango-auth');
         console.log('[TDZ Auth] localStorage before signOut:', storageKeyBefore ? `(${storageKeyBefore.length} chars)` : 'empty');
         
         try {
@@ -165,13 +165,13 @@ export const AuthProvider = ({ children }) => {
         }
         
         // Log storage after
-        const storageKeyAfter = localStorage.getItem('touristdz-auth');
+        const storageKeyAfter = localStorage.getItem('zibango-auth');
         console.log('[TDZ Auth] localStorage after signOut:', storageKeyAfter ? `(${storageKeyAfter.length} chars)` : 'empty');
         
         // Emergency: if localStorage still has a session after signOut, wipe it manually
         if (storageKeyAfter) {
             console.warn('[TDZ Auth] WARNING: localStorage still has session after signOut! Manually clearing...');
-            localStorage.removeItem('touristdz-auth');
+            localStorage.removeItem('zibango-auth');
             console.log('[TDZ Auth] localStorage manually cleared');
         }
     }, []);

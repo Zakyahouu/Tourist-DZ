@@ -1,12 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../../supabaseClient';
-import { Plus, Pencil, Trash2, X, Search, MapPin, Eye, EyeOff, Image, Upload, QrCode, Download } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Search, MapPin, Eye, EyeOff, Image, Upload, QrCode, Download, Settings2 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { useToast } from '../../context/ToastContext';
+import ManageCategoriesModal from '../../components/ManageCategoriesModal';
 
 const AdminSites = () => {
+    const { i18n } = useTranslation();
     const { showToast } = useToast();
+    const lang = i18n.language || 'en';
     const [sites, setSites] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [editingSite, setEditingSite] = useState(null);
@@ -16,6 +21,7 @@ const AdminSites = () => {
     const [showImageModal, setShowImageModal] = useState(false);
     const [selectedSiteForImages, setSelectedSiteForImages] = useState(null);
     const [qrSite, setQrSite] = useState(null);
+    const [showCategoryManager, setShowCategoryManager] = useState(false);
     const qrCanvasRef = useRef(null);
     const [siteImages, setSiteImages] = useState([]);
     const [loadingImages, setLoadingImages] = useState(false);
@@ -26,7 +32,7 @@ const AdminSites = () => {
     const emptySite = {
         name: { ar: '', fr: '', en: '' },
         description: { ar: '', fr: '', en: '' },
-        category: 'historical',
+        category_id: null,
         latitude: 34.8484,
         longitude: 5.7248,
         address: '',
@@ -37,7 +43,12 @@ const AdminSites = () => {
 
     const [form, setForm] = useState(emptySite);
 
-    useEffect(() => { fetchSites(); }, []);
+    useEffect(() => { fetchSites(); fetchCategories(); }, []);
+
+    async function fetchCategories() {
+        const { data } = await supabase.from('site_categories').select('*').order('sort_order');
+        if (data) setCategories(data);
+    }
 
     async function fetchSites() {
         setLoading(true);
@@ -54,7 +65,7 @@ const AdminSites = () => {
             const { error } = await supabase.from('tourist_sites').update({
                 name: form.name,
                 description: form.description,
-                category: form.category,
+                category_id: form.category_id,
                 latitude: parseFloat(form.latitude),
                 longitude: parseFloat(form.longitude),
                 address: form.address,
@@ -67,7 +78,7 @@ const AdminSites = () => {
             const { error } = await supabase.from('tourist_sites').insert({
                 name: form.name,
                 description: form.description,
-                category: form.category,
+                category_id: form.category_id,
                 latitude: parseFloat(form.latitude),
                 longitude: parseFloat(form.longitude),
                 address: form.address,
@@ -97,7 +108,7 @@ const AdminSites = () => {
         setForm({
             name: site.name || { ar: '', fr: '', en: '' },
             description: site.description || { ar: '', fr: '', en: '' },
-            category: site.category,
+            category_id: site.category_id,
             latitude: site.latitude,
             longitude: site.longitude,
             address: site.address || '',
@@ -167,7 +178,7 @@ const AdminSites = () => {
         ctx.fillRect(0, 0, totalW, 6);
 
         // Site name
-        const siteName = qrSite.name?.fr || qrSite.name?.en || 'Tourist DZ';
+        const siteName = qrSite.name?.fr || qrSite.name?.en || 'ZibanGo';
         ctx.fillStyle = '#1e293b';
         ctx.font = 'bold 20px sans-serif';
         ctx.textAlign = 'center';
@@ -185,7 +196,7 @@ const AdminSites = () => {
         // Branding
         ctx.fillStyle = '#f97316';
         ctx.font = 'bold 15px sans-serif';
-        ctx.fillText('Tourist DZ — Biskra, Algeria', totalW / 2, padding + titleHeight + qrSize + 54);
+        ctx.fillText('ZibanGo — Biskra, Algeria', totalW / 2, padding + titleHeight + qrSize + 54);
 
         const link = document.createElement('a');
         link.download = `qr-${siteName.replace(/\s+/g, '-').toLowerCase()}.png`;
@@ -268,14 +279,14 @@ const AdminSites = () => {
         fetchSiteImages(selectedSiteForImages.id);
     };
 
-    const categories = ['historical', 'natural', 'cultural', 'thermal'];
-
     const filteredSites = sites.filter(s => {
         const matchesSearch = (s.name?.fr || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
             (s.name?.en || '').toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory = filterCategory === 'all' || s.category === filterCategory;
+        const matchesCategory = filterCategory === 'all' || s.category_id === filterCategory;
         return matchesSearch && matchesCategory;
     });
+
+    const getCategory = (id) => categories.find(c => c.id === id);
 
     return (
         <div className="space-y-6">
@@ -308,8 +319,11 @@ const AdminSites = () => {
                     className="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-medium bg-white focus:ring-2 focus:ring-sky-500"
                 >
                     <option value="all">All Categories</option>
-                    {categories.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
+                    {categories.map(c => <option key={c.id} value={c.id}>{c[`name_${lang}`] || c.name_en}</option>)}
                 </select>
+                <button onClick={() => setShowCategoryManager(true)} className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-sky-600 transition-colors bg-white">
+                    <Settings2 size={16} /> Manage
+                </button>
             </div>
 
             {/* Table */}
@@ -341,11 +355,9 @@ const AdminSites = () => {
                                             <div className="text-xs text-slate-400">{site.address || 'No address'}</div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${site.category === 'historical' ? 'bg-amber-100 text-amber-700'
-                                                : site.category === 'natural' ? 'bg-green-100 text-green-700'
-                                                    : site.category === 'cultural' ? 'bg-purple-100 text-purple-700'
-                                                        : 'bg-blue-100 text-blue-700'
-                                                }`}>{site.category}</span>
+                                            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
+                                                {getCategory(site.category_id)?.[`name_${lang}`] || getCategory(site.category_id)?.name_en || site.category_id || '—'}
+                                            </span>
                                         </td>
                                         <td className="px-6 py-4 font-bold text-slate-700">{site.avg_rating?.toFixed(1) || '0.0'}</td>
                                         <td className="px-6 py-4">
@@ -411,8 +423,9 @@ const AdminSites = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Category</label>
-                                    <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white focus:ring-2 focus:ring-sky-500">
-                                        {categories.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
+                                    <select value={form.category_id || ''} onChange={e => setForm({ ...form, category_id: e.target.value || null })} className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white focus:ring-2 focus:ring-sky-500">
+                                        <option value="">Select category...</option>
+                    {categories.map(c => <option key={c.id} value={c.id}>{c[`name_${lang}`] || c.name_en}</option>)}
                                     </select>
                                 </div>
                                 <div>
@@ -603,6 +616,15 @@ const AdminSites = () => {
                         </p>
                     </div>
                 </div>
+            )}
+
+            {showCategoryManager && (
+                <ManageCategoriesModal
+                    tableName="site_categories"
+                    categories={categories}
+                    onCategoryChange={c => setCategories(c)}
+                    onClose={() => setShowCategoryManager(false)}
+                />
             )}
         </div>
     );

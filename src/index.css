@@ -1,24 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  /* Lighter, welcoming Touristic Theme */
-  --color-brand-primary: #e67e22;
-  /* Warm Terracotta */
-  --color-brand-secondary: #2980b9;
-  /* Desert Sky Blue */
-  --color-brand-accent: #f1c40f;
-  /* Golden Sand */
-  --color-brand-bg: #f8fcfb;
-  /* Very light cool tint background */
-  --color-brand-card: #ffffff;
+  /* ZibanGo — Luxury Minimal / Smart Tourism palette */
+  --color-brand-primary: #1F5B3A;
+  /* Dark Green — Sustainability, Oasis, Trust */
+  --color-brand-secondary: #D6A64C;
+  /* Desert Gold — Heritage, Luxury, Sand */
+  --color-brand-accent: #A97B43;
+  /* Bronze Gold — Historical elements */
+  --color-brand-bg: #F8F7F4;
+  /* Off-White background */
+  --color-brand-card: #FFFFFF;
   /* White card */
   --color-brand-text: #1e293b;
   /* Dark slate text */
   --color-brand-text-muted: #64748b;
   /* Muted slate text */
+  --color-brand-success: #4C8B5B;
+  /* Secondary Light Green — buttons, badges */
 
-  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --font-arabic: 'Tajawal', 'Cairo', system-ui, sans-serif;
+  --font-sans: 'Poppins', system-ui, -apple-system, sans-serif;
+  --font-arabic: 'Cairo', system-ui, sans-serif;
 }
 
 body {

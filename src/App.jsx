@@ -13,6 +13,7 @@ import TopNavbar from './components/TopNavbar';
 import Footer from './components/Footer';
 
 // Lazy-load pages for code splitting
+const LandingPage = lazy(() => import('./pages/LandingPage'));
 const HomePage = lazy(() => import('./pages/HomePage'));
 const MapPage = lazy(() => import('./pages/MapPage'));
 const EventsPage = lazy(() => import('./pages/EventsPage'));
@@ -105,7 +106,8 @@ function App() {
 
             {/* Public Routes — single flat route list with shared layout */}
             <Route element={<PublicLayout />}>
-              <Route path="/" element={<HomePage />} />
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/explore" element={<HomePage />} />
               <Route path="/map" element={<MapPage />} />
               <Route path="/events" element={<EventsPage />} />
               <Route path="/gallery" element={<GalleryPage />} />

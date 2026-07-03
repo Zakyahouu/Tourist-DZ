@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Calendar, Users, MapPin, Search, CheckCircle, Headphones, Accessibility, Clock } from 'lucide-react';
+import { Calendar, Users, MapPin, Search, Accessibility } from 'lucide-react';
 import eventsHeroImage from '../assets/events_hero_image.webp';
 import { supabase } from '../supabaseClient';
 import logger from '../utils/logger';
@@ -15,6 +15,7 @@ const EventsPage = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [events, setEvents] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [filter, setFilter] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
@@ -22,6 +23,12 @@ const EventsPage = () => {
     const [registering, setRegistering] = useState(null);
     const lang = i18n.language || 'fr';
     const cms = useCms();
+
+    useEffect(() => {
+        supabase.from('event_categories').select('*').order('sort_order').then(({ data }) => {
+            if (data) setCategories(data);
+        });
+    }, []);
 
     const fetchEvents = useCallback(async () => {
         try {
@@ -33,7 +40,7 @@ const EventsPage = () => {
                 .order('start_date', { ascending: true });
 
             if (filter !== 'all') {
-                query = query.eq('type', filter);
+                query = query.eq('category_id', filter);
             }
 
             const { data } = await query;
@@ -85,13 +92,9 @@ const EventsPage = () => {
         }
     };
 
-    const categories = [
+    const filterCats = [
         { id: 'all', label: t('categories.all') },
-        { id: 'tour', label: t('events.types.tour') },
-        { id: 'camp', label: t('events.types.camp') },
-        { id: 'competition', label: t('events.types.competition') },
-        { id: 'volunteer', label: t('events.types.volunteer') },
-        { id: 'cultural', label: t('categories.cultural') },
+        ...categories.map(c => ({ id: c.id, label: c[`name_${lang}`] || c.name_en })),
     ];
 
     return (
@@ -133,7 +136,7 @@ const EventsPage = () => {
                     </div>
 
                     <div className="flex overflow-x-auto w-full md:w-auto space-x-3 space-x-reverse hide-scrollbar pb-2 md:pb-0">
-                        {categories.map((cat) => (
+                        {filterCats.map((cat) => (
                             <button
                                 key={cat.id}
                                 onClick={() => setFilter(cat.id)}
@@ -178,7 +181,7 @@ const EventsPage = () => {
                                         <div className="ml-5 rtl:mr-5 rtl:ml-0 flex-1">
                                             <div className="flex flex-wrap gap-2 mb-2">
                                                 <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-brand-primary)] bg-[var(--color-brand-primary)]/10 border border-[var(--color-brand-primary)]/20 px-2.5 py-1 rounded-lg">
-                                                    {event.type}
+                                                    {categories.find(c => c.id === event.category_id)?.[`name_${lang}`] || event.category_id || '—'}
                                                 </span>
                                                 {event.is_solidarity && (
                                                     <span title="Solidarity Tourism Event" className="bg-teal-50 text-teal-600 px-2.5 py-1 rounded-lg border border-teal-200 text-[10px] font-bold tracking-wider uppercase flex items-center gap-1">

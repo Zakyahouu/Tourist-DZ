@@ -16,6 +16,7 @@ const AccommodationDetailsPage = () => {
     const navigate = useNavigate();
 
     const [accommodation, setAccommodation] = useState(null);
+    const [accCategories, setAccCategories] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -23,14 +24,18 @@ const AccommodationDetailsPage = () => {
 
         async function fetchDetails() {
             try {
-                const { data, error } = await supabase
-                    .from('accommodations')
-                    .select('*, accommodation_images(image_url, is_primary)')
-                    .eq('id', id)
-                    .single();
+                const [accRes, catRes] = await Promise.all([
+                    supabase
+                        .from('accommodations')
+                        .select('*, accommodation_images(image_url, is_primary)')
+                        .eq('id', id)
+                        .single(),
+                    supabase.from('accommodation_categories').select('*').order('sort_order'),
+                ]);
 
-                if (error) throw error;
-                setAccommodation(data);
+                if (accRes.error) throw accRes.error;
+                setAccommodation(accRes.data);
+                if (catRes.data) setAccCategories(catRes.data);
             } catch (error) {
                 logger.error('Error fetching accommodation details:', error);
             } finally {
@@ -84,7 +89,7 @@ const AccommodationDetailsPage = () => {
                     <div className="flex items-center gap-2">
                         <FavoriteButton siteId={accommodation.id} size={20} />
                         <span className="bg-white text-[var(--color-brand-primary)] px-4 py-1.5 text-xs font-black rounded-full uppercase tracking-wider shadow-lg capitalize">
-                            {t(`accommodationTypes.${accommodation.type}`) || accommodation.type}
+                            {accCategories.find(c => c.id === accommodation.category_id)?.[`name_${lang}`] || accCategories.find(c => c.id === accommodation.category_id)?.name_en || accommodation.category_id || '—'}
                         </span>
                     </div>
                 </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Heart, Star, Calendar, LogOut, MapPin, Image as ImageIcon, Shield } from 'lucide-react';
+import { Heart, Star, Calendar, LogOut, MapPin, Image as ImageIcon, Shield, Bell } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
@@ -18,7 +18,11 @@ const ProfilePage = () => {
     const [recentReviews, setRecentReviews] = useState([]);
     const [favoriteSites, setFavoriteSites] = useState([]);
     const [myEvents, setMyEvents] = useState([]);
-    const [activeTab, setActiveTab] = useState('overview'); // overview, favorites, events
+    const [myAccommodations, setMyAccommodations] = useState([]);
+    const [eventCategories, setEventCategories] = useState([]);
+    const [siteCategories, setSiteCategories] = useState([]);
+    const [announcements, setAnnouncements] = useState({});
+    const [activeTab, setActiveTab] = useState('overview'); // overview, favorites, events, bookings
     const [statsLoading, setStatsLoading] = useState(true);
 
     // Redirect if not logged in
@@ -56,17 +60,30 @@ const ProfilePage = () => {
 
                 const { data: favs } = await supabase
                     .from('favorites')
-                    .select('id, tourist_sites(id, name, category, site_images(image_url))')
+                    .select('id, tourist_sites(id, name, category_id, site_images(image_url))')
                     .eq('user_id', user.id)
                     .order('created_at', { ascending: false });
                 setFavoriteSites(favs || []);
 
                 const { data: events } = await supabase
                     .from('event_registrations')
-                    .select('id, status, registered_at, events(id, title, type, start_date, location)')
+                    .select('id, status, registered_at, events(id, title, start_date, location)')
                     .eq('user_id', user.id)
                     .order('registered_at', { ascending: false });
                 setMyEvents(events || []);
+
+                const { data: accs } = await supabase
+                    .from('accommodation_requests')
+                    .select('id, status, requested_at, rejection_reason, accommodations(id, title, location, start_date, end_date)')
+                    .eq('user_id', user.id)
+                    .order('requested_at', { ascending: false });
+                setMyAccommodations(accs || []);
+
+                const { data: cats } = await supabase.from('event_categories').select('*').order('sort_order');
+                if (cats) setEventCategories(cats);
+
+                const { data: sc } = await supabase.from('site_categories').select('*').order('sort_order');
+                if (sc) setSiteCategories(sc);
 
             } catch (error) {
                 logger.error('Error fetching profile stats:', error);
@@ -90,6 +107,8 @@ const ProfilePage = () => {
         navigate('/');
     };
 
+    const [announcementsModal, setAnnouncementsModal] = useState(null);
+
     const handleCancelEvent = async (registrationId) => {
         if (!confirm('Cancel your registration for this event?')) return;
         setStatsLoading(true);
@@ -106,6 +125,41 @@ const ProfilePage = () => {
             setStatsLoading(false);
         }
     };
+
+    const viewAnnouncements = async (registrationId, evt) => {
+        try {
+            const { data } = await supabase
+                .from('event_announcements')
+                .select('*')
+                .eq('event_id', evt.id)
+                .order('created_at', { ascending: false });
+            setAnnouncementsModal({ event: evt, announcements: data || [] });
+        } catch (err) {
+            logger.error(err);
+            showToast('Failed to load announcements.', 'error');
+        }
+    };
+
+    const StatusBadge = ({ status }) => {
+        const s = (status || 'pending').toLowerCase();
+        let bg, text;
+        if (s === 'accepted' || s === 'confirmed') {
+            bg = 'bg-emerald-100'; text = 'text-emerald-700';
+        } else if (s === 'rejected') {
+            bg = 'bg-red-100'; text = 'text-red-700';
+        } else if (s === 'cancelled') {
+            bg = 'bg-gray-100'; text = 'text-gray-600';
+        } else {
+            bg = 'bg-amber-100'; text = 'text-amber-700';
+        }
+        return (
+            <span className={`px-2.5 py-1 text-[10px] uppercase font-black rounded tracking-wider ${bg} ${text}`}>
+                {s}
+            </span>
+        );
+    };
+
+    const lang = i18n.language || 'fr';
 
     if (authLoading) {
         return (
@@ -191,6 +245,12 @@ const ProfilePage = () => {
                             {tab.charAt(0).toUpperCase() + tab.slice(1)}
                         </button>
                     ))}
+                    <button
+                        onClick={() => setActiveTab('bookings')}
+                        className={`px-5 py-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'bookings' ? 'border-[var(--color-brand-primary)] text-[var(--color-brand-primary)]' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+                    >
+                        {t('profile.bookings') || 'Bookings'}
+                    </button>
                 </div>
 
                 {activeTab === 'overview' && (
@@ -272,7 +332,7 @@ const ProfilePage = () => {
                                                 onError={(e) => { e.target.src = fallbackHistorical; }}
                                             />
                                             <div className="absolute top-3 left-3 bg-white/90 backdrop-blur px-2.5 py-1 rounded text-[10px] font-black uppercase text-[var(--color-brand-primary)] tracking-wider">
-                                                {site.category}
+                                                {siteCategories.find(c => c.id === site.category_id)?.[`name_${lang}`] || siteCategories.find(c => c.id === site.category_id)?.name_en || site.category_id || '—'}
                                             </div>
                                         </div>
                                         <div className="p-5 flex-1 flex flex-col">
@@ -304,10 +364,8 @@ const ProfilePage = () => {
                                     <div key={reg.id} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm flex flex-col sm:flex-row gap-5 items-start sm:items-center">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-2">
-                                                <span className={`px-2.5 py-1 text-[10px] uppercase font-black rounded tracking-wider ${reg.status === 'confirmed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                                                    {reg.status}
-                                                </span>
-                                                <span className="text-xs font-bold text-sky-600 bg-sky-50 px-2 py-1 rounded uppercase tracking-wider">{evt.type}</span>
+                                                <StatusBadge status={reg.status} />
+                                                <span className="text-xs font-bold text-sky-600 bg-sky-50 px-2 py-1 rounded uppercase tracking-wider">{eventCategories.find(c => c.id === evt.category_id)?.[`name_${lang}`] || evt.category_id || '—'}</span>
                                             </div>
                                             <h3 className="text-lg font-black text-gray-800 mb-1">{evt.title?.[i18n.language] || evt.title?.fr || 'Event'}</h3>
                                             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 font-medium">
@@ -315,16 +373,129 @@ const ProfilePage = () => {
                                                 <span className="flex items-center text-gray-400"><MapPin size={14} className="mr-1.5" /> {evt.location}</span>
                                             </div>
                                         </div>
-                                        <button
-                                            onClick={() => handleCancelEvent(reg.id)}
-                                            className="w-full sm:w-auto px-4 py-2 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors border border-red-100"
-                                        >
-                                            Cancel
-                                        </button>
+                                        <div className="flex gap-2">
+                                            {reg.status === 'accepted' && (
+                                                <button
+                                                    onClick={() => viewAnnouncements(reg.id, evt)}
+                                                    className="px-4 py-2 text-sm font-bold text-sky-600 bg-sky-50 hover:bg-sky-100 rounded-xl transition-colors border border-sky-100 flex items-center gap-1.5"
+                                                >
+                                                    <Bell size={14} /> Announcements
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={() => handleCancelEvent(reg.id)}
+                                                className="px-4 py-2 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors border border-red-100"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
                                     </div>
                                 );
                             })
                         )}
+                    </div>
+                )}
+
+                {activeTab === 'bookings' && (
+                    <div className="space-y-6 animate-fade-in">
+                        {(myEvents.length === 0 && myAccommodations.length === 0) ? (
+                            <div className="py-12 text-center text-gray-400 bg-white rounded-2xl border border-gray-100 border-dashed">
+                                <Calendar size={48} className="mx-auto mb-4 text-gray-300" />
+                                <p className="font-bold text-lg mb-1">No bookings yet</p>
+                                <p className="text-sm">Register for events or request accommodation to see them here.</p>
+                            </div>
+                        ) : (
+                            <>
+                                {myEvents.length > 0 && (
+                                    <div>
+                                        <h3 className="font-bold text-lg text-[var(--color-brand-text)] mb-3">Event Registrations</h3>
+                                        <div className="space-y-3">
+                                            {myEvents.map((reg) => {
+                                                const evt = reg.events;
+                                                if (!evt) return null;
+                                                return (
+                                                    <div key={reg.id} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <StatusBadge status={reg.status} />
+                                                                <span className="text-xs font-bold text-sky-600 bg-sky-50 px-2 py-1 rounded uppercase tracking-wider">{eventCategories.find(c => c.id === evt.category_id)?.[`name_${lang}`] || evt.category_id || '—'}</span>
+                                                            </div>
+                                                            <h4 className="font-bold text-gray-800">{evt.title?.[i18n.language] || evt.title?.fr || 'Event'}</h4>
+                                                            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-400 font-medium mt-1">
+                                                                <span><Calendar size={12} className="inline mr-1" />{new Date(evt.start_date).toLocaleDateString()}</span>
+                                                                {evt.location && <span><MapPin size={12} className="inline mr-1" />{evt.location}</span>}
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex gap-2">
+                                                            {reg.status === 'accepted' && (
+                                                                <button onClick={() => viewAnnouncements(reg.id, evt)} className="px-3 py-1.5 text-xs font-bold text-sky-600 bg-sky-50 hover:bg-sky-100 rounded-lg border border-sky-100 flex items-center gap-1"><Bell size={12} /> Announcements</button>
+                                                            )}
+                                                            <button onClick={() => handleCancelEvent(reg.id)} className="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-100">Cancel</button>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+                                {myAccommodations.length > 0 && (
+                                    <div>
+                                        <h3 className="font-bold text-lg text-[var(--color-brand-text)] mb-3">Accommodation Requests</h3>
+                                        <div className="space-y-3">
+                                            {myAccommodations.map((req) => {
+                                                const acc = req.accommodations;
+                                                if (!acc) return null;
+                                                return (
+                                                    <div key={req.id} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <StatusBadge status={req.status} />
+                                                            </div>
+                                                            <h4 className="font-bold text-gray-800">{acc.title?.[i18n.language] || acc.title?.fr || 'Accommodation'}</h4>
+                                                            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-400 font-medium mt-1">
+                                                                {acc.start_date && <span><Calendar size={12} className="inline mr-1" />{new Date(acc.start_date).toLocaleDateString()} {acc.end_date ? `– ${new Date(acc.end_date).toLocaleDateString()}` : ''}</span>}
+                                                                {acc.location && <span><MapPin size={12} className="inline mr-1" />{acc.location}</span>}
+                                                            </div>
+                                                            {req.status === 'rejected' && req.rejection_reason && (
+                                                                <p className="text-xs text-red-500 mt-1">Reason: {req.rejection_reason}</p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
+                )}
+
+                {/* Announcements Modal */}
+                {announcementsModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={() => setAnnouncementsModal(null)}>
+                        <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-y-auto p-6" onClick={e => e.stopPropagation()}>
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="font-black text-lg text-[var(--color-brand-text)]">
+                                    Announcements for {announcementsModal.event.title?.[lang] || announcementsModal.event.title?.fr || 'Event'}
+                                </h3>
+                                <button onClick={() => setAnnouncementsModal(null)} className="text-gray-400 hover:text-gray-600 p-1">
+                                    <span className="text-xl">&times;</span>
+                                </button>
+                            </div>
+                            {announcementsModal.announcements.length === 0 ? (
+                                <p className="text-gray-400 text-sm py-8 text-center">No announcements yet.</p>
+                            ) : (
+                                <div className="space-y-3">
+                                    {announcementsModal.announcements.map(a => (
+                                        <div key={a.id} className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                                            <p className="text-sm text-gray-700">{a[`message_${lang}`] || a.message_fr || a.message_en || a.message_ar || ''}</p>
+                                            <p className="text-[10px] text-gray-400 mt-2 font-medium">{new Date(a.created_at).toLocaleDateString()}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
 
