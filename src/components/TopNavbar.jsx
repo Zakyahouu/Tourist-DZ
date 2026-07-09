@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Menu, X, User, Shield } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import logoWithWords from '../assets/images/logo_with_words.jpeg';
 
 const TopNavbar = () => {
     const { t, i18n } = useTranslation();
@@ -34,22 +35,24 @@ const TopNavbar = () => {
     const initials = displayName ? displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '';
 
     return (
-        <nav className={`fixed w-full top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100 py-1' : 'bg-transparent py-3'}`}>
+        <nav className={`fixed w-full top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-[#F8F7F4] shadow-sm border-b border-gray-100 py-1' : 'bg-transparent py-3'}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16 relative">
 
                     {/* Left: Logo */}
                     <div className="flex items-center flex-shrink-0 z-10 basis-1/4">
                         <Link to="/" className="flex items-center">
-                            <span className={`text-2xl font-black tracking-tight transition-colors ${scrolled ? 'text-gray-900' : 'text-gray-900 drop-shadow-sm'}`}>
-                                Ziban<span className="text-[var(--color-brand-primary)]">Go</span>
-                            </span>
+                            <img
+                                src={logoWithWords}
+                                alt="ZibanGo"
+                                className={`h-8 w-auto transition-all duration-300 ${scrolled ? 'opacity-100' : 'opacity-90 drop-shadow-sm'}`}
+                            />
                         </Link>
                     </div>
 
                     {/* Center: Desktop Menu */}
                     <div className="hidden md:flex absolute left-1/2 transform -translate-x-1/2 z-0">
-                        <div className={`flex items-baseline space-x-2 rtl:space-x-reverse px-2 py-1.5 rounded-full transition-all duration-300 ${scrolled ? 'bg-gray-100/80 border border-transparent' : 'bg-white/90 backdrop-blur-sm border border-gray-200 shadow-sm'}`}>
+                        <div className={`flex items-baseline space-x-2 rtl:space-x-reverse px-2 py-1.5 rounded-full transition-all duration-300 ${scrolled ? 'bg-white border border-gray-200 shadow-sm' : 'bg-white/90 backdrop-blur-sm border border-gray-200 shadow-sm'}`}>
                             {navItems.map((item) => {
                                 const isActive = location.pathname === item.path;
                                 return (
@@ -58,7 +61,7 @@ const TopNavbar = () => {
                                         to={item.path}
                                         className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${isActive
                                             ? 'text-white bg-[var(--color-brand-primary)] shadow-md'
-                                            : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+                                            : 'text-gray-600 hover:text-[var(--color-brand-primary)] hover:bg-white'
                                             }`}
                                     >
                                         {item.label}
@@ -70,20 +73,20 @@ const TopNavbar = () => {
 
                     {/* Right: Language + Profile/Login */}
                     <div className="hidden md:flex items-center justify-end space-x-3 rtl:space-x-reverse z-10 basis-1/4">
-                        <div className={`flex items-center space-x-1 rtl:space-x-reverse rounded-full p-1 transition-colors ${scrolled ? 'bg-gray-100 border-transparent text-gray-600' : 'bg-white/90 border-gray-200 shadow-sm text-gray-700'}`}>
-                            <button onClick={() => changeLanguage('en')} className={`px-2.5 py-1.5 rounded-full text-xs font-bold transition-all ${i18n.language === 'en' ? 'bg-[var(--color-brand-secondary)] text-white shadow-sm' : 'hover:bg-gray-200 hover:text-gray-900'}`}>EN</button>
-                            <button onClick={() => changeLanguage('fr')} className={`px-2.5 py-1.5 rounded-full text-xs font-bold transition-all ${i18n.language === 'fr' ? 'bg-[var(--color-brand-secondary)] text-white shadow-sm' : 'hover:bg-gray-200 hover:text-gray-900'}`}>FR</button>
-                            <button onClick={() => changeLanguage('ar')} className={`px-2.5 py-1.5 rounded-full text-xs font-bold transition-all ${i18n.language === 'ar' ? 'bg-[var(--color-brand-secondary)] text-white shadow-sm' : 'hover:bg-gray-200 hover:text-gray-900'}`}>AR</button>
+                        <div className={`flex items-center space-x-1 rtl:space-x-reverse rounded-full p-1 transition-colors ${scrolled ? 'bg-white border border-gray-200 text-gray-600' : 'bg-white/90 border-gray-200 shadow-sm text-gray-700'}`}>
+                            <button onClick={() => changeLanguage('en')} className={`px-2.5 py-1.5 rounded-full text-xs font-bold transition-all ${i18n.language === 'en' ? 'bg-[var(--color-brand-secondary)] text-white shadow-sm' : 'hover:bg-[var(--color-brand-primary)]/10 hover:text-[var(--color-brand-primary)]'}`}>EN</button>
+                            <button onClick={() => changeLanguage('fr')} className={`px-2.5 py-1.5 rounded-full text-xs font-bold transition-all ${i18n.language === 'fr' ? 'bg-[var(--color-brand-secondary)] text-white shadow-sm' : 'hover:bg-[var(--color-brand-primary)]/10 hover:text-[var(--color-brand-primary)]'}`}>FR</button>
+                            <button onClick={() => changeLanguage('ar')} className={`px-2.5 py-1.5 rounded-full text-xs font-bold transition-all ${i18n.language === 'ar' ? 'bg-[var(--color-brand-secondary)] text-white shadow-sm' : 'hover:bg-[var(--color-brand-primary)]/10 hover:text-[var(--color-brand-primary)]'}`}>AR</button>
                         </div>
 
                         {isAdmin && (
-                            <Link to="/admin" className="flex items-center justify-center p-2 rounded-full bg-slate-800 text-yellow-400 hover:bg-slate-700 transition-colors shadow-md" title="Admin Dashboard">
+                            <Link to="/admin" className="flex items-center justify-center p-2 rounded-full bg-[var(--color-brand-primary)] text-white hover:bg-[var(--color-brand-primary)]/90 transition-colors shadow-md" title="Admin Dashboard">
                                 <Shield size={16} />
                             </Link>
                         )}
 
                         {user ? (
-                            <Link to="/profile" className="flex items-center justify-center rounded-full bg-[var(--color-brand-secondary)] text-white hover:bg-blue-800 transition-colors shadow-lg shadow-blue-900/20 hover:-translate-y-0.5 transform overflow-hidden" title={displayName}>
+                            <Link to="/profile" className="flex items-center justify-center rounded-full bg-[var(--color-brand-secondary)] text-white hover:bg-[var(--color-brand-secondary)]/90 transition-colors shadow-lg shadow-[var(--color-brand-secondary)]/20 hover:-translate-y-0.5 transform overflow-hidden" title={displayName}>
                                 {profile?.avatar_url ? (
                                     <img src={profile.avatar_url} alt={displayName} className="w-10 h-10 object-cover rounded-full" />
                                 ) : (
@@ -93,7 +96,7 @@ const TopNavbar = () => {
                                 )}
                             </Link>
                         ) : (
-                            <Link to="/auth" className="flex items-center px-5 py-2.5 rounded-full bg-[var(--color-brand-primary)] text-white font-bold text-sm hover:bg-[#d6721d] transition-colors shadow-lg shadow-orange-500/20 hover:-translate-y-0.5 transform">
+                            <Link to="/auth" className="flex items-center px-5 py-2.5 rounded-full bg-[var(--color-brand-primary)] text-white font-bold text-sm hover:bg-[var(--color-brand-primary)]/90 transition-colors shadow-lg shadow-[var(--color-brand-primary)]/20 hover:-translate-y-0.5 transform">
                                 {t('app.login')}
                             </Link>
                         )}
@@ -103,7 +106,7 @@ const TopNavbar = () => {
                     <div className="-mr-2 flex items-center md:hidden z-10">
                         <button
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
-                            className={`inline-flex items-center justify-center p-2.5 rounded-full focus:outline-none transition-colors ${scrolled ? 'text-gray-800 bg-gray-100' : 'text-gray-900 bg-white/90 backdrop-blur-sm shadow-sm border border-gray-200'}`}
+                            className={`inline-flex items-center justify-center p-2.5 rounded-full focus:outline-none transition-colors ${scrolled ? 'text-gray-800 bg-[#F8F7F4] border border-gray-200' : 'text-gray-900 bg-white/90 backdrop-blur-sm shadow-sm border border-gray-200'}`}
                         >
                             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
                         </button>
@@ -136,14 +139,14 @@ const TopNavbar = () => {
                         )}
 
                         <div className="py-6 border-t border-gray-100 flex justify-between items-center px-2 mt-4">
-                            <div className="flex space-x-2 rtl:space-x-reverse bg-gray-50 p-1.5 rounded-full border border-gray-100">
-                                <button onClick={() => { changeLanguage('en'); setIsMenuOpen(false); }} className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${i18n.language === 'en' ? 'bg-[var(--color-brand-secondary)] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-200'}`}>EN</button>
-                                <button onClick={() => { changeLanguage('fr'); setIsMenuOpen(false); }} className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${i18n.language === 'fr' ? 'bg-[var(--color-brand-secondary)] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-200'}`}>FR</button>
-                                <button onClick={() => { changeLanguage('ar'); setIsMenuOpen(false); }} className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${i18n.language === 'ar' ? 'bg-[var(--color-brand-secondary)] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-200'}`}>AR</button>
+                            <div className="flex space-x-2 rtl:space-x-reverse bg-white p-1.5 rounded-full border border-gray-200">
+                                <button onClick={() => { changeLanguage('en'); setIsMenuOpen(false); }} className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${i18n.language === 'en' ? 'bg-[var(--color-brand-secondary)] text-white shadow-sm' : 'text-gray-600 hover:bg-[var(--color-brand-primary)]/10'}`}>EN</button>
+                                <button onClick={() => { changeLanguage('fr'); setIsMenuOpen(false); }} className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${i18n.language === 'fr' ? 'bg-[var(--color-brand-secondary)] text-white shadow-sm' : 'text-gray-600 hover:bg-[var(--color-brand-primary)]/10'}`}>FR</button>
+                                <button onClick={() => { changeLanguage('ar'); setIsMenuOpen(false); }} className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${i18n.language === 'ar' ? 'bg-[var(--color-brand-secondary)] text-white shadow-sm' : 'text-gray-600 hover:bg-[var(--color-brand-primary)]/10'}`}>AR</button>
                             </div>
 
                             {user ? (
-                                <Link to="/profile" onClick={() => setIsMenuOpen(false)} className="text-white bg-[var(--color-brand-secondary)] p-3 rounded-full shadow-lg shadow-blue-900/20">
+                                <Link to="/profile" onClick={() => setIsMenuOpen(false)} className="text-white bg-[var(--color-brand-secondary)] p-3 rounded-full shadow-lg shadow-[var(--color-brand-secondary)]/20">
                                     {initials ? <span className="text-sm font-black">{initials}</span> : <User size={22} />}
                                 </Link>
                             ) : (

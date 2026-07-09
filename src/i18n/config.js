@@ -44,15 +44,22 @@ const resources = {
                 "feature_4_desc": "Join community-driven initiatives that make a real impact — from cultural exchanges to environmental conservation projects.",
                 "cta_title": "Ready to Explore?",
                 "cta_subtitle": "Start your journey through the heart of the Ziban — where heritage meets innovation.",
-                "cta_button": "Start Exploring"
+                "cta_button": "Start Exploring",
+                "stats_sites": "Tourist Attractions",
+                "stats_reviews": "Reviews",
+                "stats_poi": "Points of Interest",
+                "featured_title": "Featured Destinations",
+                "map_title": "Explore Biskra",
+                "reviews_title": "What Travelers Say"
             },
             "home": {
                 "searchPlaceholder": "Search destinations, hotels, events...",
-                "viewAll": "View All",
-                "featuredPlaces": "Featured Places",
-                "upcomingEvents": "Upcoming Tours & Events",
+                "viewAll": "View all",
+                "featuredPlaces": "Must-visit places",
+                "upcomingEvents": "Upcoming Events",
                 "discoverBiskra": "Discover Biskra",
-                "heroSubtitle": "Experience the enchanting palm groves, therapeutic hot springs, and rich history of Algeria's premier oasis destination."
+                "heroSubtitle": "Discover the enchanting palm groves, therapeutic thermal springs, and rich history of Algeria's premier oasis destination.",
+                "loadMore": "Load More"
             },
             "categories": {
                 "all": "All",
@@ -191,7 +198,13 @@ const resources = {
                 "feature_4_desc": "Rejoignez des initiatives communautaires qui ont un réel impact — des échanges culturels aux projets de conservation environnementale.",
                 "cta_title": "Prêt à Explorer ?",
                 "cta_subtitle": "Commencez votre voyage au cœur des Ziban — là où le patrimoine rencontre l'innovation.",
-                "cta_button": "Commencer l'Exploration"
+                "cta_button": "Commencer l'Exploration",
+                "stats_sites": "Sites Touristiques",
+                "stats_reviews": "Avis",
+                "stats_poi": "Points d'Intérêt",
+                "featured_title": "Destinations en Vedette",
+                "map_title": "Explorez Biskra",
+                "reviews_title": "Ce que disent les Voyageurs"
             },
             "home": {
                 "searchPlaceholder": "Rechercher des destinations, hôtels, événements...",
@@ -199,7 +212,8 @@ const resources = {
                 "featuredPlaces": "Lieux incontournables",
                 "upcomingEvents": "Tours et événements à venir",
                 "discoverBiskra": "Découvrir Biskra",
-                "heroSubtitle": "Découvrez les palmeraies enchanteresses, les sources thermales thérapeutiques et la riche histoire de la première destination oasienne d'Algérie."
+                "heroSubtitle": "Découvrez les palmeraies enchanteresses, les sources thermales thérapeutiques et la riche histoire de la première destination oasienne d'Algérie.",
+                "loadMore": "Voir Plus"
             },
             "categories": {
                 "all": "Tout",
@@ -338,7 +352,13 @@ const resources = {
                 "feature_4_desc": "انضم إلى المبادرات المجتمعية التي تحدث تأثيراً حقيقياً — من التبادل الثقافي إلى مشاريع الحفاظ على البيئة.",
                 "cta_title": "مستعد للاستكشاف؟",
                 "cta_subtitle": "ابدأ رحلتك في قلب الزيبان — حيث يلتقي التراث بالابتكار.",
-                "cta_button": "ابدأ الاستكشاف"
+                "cta_button": "ابدأ الاستكشاف",
+                "stats_sites": "المعالم السياحية",
+                "stats_reviews": "التقييمات",
+                "stats_poi": "نقاط الاهتمام",
+                "featured_title": "الوجهات المميزة",
+                "map_title": "استكشف بسكرة",
+                "reviews_title": "ماذا يقول المسافرون"
             },
             "home": {
                 "searchPlaceholder": "البحث عن الوجهات، الفنادق، الفعاليات...",
@@ -346,7 +366,8 @@ const resources = {
                 "featuredPlaces": "أماكن لا بد من زيارتها",
                 "upcomingEvents": "الجولات والفعاليات القادمة",
                 "discoverBiskra": "اكتشف بسكرة",
-                "heroSubtitle": "استمتع ببساتين النخيل الساحرة، والينابيع الحرارية العلاجية، والتاريخ الغني لأبرز واحة في الجزائر."
+                "heroSubtitle": "استمتع ببساتين النخيل الساحرة، والينابيع الحرارية العلاجية، والتاريخ الغني لأبرز واحة في الجزائر.",
+                "loadMore": "عرض المزيد"
             },
             "categories": {
                 "all": "الكل",
