@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Calendar, Users, MapPin, Search, Accessibility } from 'lucide-react';
+import { Calendar, Users, MapPin, Search, Accessibility, Clock, Headphones, CheckCircle } from 'lucide-react';
 import eventsHeroImage from '../assets/events_hero_image.webp';
 import { supabase } from '../supabaseClient';
 import logger from '../utils/logger';

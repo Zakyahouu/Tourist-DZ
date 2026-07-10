@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { supabase } from '../../supabaseClient';
 import { Plus, Pencil, Trash2, X, Search, Calendar, Users, MessageSquare, Settings2 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import logger from '../../utils/logger';
 import ManageCategoriesModal from '../../components/ManageCategoriesModal';
 
 const AdminEvents = () => {

@@ -1,21 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { supabase } from '../../supabaseClient';
-import { Search, Plus, Edit2, Trash2, X, Image as ImageIcon, Users, Settings2 } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, X, Image as ImageIcon, Users } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
-import ManageCategoriesModal from '../../components/ManageCategoriesModal';
 
 const AdminAccommodations = () => {
-    const { i18n } = useTranslation();
     const { showToast } = useToast();
-    const lang = i18n.language || 'en';
     const [items, setItems] = useState([]);
-    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
-    const [filterCategoryId, setFilterCategoryId] = useState('all');
     const [modal, setModal] = useState(null);
-    const [showCategoryManager, setShowCategoryManager] = useState(false);
 
     const [showImageModal, setShowImageModal] = useState(false);
     const [selectedAccForImages, setSelectedAccForImages] = useState(null);
@@ -28,26 +21,17 @@ const AdminAccommodations = () => {
     const [selectedAccForRequests, setSelectedAccForRequests] = useState(null);
     const [requests, setRequests] = useState([]);
 
-    const emptyForm = { name: { fr: '', en: '', ar: '' }, description: { fr: '', en: '', ar: '' }, category_id: null, latitude: 0, longitude: 0, address: '', phone: '', website: '', price_range: '', rating: 0, is_active: true };
+    const emptyForm = { name: { fr: '', en: '', ar: '' }, description: { fr: '', en: '', ar: '' }, type: 'hotel', latitude: 0, longitude: 0, address: '', phone: '', website: '', price_range: '', rating: 0, is_active: true };
 
-    useEffect(() => { fetchItems(); fetchCategories(); }, [filterCategoryId]);
-
-    async function fetchCategories() {
-        const { data } = await supabase.from('accommodation_categories').select('*').order('sort_order');
-        if (data) setCategories(data);
-    }
+    useEffect(() => { fetchItems(); }, []);
 
     async function fetchItems() {
         setLoading(true);
-        let q = supabase.from('accommodations').select('*').order('created_at', { ascending: false });
-        if (filterCategoryId !== 'all') q = q.eq('category_id', filterCategoryId);
-        const { data, error } = await q;
+        const { data, error } = await supabase.from('accommodations').select('*').order('created_at', { ascending: false });
         if (error) showToast('Failed to load accommodations: ' + error.message, 'error');
         else setItems(data || []);
         setLoading(false);
     }
-
-    const getCategory = (id) => categories.find(c => c.id === id);
 
     const filtered = items.filter(i => {
         if (!search) return true;
@@ -199,13 +183,6 @@ const AdminAccommodations = () => {
                     <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name or address..." className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-sky-500" />
                 </div>
-                <select value={filterCategoryId} onChange={e => setFilterCategoryId(e.target.value)} className="px-4 py-2.5 rounded-lg border border-slate-200 text-sm font-medium bg-white focus:ring-2 focus:ring-sky-500">
-                    <option value="all">All Categories</option>
-                    {categories.map(c => <option key={c.id} value={c.id}>{c[`name_${lang}`] || c.name_en}</option>)}
-                </select>
-                <button onClick={() => setShowCategoryManager(true)} className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-sky-600 transition-colors bg-white">
-                    <Settings2 size={16} /> Manage
-                </button>
             </div>
 
             {/* Table */}
@@ -231,7 +208,7 @@ const AdminAccommodations = () => {
                             ) : filtered.map(item => (
                                 <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                                     <td className="px-6 py-4 font-semibold text-slate-800">{item.name?.fr || item.name?.en || '—'}</td>
-                                    <td className="px-6 py-4"><span className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-bold">{getCategory(item.category_id)?.[`name_${lang}`] || getCategory(item.category_id)?.name_en || item.category_id || '—'}</span></td>
+                                    <td className="px-6 py-4"><span className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-bold capitalize">{item.type || '—'}</span></td>
                                     <td className="px-6 py-4 text-slate-600 max-w-[200px] truncate">{item.address || '—'}</td>
                                     <td className="px-6 py-4 text-slate-600">{item.phone || '—'}</td>
                                     <td className="px-6 py-4 text-slate-600">{item.price_range || '—'}</td>
@@ -256,7 +233,7 @@ const AdminAccommodations = () => {
             </div>
 
             {/* Modal */}
-            {modal && <AccommodationModal modal={modal} onClose={() => setModal(null)} onSave={handleSave} categories={categories} />}
+            {modal && <AccommodationModal modal={modal} onClose={() => setModal(null)} onSave={handleSave} />}
 
             {/* Images Modal */}
             {showImageModal && (
@@ -328,102 +305,6 @@ const AdminAccommodations = () => {
                     </div>
                 </div>
             )}
-            {showCategoryManager && (
-                <ManageCategoriesModal
-                    tableName="accommodation_categories"
-                    categories={categories}
-                    onCategoryChange={c => setCategories(c)}
-                    onClose={() => setShowCategoryManager(false)}
-                />
-            )}
-        </div>
-    );
-};
-
-const AccommodationModal = ({ modal, onClose, onSave, categories }) => {
-    const { i18n } = useTranslation();
-    const lang = i18n.language || 'en';
-    const [form, setForm] = useState(modal.data);
-    const [saving, setSaving] = useState(false);
-    const set = (key, val) => setForm(prev => ({ ...prev, [key]: val }));
-    const setName = (lang, val) => setForm(prev => ({ ...prev, name: { ...prev.name, [lang]: val } }));
-    const setDesc = (lang, val) => setForm(prev => ({ ...prev, description: { ...prev.description, [lang]: val } }));
-
-    const submit = async (e) => {
-        e.preventDefault();
-        setSaving(true);
-        await onSave(form);
-        setSaving(false);
-    };
-
-    return (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-            <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-                    <h3 className="text-lg font-bold text-slate-800">{modal.mode === 'create' ? 'Add Accommodation' : 'Edit Accommodation'}</h3>
-                    <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg"><X size={20} /></button>
-                </div>
-                <form onSubmit={submit} className="p-6 space-y-5">
-                    <div className="grid grid-cols-3 gap-3">
-                        {['fr', 'en', 'ar'].map(l => (
-                            <div key={l}>
-                                <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Name ({l})</label>
-                                <input value={form.name?.[l] || ''} onChange={e => setName(l, e.target.value)} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sky-500" required={l === 'fr'} />
-                            </div>
-                        ))}
-                    </div>
-                    <div className="grid grid-cols-3 gap-3">
-                        {['fr', 'en', 'ar'].map(l => (
-                            <div key={l}>
-                                <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Description ({l})</label>
-                                <textarea value={form.description?.[l] || ''} onChange={e => setDesc(l, e.target.value)} rows={2} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sky-500" />
-                            </div>
-                        ))}
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Category</label>
-                            <select value={form.category_id || ''} onChange={e => set('category_id', e.target.value || null)} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
-                                <option value="">Select category...</option>
-                                {categories.map(c => <option key={c.id} value={c.id}>{c[`name_${lang}`] || c.name_en}</option>)}
-                            </select>
-                        </div>
-                        <div>
-                            <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Address</label>
-                            <input value={form.address || ''} onChange={e => set('address', e.target.value)} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sky-500" />
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Latitude</label>
-                            <input type="number" step="any" value={form.latitude} onChange={e => set('latitude', parseFloat(e.target.value) || 0)} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sky-500" required />
-                        </div>
-                        <div>
-                            <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Longitude</label>
-                            <input type="number" step="any" value={form.longitude} onChange={e => set('longitude', parseFloat(e.target.value) || 0)} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sky-500" required />
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-3">
-                        <div>
-                            <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Phone</label>
-                            <input value={form.phone || ''} onChange={e => set('phone', e.target.value)} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sky-500" />
-                        </div>
-                        <div>
-                            <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Website</label>
-                            <input value={form.website || ''} onChange={e => set('website', e.target.value)} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sky-500" />
-                        </div>
-                        <div>
-                            <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Price Range</label>
-                            <input value={form.price_range || ''} onChange={e => set('price_range', e.target.value)} placeholder="e.g. $$ or 3000-5000 DZD" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sky-500" />
-                        </div>
-                    </div>
-                    <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
-                        <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
-                        <button type="submit" disabled={saving} className="px-6 py-2 text-sm font-semibold bg-sky-600 hover:bg-sky-700 text-white rounded-lg disabled:opacity-50">{saving ? 'Saving...' : 'Save'}</button>
-                    </div>
-                </form>
-            </div>
-
             {/* Requests Modal */}
             {showRequestsModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4" onClick={() => setShowRequestsModal(false)}>
@@ -482,6 +363,97 @@ const AccommodationModal = ({ modal, onClose, onSave, categories }) => {
                     </div>
                 </div>
             )}
+        </div>
+    );
+};
+
+const AccommodationModal = ({ modal, onClose, onSave }) => {
+    const [form, setForm] = useState(modal.data);
+    const [saving, setSaving] = useState(false);
+    const set = (key, val) => setForm(prev => ({ ...prev, [key]: val }));
+    const setName = (lang, val) => setForm(prev => ({ ...prev, name: { ...prev.name, [lang]: val } }));
+    const setDesc = (lang, val) => setForm(prev => ({ ...prev, description: { ...prev.description, [lang]: val } }));
+
+    const submit = async (e) => {
+        e.preventDefault();
+        setSaving(true);
+        await onSave(form);
+        setSaving(false);
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
+            <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+                    <h3 className="text-lg font-bold text-slate-800">{modal.mode === 'create' ? 'Add Accommodation' : 'Edit Accommodation'}</h3>
+                    <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg"><X size={20} /></button>
+                </div>
+                <form onSubmit={submit} className="p-6 space-y-5">
+                    <div className="grid grid-cols-3 gap-3">
+                        {['fr', 'en', 'ar'].map(l => (
+                            <div key={l}>
+                                <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Name ({l})</label>
+                                <input value={form.name?.[l] || ''} onChange={e => setName(l, e.target.value)} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sky-500" required={l === 'fr'} />
+                            </div>
+                        ))}
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                        {['fr', 'en', 'ar'].map(l => (
+                            <div key={l}>
+                                <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Description ({l})</label>
+                                <textarea value={form.description?.[l] || ''} onChange={e => setDesc(l, e.target.value)} rows={2} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sky-500" />
+                            </div>
+                        ))}
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Type</label>
+                            <select value={form.type || 'hotel'} onChange={e => set('type', e.target.value)} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                                <option value="hotel">Hotel</option>
+                                <option value="guesthouse">Guesthouse</option>
+                                <option value="hostel">Hostel</option>
+                                <option value="restaurant">Restaurant</option>
+                                <option value="cafe">Café</option>
+                                <option value="riad">Riad</option>
+                                <option value="apartment">Apartment</option>
+                                <option value="camping">Camping</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Address</label>
+                            <input value={form.address || ''} onChange={e => set('address', e.target.value)} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sky-500" />
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Latitude</label>
+                            <input type="number" step="any" value={form.latitude} onChange={e => set('latitude', parseFloat(e.target.value) || 0)} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sky-500" required />
+                        </div>
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Longitude</label>
+                            <input type="number" step="any" value={form.longitude} onChange={e => set('longitude', parseFloat(e.target.value) || 0)} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sky-500" required />
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Phone</label>
+                            <input value={form.phone || ''} onChange={e => set('phone', e.target.value)} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sky-500" />
+                        </div>
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Website</label>
+                            <input value={form.website || ''} onChange={e => set('website', e.target.value)} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sky-500" />
+                        </div>
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Price Range</label>
+                            <input value={form.price_range || ''} onChange={e => set('price_range', e.target.value)} placeholder="e.g. $$ or 3000-5000 DZD" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sky-500" />
+                        </div>
+                    </div>
+                    <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                        <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+                        <button type="submit" disabled={saving} className="px-6 py-2 text-sm font-semibold bg-sky-600 hover:bg-sky-700 text-white rounded-lg disabled:opacity-50">{saving ? 'Saving...' : 'Save'}</button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 };

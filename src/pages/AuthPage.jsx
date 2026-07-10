@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { supabase } from '../supabaseClient';
 import { Mail, Lock, User, ArrowRight, ArrowLeft } from 'lucide-react';
 import authPanelImage from '../assets/home_hero_image.webp';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const AuthPage = () => {
@@ -17,7 +17,6 @@ const AuthPage = () => {
     const [fullName, setFullName] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [showConfirmMessage, setShowConfirmMessage] = useState(false);
     const [showForgotPassword, setShowForgotPassword] = useState(false);
     const [forgotEmail, setForgotEmail] = useState('');
     const [forgotLoading, setForgotLoading] = useState(false);
@@ -41,12 +40,12 @@ const AuthPage = () => {
 
         try {
             if (isLogin) {
-                const { error } = await supabase.auth.signInWithPassword({ email, password });
+                const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
                 if (error) throw error;
                 navigate(from, { replace: true });
             } else {
                 const { error } = await supabase.auth.signUp({
-                    email,
+                    email: email.trim(),
                     password,
                     options: {
                         emailRedirectTo: `${window.location.origin}/auth`,
@@ -57,8 +56,7 @@ const AuthPage = () => {
                     }
                 });
                 if (error) throw error;
-                setShowConfirmMessage(true);
-                return;
+                navigate(from, { replace: true });
             }
         } catch (err) {
             setError(err.message);
@@ -71,7 +69,7 @@ const AuthPage = () => {
         e.preventDefault();
         setForgotLoading(true);
         setError(null);
-        const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+        const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail.trim(), {
             redirectTo: `${window.location.origin}/auth`,
         });
         setForgotLoading(false);
@@ -126,24 +124,7 @@ const AuthPage = () => {
                         <p className="text-[var(--color-brand-text-muted)] text-base font-medium text-center">{t('app.tagline')}</p>
                     </div>
 
-                    {/* Email confirmation screen */}
-                    {showConfirmMessage ? (
-                        <div className="text-center">
-                            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <Mail size={36} className="text-emerald-600" />
-                            </div>
-                            <h2 className="text-3xl font-black text-[var(--color-brand-text)] mb-3">Check your inbox</h2>
-                            <p className="text-[var(--color-brand-text-muted)] text-lg mb-6">
-                                We sent a confirmation link to <strong>{email}</strong>. Click it to activate your account then come back to log in.
-                            </p>
-                            <button
-                                onClick={() => { setShowConfirmMessage(false); setIsLogin(true); }}
-                                className="px-6 py-3 bg-[var(--color-brand-primary)] text-white font-bold rounded-2xl hover:bg-orange-500 transition-colors"
-                            >
-                                Back to Login
-                            </button>
-                        </div>
-                    ) : showForgotPassword ? (
+                    {showForgotPassword ? (
                         /* Forgot password screen */
                         <div>
                             <button onClick={() => { setShowForgotPassword(false); setForgotSent(false); setError(null); }} className="flex items-center text-sm font-bold text-gray-500 hover:text-[var(--color-brand-secondary)] mb-8 transition-colors">
