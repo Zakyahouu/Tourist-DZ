@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Smartphone, Star, MapPin, ChevronRight } from 'lucide-react';
+import { ArrowRight, Smartphone, Star, MapPin, ChevronRight, Headphones, QrCode, Map, HeartHandshake } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import logger from '../utils/logger';
 import heroImage from '../assets/images/small_panner.jpg';
@@ -180,9 +180,9 @@ const LandingPage = () => {
         <div className="bg-[var(--color-brand-bg)] min-h-screen" dir={isRTL ? 'rtl' : 'ltr'}>
 
             {/* ── HERO ── */}
-            <section className="relative py-28 lg:py-36 bg-[var(--color-brand-bg)] overflow-hidden">
+            <section className="relative pt-28 pb-14 lg:pt-32 lg:pb-20 bg-[var(--color-brand-bg)] overflow-hidden">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
+                    <div className="grid md:grid-cols-2 gap-10 lg:gap-14 items-center">
                         <div>
                             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight text-[var(--color-brand-text)] leading-[1.1]">
                                 {t('landing.hero_title')}
@@ -223,19 +223,19 @@ const LandingPage = () => {
             </section>
 
             {/* ── ABOUT ── */}
-            <section className="py-24 lg:py-32">
+            <section className="py-14 lg:py-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                    <div className="grid md:grid-cols-2 gap-10 items-center">
                         <div>
                             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--color-brand-text)] tracking-tight leading-tight">
                                 {t('landing.about_title')}
                             </h2>
-                            <div className="mt-6 space-y-4 text-base sm:text-lg text-slate-500 leading-relaxed">
+                            <div className="mt-5 space-y-4 text-base sm:text-lg text-slate-500 leading-relaxed">
                                 <p>{t('landing.about_desc_1')}</p>
                                 <p>{t('landing.about_desc_2')}</p>
                             </div>
                         </div>
-                        <div className="relative h-80 md:h-96 rounded-3xl overflow-hidden shadow-xl">
+                        <div className="relative h-72 md:h-96 rounded-3xl overflow-hidden shadow-xl">
                             <img
                                 src={oldHeroImage}
                                 alt="Biskra"
@@ -243,24 +243,31 @@ const LandingPage = () => {
                             />
                         </div>
                     </div>
+
+                    {/* ── PLATFORM FEATURES ── */}
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
+                        {[
+                            { icon: Headphones, title: t('landing.feature_1_title'), desc: t('landing.feature_1_desc'), color: 'bg-orange-50 text-[var(--color-brand-primary)]' },
+                            { icon: QrCode, title: t('landing.feature_2_title'), desc: t('landing.feature_2_desc'), color: 'bg-sky-50 text-[var(--color-brand-secondary)]' },
+                            { icon: Map, title: t('landing.feature_3_title'), desc: t('landing.feature_3_desc'), color: 'bg-emerald-50 text-emerald-600' },
+                            { icon: HeartHandshake, title: t('landing.feature_4_title'), desc: t('landing.feature_4_desc'), color: 'bg-teal-50 text-teal-600' },
+                        ].map((feat, idx) => (
+                            <div key={idx} className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                                <div className={`w-12 h-12 rounded-xl ${feat.color} flex items-center justify-center mb-4`}>
+                                    <feat.icon size={22} />
+                                </div>
+                                <h3 className="font-bold text-base text-[var(--color-brand-text)] mb-2">{feat.title}</h3>
+                                <p className="text-sm text-slate-500 leading-relaxed">{feat.desc}</p>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </section>
 
-            {/* ── EDITORIAL BANNER ──
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-10">
-                <div className="rounded-2xl overflow-hidden shadow-md">
-                    <img
-                        src={oldHeroImage}
-                        alt=""
-                        className="w-full h-auto object-contain"
-                    />
-                </div>
-            </div> */}
-
             {/* ── STATS ── */}
-            <section className="py-20 bg-white">
+            <section className="py-12 bg-white border-y border-slate-100">
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-3 gap-8 md:gap-16">
+                    <div className="grid grid-cols-3 gap-6 md:gap-16">
                         <StatCard value={siteCount} label={t('landing.stats_sites')} />
                         <StatCard value={reviewCount} label={t('landing.stats_reviews')} />
                         <StatCard value={poiCount} label={t('landing.stats_poi')} />
@@ -269,9 +276,9 @@ const LandingPage = () => {
             </section>
 
             {/* ── FEATURED SITES ── */}
-            <section className="py-24 lg:py-32">
+            <section className="py-14 lg:py-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between mb-10">
+                    <div className="flex items-center justify-between mb-8">
                         <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[var(--color-brand-text)] tracking-tight">
                             {t('landing.featured_title')}
                         </h2>
@@ -300,14 +307,14 @@ const LandingPage = () => {
 
             {/* ── MAP PREVIEW ── */}
             {sitesWithCoords.length > 0 && (
-                <section className="py-16 lg:py-24 bg-white/40">
+                <section className="py-14 lg:py-20 bg-white/60 border-y border-slate-100">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="text-center mb-10">
+                        <div className="text-center mb-8">
                             <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[var(--color-brand-text)] tracking-tight">
                                 {t('landing.map_title')}
                             </h2>
                         </div>
-                        <div className="rounded-3xl overflow-hidden shadow-lg border border-slate-100 h-[400px]">
+                        <div className="rounded-3xl overflow-hidden shadow-lg border border-slate-100 h-[380px]">
                             <MapContainer
                                 center={[34.8480, 5.7286]}
                                 zoom={11}
@@ -316,7 +323,7 @@ const LandingPage = () => {
                                 scrollWheelZoom={false}
                             >
                                 <TileLayer
-                                    url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                                 />
                                 {sitesWithCoords.map(site => (
@@ -335,9 +342,9 @@ const LandingPage = () => {
 
             {/* ── REVIEWS ── */}
             {recentReviews.length > 0 && (
-                <section className="py-24 lg:py-32">
+                <section className="py-14 lg:py-20">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="text-center mb-12">
+                        <div className="text-center mb-8">
                             <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[var(--color-brand-text)] tracking-tight">
                                 {t('landing.reviews_title')}
                             </h2>
@@ -352,7 +359,7 @@ const LandingPage = () => {
             )}
 
             {/* ── CTA ── */}
-            <section className="py-28 lg:py-36 bg-[var(--color-brand-primary)]/5">
+            <section className="py-16 lg:py-20 bg-[var(--color-brand-primary)]/5">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--color-brand-text)] tracking-tight">
                         {t('landing.cta_title')}

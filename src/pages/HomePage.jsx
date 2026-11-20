@@ -126,7 +126,7 @@ const HomePage = () => {
         <div className="flex flex-col min-h-screen bg-[var(--color-brand-bg)]">
 
             {/* Typography Header */}
-            <section className="py-16 bg-[var(--color-brand-bg)]">
+            <section className="pt-28 pb-8 bg-[var(--color-brand-bg)]">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <span className="inline-block py-1.5 px-4 rounded-full bg-[var(--color-brand-primary)]/10 text-[var(--color-brand-primary)] font-bold tracking-widest uppercase text-xs mb-4">
                         {cms.home_hero_badge || t('app.tagline')}
@@ -168,10 +168,10 @@ const HomePage = () => {
                 </div>
             </section>
 
-            <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mt-12 relative z-20">
+            <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mt-2 relative z-20">
 
                 {/* Category Filter */}
-                <div className="bg-white rounded-2xl p-4 md:p-6 mb-8 md:mb-12 shadow-xl border border-gray-100 flex overflow-x-auto lg:overflow-visible lg:justify-center space-x-4 hide-scrollbar">
+                <div className="bg-white rounded-2xl p-3 md:p-4 mb-8 shadow-sm border border-gray-100 flex overflow-x-auto lg:overflow-visible lg:justify-center space-x-3 hide-scrollbar">
                     {categories.map((cat) => (
                         <button
                             key={cat.id}

@@ -290,10 +290,10 @@ const MapPage = () => {
                     zoomControl={true}
                     className="w-full h-full"
                 >
-                    {/* Light clear touristic map tiles (Voyager) */}
+                    {/* OpenStreetMap standard tiles (no API key required) */}
                     <TileLayer
-                        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     />
 
                     {selectedSite && selectedSite.latitude != null && selectedSite.longitude != null && <MapUpdater center={[selectedSite.latitude, selectedSite.longitude]} />}
