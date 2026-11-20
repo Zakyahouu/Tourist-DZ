@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import { AlertTriangle } from 'lucide-react';
 
 class ErrorBoundary extends Component {
     constructor(props) {
@@ -22,7 +23,9 @@ class ErrorBoundary extends Component {
             return (
                 <div className="flex flex-col items-center justify-center min-h-screen bg-[var(--color-brand-bg)] text-center px-6">
                     <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-10 max-w-md w-full">
-                        <div className="text-6xl mb-4">⚠️</div>
+                        <div className="w-16 h-16 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-5">
+                            <AlertTriangle size={32} />
+                        </div>
                         <h1 className="text-2xl font-black text-slate-800 mb-2">Something went wrong</h1>
                         <p className="text-slate-500 mb-6 text-sm">
                             An unexpected error occurred. Please refresh the page or go back to the home page.

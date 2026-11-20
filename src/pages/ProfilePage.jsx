@@ -60,23 +60,23 @@ const ProfilePage = () => {
 
                 const { data: favs } = await supabase
                     .from('favorites')
-                    .select('id, tourist_sites(id, name, category_id, site_images(image_url))')
+                    .select('id, tourist_sites(id, name, category_id, site_images(image_url, is_primary, sort_order))')
                     .eq('user_id', user.id)
                     .order('created_at', { ascending: false });
                 setFavoriteSites(favs || []);
 
                 const { data: events } = await supabase
                     .from('event_registrations')
-                    .select('id, status, registered_at, events(id, title, start_date, location)')
+                    .select('id, status, registered_at, rejection_reason, events(id, title, start_date, end_date, location, category_id)')
                     .eq('user_id', user.id)
                     .order('registered_at', { ascending: false });
                 setMyEvents(events || []);
 
                 const { data: accs } = await supabase
                     .from('accommodation_requests')
-                    .select('id, status, requested_at, rejection_reason, accommodations(id, title, location, start_date, end_date)')
+                    .select('id, status, created_at, check_in, check_out, guests, message, rejection_reason, accommodations(id, name, address, category_id)')
                     .eq('user_id', user.id)
-                    .order('requested_at', { ascending: false });
+                    .order('created_at', { ascending: false });
                 setMyAccommodations(accs || []);
 
                 const { data: cats } = await supabase.from('event_categories').select('*').order('sort_order');
@@ -108,6 +108,22 @@ const ProfilePage = () => {
     };
 
     const [announcementsModal, setAnnouncementsModal] = useState(null);
+
+    const handleCancelAccommodation = async (requestId) => {
+        if (!confirm('Cancel your booking request for this accommodation?')) return;
+        setStatsLoading(true);
+        try {
+            const { error } = await supabase.from('accommodation_requests').delete().eq('id', requestId);
+            if (error) throw error;
+            setMyAccommodations(prev => prev.filter(a => a.id !== requestId));
+            showToast('Booking request cancelled.', 'success');
+        } catch (err) {
+            logger.error(err);
+            showToast('Could not cancel request. Please try again.', 'error');
+        } finally {
+            setStatsLoading(false);
+        }
+    };
 
     const handleCancelEvent = async (registrationId) => {
         if (!confirm('Cancel your registration for this event?')) return;
@@ -320,7 +336,8 @@ const ProfilePage = () => {
                             favoriteSites.map((fav) => {
                                 const site = fav.tourist_sites;
                                 if (!site) return null;
-                                const imgUrl = site.site_images?.[0]?.image_url || fallbackHistorical;
+                                const sortedImgs = [...(site.site_images || [])].sort((a, b) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0));
+                                const imgUrl = sortedImgs[0]?.image_url || fallbackHistorical;
 
                                 return (
                                     <Link key={fav.id} to={`/site/${site.id}`} className="group bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-all flex flex-col">
@@ -450,16 +467,37 @@ const ProfilePage = () => {
                                                         <div className="flex-1">
                                                             <div className="flex items-center gap-2 mb-1">
                                                                 <StatusBadge status={req.status} />
+                                                                {req.guests > 0 && (
+                                                                    <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
+                                                                        {req.guests} {req.guests === 1 ? 'Guest' : 'Guests'}
+                                                                    </span>
+                                                                )}
                                                             </div>
-                                                            <h4 className="font-bold text-gray-800">{acc.title?.[i18n.language] || acc.title?.fr || 'Accommodation'}</h4>
+                                                            <Link to={`/accommodation/${acc.id}`} className="font-bold text-gray-800 hover:text-[var(--color-brand-primary)] transition-colors">
+                                                                {acc.name?.[i18n.language] || acc.name?.fr || acc.name?.en || 'Accommodation'}
+                                                            </Link>
                                                             <div className="flex flex-wrap items-center gap-3 text-xs text-gray-400 font-medium mt-1">
-                                                                {acc.start_date && <span><Calendar size={12} className="inline mr-1" />{new Date(acc.start_date).toLocaleDateString()} {acc.end_date ? `– ${new Date(acc.end_date).toLocaleDateString()}` : ''}</span>}
-                                                                {acc.location && <span><MapPin size={12} className="inline mr-1" />{acc.location}</span>}
+                                                                {req.check_in && (
+                                                                    <span>
+                                                                        <Calendar size={12} className="inline mr-1" />
+                                                                        {new Date(req.check_in).toLocaleDateString()}
+                                                                        {req.check_out ? ` – ${new Date(req.check_out).toLocaleDateString()}` : ''}
+                                                                    </span>
+                                                                )}
+                                                                {acc.address && <span><MapPin size={12} className="inline mr-1" />{acc.address}</span>}
                                                             </div>
                                                             {req.status === 'rejected' && req.rejection_reason && (
                                                                 <p className="text-xs text-red-500 mt-1">Reason: {req.rejection_reason}</p>
                                                             )}
                                                         </div>
+                                                        {req.status === 'pending' && (
+                                                            <button
+                                                                onClick={() => handleCancelAccommodation(req.id)}
+                                                                className="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-100"
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 );
                                             })}

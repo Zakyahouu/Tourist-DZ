@@ -117,7 +117,7 @@ const AuthPage = () => {
                     <div className="lg:hidden flex flex-col items-center justify-center mb-10 mt-8">
                         <div className="w-20 h-20 bg-[var(--color-brand-bg)] rounded-3xl flex items-center justify-center shadow-lg mb-6 border border-gray-100">
                             <span className="text-4xl font-black text-[var(--color-brand-secondary)]">
-                                T<span className="text-[var(--color-brand-primary)]">DZ</span>
+                                Z<span className="text-[var(--color-brand-primary)]">G</span>
                             </span>
                         </div>
                         <h1 className="text-3xl font-black text-[var(--color-brand-text)] text-center mb-3 tracking-tight">{t('app.title')}</h1>

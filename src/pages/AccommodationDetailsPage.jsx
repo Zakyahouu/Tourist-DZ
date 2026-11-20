@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MapPin, Star, ArrowLeft, Hotel, Phone, Globe, DollarSign } from 'lucide-react';
+import { MapPin, Star, ArrowLeft, Hotel, Phone, Globe, DollarSign, Calendar, Users, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import logger from '../utils/logger';
 import fallbackNatural from '../assets/fallback_image_natural.webp';
 import { useParams, useNavigate } from 'react-router-dom';
-import FavoriteButton from '../components/FavoriteButton';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 const isSafeUrl = (url) => /^https?:\/\//i.test(url);
 
@@ -14,10 +15,16 @@ const AccommodationDetailsPage = () => {
     const { t, i18n } = useTranslation();
     const lang = i18n.language || 'fr';
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const { showToast } = useToast();
 
     const [accommodation, setAccommodation] = useState(null);
     const [accCategories, setAccCategories] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const [existingRequest, setExistingRequest] = useState(null);
+    const [bookingForm, setBookingForm] = useState({ check_in: '', check_out: '', guests: 1, message: '' });
+    const [submittingBooking, setSubmittingBooking] = useState(false);
 
     useEffect(() => {
         if (!id) { setLoading(false); return; }
@@ -36,6 +43,16 @@ const AccommodationDetailsPage = () => {
                 if (accRes.error) throw accRes.error;
                 setAccommodation(accRes.data);
                 if (catRes.data) setAccCategories(catRes.data);
+
+                if (user) {
+                    const { data: reqData } = await supabase
+                        .from('accommodation_requests')
+                        .select('*')
+                        .eq('accommodation_id', id)
+                        .eq('user_id', user.id)
+                        .maybeSingle();
+                    setExistingRequest(reqData || null);
+                }
             } catch (error) {
                 logger.error('Error fetching accommodation details:', error);
             } finally {
@@ -43,7 +60,44 @@ const AccommodationDetailsPage = () => {
             }
         }
         fetchDetails();
-    }, [id]);
+    }, [id, user]);
+
+    const handleBookingSubmit = async (e) => {
+        e.preventDefault();
+        if (!user) {
+            navigate('/auth', { state: { from: `/accommodation/${id}` } });
+            return;
+        }
+        if (bookingForm.check_in && bookingForm.check_out && bookingForm.check_out < bookingForm.check_in) {
+            return showToast('Check-out date must be after check-in date.', 'error');
+        }
+        setSubmittingBooking(true);
+        try {
+            const payload = {
+                user_id: user.id,
+                accommodation_id: id,
+                check_in: bookingForm.check_in || null,
+                check_out: bookingForm.check_out || null,
+                guests: Math.max(1, parseInt(bookingForm.guests) || 1),
+                message: bookingForm.message.trim() || null,
+                status: 'pending',
+                rejection_reason: null,
+            };
+            const { data, error } = await supabase
+                .from('accommodation_requests')
+                .upsert(payload, { onConflict: 'user_id,accommodation_id' })
+                .select()
+                .single();
+            if (error) throw error;
+            setExistingRequest(data);
+            showToast('Booking request sent!', 'success');
+        } catch (err) {
+            logger.error('Error submitting booking request:', err);
+            showToast('Could not submit request. Please try again.', 'error');
+        } finally {
+            setSubmittingBooking(false);
+        }
+    };
 
     if (loading) return (
         <div className="h-screen flex items-center justify-center bg-[var(--color-brand-bg)]">
@@ -87,9 +141,8 @@ const AccommodationDetailsPage = () => {
                         <ArrowLeft size={18} className="mr-2 rtl:rotate-180 rtl:ml-2 rtl:mr-0" /> Back
                     </button>
                     <div className="flex items-center gap-2">
-                        <FavoriteButton siteId={accommodation.id} size={20} />
                         <span className="bg-white text-[var(--color-brand-primary)] px-4 py-1.5 text-xs font-black rounded-full uppercase tracking-wider shadow-lg capitalize">
-                            {accCategories.find(c => c.id === accommodation.category_id)?.[`name_${lang}`] || accCategories.find(c => c.id === accommodation.category_id)?.name_en || accommodation.category_id || '—'}
+                            {accCategories.find(c => c.id === accommodation.category_id)?.[`name_${lang}`] || accCategories.find(c => c.id === accommodation.category_id)?.name_en || '—'}
                         </span>
                     </div>
                 </div>
@@ -200,7 +253,111 @@ const AccommodationDetailsPage = () => {
                                 {!accommodation.address && !accommodation.phone && !accommodation.website && (
                                     <p className="text-sm text-gray-400 italic text-center py-4">No contact information provided.</p>
                                 )}
+
+                                {accommodation.latitude != null && accommodation.longitude != null && (
+                                    <div className="pt-2">
+                                        <a
+                                            href={`https://www.google.com/maps/dir/?api=1&destination=${accommodation.latitude},${accommodation.longitude}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full bg-[var(--color-brand-secondary)] hover:bg-blue-800 text-white py-3.5 rounded-2xl font-bold flex justify-center items-center transition-colors shadow-lg shadow-blue-900/20 text-sm"
+                                        >
+                                            <MapPin size={16} className="mr-2" /> {t('site.getDirections')}
+                                        </a>
+                                    </div>
+                                )}
                             </div>
+                        </div>
+
+                        {/* Request Booking Card */}
+                        <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-xl shadow-gray-200/50">
+                            <h3 className="text-xl font-black text-[var(--color-brand-text)] mb-4 flex items-center">
+                                <Calendar size={20} className="mr-2 text-[var(--color-brand-primary)]" /> Request Booking
+                            </h3>
+
+                            {existingRequest && existingRequest.status !== 'cancelled' && existingRequest.status !== 'rejected' ? (
+                                <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-100 space-y-2">
+                                    <div className="flex items-center gap-2 text-emerald-700 font-black text-sm uppercase tracking-wider">
+                                        {existingRequest.status === 'accepted' ? <CheckCircle size={18} /> : <Clock size={18} />}
+                                        Request {existingRequest.status}
+                                    </div>
+                                    <p className="text-xs text-emerald-600 font-medium">
+                                        {existingRequest.guests} {existingRequest.guests === 1 ? 'Guest' : 'Guests'}
+                                        {existingRequest.check_in ? ` · ${existingRequest.check_in}` : ''}
+                                        {existingRequest.check_out ? ` → ${existingRequest.check_out}` : ''}
+                                    </p>
+                                    <p className="text-xs text-gray-500 pt-1">
+                                        You can track or cancel this request in your Profile under Bookings.
+                                    </p>
+                                </div>
+                            ) : (
+                                <form onSubmit={handleBookingSubmit} className="space-y-4">
+                                    {existingRequest?.status === 'rejected' && (
+                                        <div className="p-3 rounded-xl bg-red-50 border border-red-100 text-xs text-red-600 font-medium flex items-start gap-2">
+                                            <XCircle size={16} className="flex-shrink-0 mt-0.5" />
+                                            <div>
+                                                <span className="font-bold">Previous request declined.</span>
+                                                {existingRequest.rejection_reason && <p>Reason: {existingRequest.rejection_reason}</p>}
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-[10px] font-black uppercase text-gray-400 tracking-wider mb-1">Check-in</label>
+                                            <input
+                                                type="date"
+                                                required
+                                                min={new Date().toISOString().split('T')[0]}
+                                                value={bookingForm.check_in}
+                                                onChange={e => setBookingForm(prev => ({ ...prev, check_in: e.target.value }))}
+                                                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-gray-700 focus:outline-none focus:border-[var(--color-brand-primary)]"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black uppercase text-gray-400 tracking-wider mb-1">Check-out</label>
+                                            <input
+                                                type="date"
+                                                required
+                                                min={bookingForm.check_in || new Date().toISOString().split('T')[0]}
+                                                value={bookingForm.check_out}
+                                                onChange={e => setBookingForm(prev => ({ ...prev, check_out: e.target.value }))}
+                                                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-gray-700 focus:outline-none focus:border-[var(--color-brand-primary)]"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black uppercase text-gray-400 tracking-wider mb-1 flex items-center gap-1">
+                                            <Users size={12} /> Guests
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            max="20"
+                                            required
+                                            value={bookingForm.guests}
+                                            onChange={e => setBookingForm(prev => ({ ...prev, guests: e.target.value }))}
+                                            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-gray-700 focus:outline-none focus:border-[var(--color-brand-primary)]"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black uppercase text-gray-400 tracking-wider mb-1">Message (Optional)</label>
+                                        <textarea
+                                            rows={2}
+                                            placeholder="Special requests, arrival time..."
+                                            value={bookingForm.message}
+                                            onChange={e => setBookingForm(prev => ({ ...prev, message: e.target.value }))}
+                                            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[var(--color-brand-primary)] resize-none"
+                                        />
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        disabled={submittingBooking}
+                                        className="w-full bg-[var(--color-brand-primary)] hover:bg-orange-600 text-white py-3.5 rounded-2xl font-bold transition-all shadow-lg shadow-orange-500/20 text-sm disabled:opacity-50"
+                                    >
+                                        {submittingBooking ? 'Sending Request...' : 'Send Booking Request'}
+                                    </button>
+                                </form>
+                            )}
                         </div>
                     </div>
 

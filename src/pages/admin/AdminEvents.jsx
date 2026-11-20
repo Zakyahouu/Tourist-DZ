@@ -41,10 +41,12 @@ const AdminEvents = () => {
         max_participants: '',
         is_solidarity: false,
         is_active: true,
+        image_url: '',
         audio_url: '',
     };
 
     const [form, setForm] = useState(emptyEvent);
+    const [uploadingImage, setUploadingImage] = useState(false);
 
     useEffect(() => { fetchEvents(); fetchCategories(); }, []);
 
@@ -82,7 +84,8 @@ const AdminEvents = () => {
             max_participants: form.max_participants ? parseInt(form.max_participants) : null,
             is_solidarity: form.is_solidarity,
             is_active: form.is_active,
-            audio_url: form.audio_url,
+            image_url: form.image_url?.trim() || null,
+            audio_url: form.audio_url?.trim() || null,
         };
 
         if (editingEvent) {
@@ -121,9 +124,31 @@ const AdminEvents = () => {
             max_participants: evt.max_participants || '',
             is_solidarity: evt.is_solidarity,
             is_active: evt.is_active,
+            image_url: evt.image_url || '',
             audio_url: evt.audio_url || '',
         });
         setShowModal(true);
+    };
+
+    const handleEventImageUpload = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploadingImage(true);
+        try {
+            const ext = file.name.split('.').pop() || 'jpg';
+            const fileName = `event-${Date.now()}.${ext}`;
+            const { error: uploadError } = await supabase.storage
+                .from('event-images')
+                .upload(fileName, file, { contentType: file.type || `image/${ext}` });
+            if (uploadError) throw uploadError;
+            const { data: { publicUrl } } = supabase.storage.from('event-images').getPublicUrl(fileName);
+            setForm(prev => ({ ...prev, image_url: publicUrl }));
+            showToast('Event image uploaded!', 'success');
+        } catch (err) {
+            showToast('Image upload failed: ' + err.message, 'error');
+        } finally {
+            setUploadingImage(false);
+        }
     };
 
     const getRegistrationStatus = (reg) => {
@@ -195,11 +220,8 @@ const AdminEvents = () => {
 
         // Fire-and-forget push notification to accepted registrants
         try {
-            const funcUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-push`;
-            fetch(funcUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}` },
-                body: JSON.stringify({ event_id: selectedEventForAnnouncements.id }),
+            supabase.functions.invoke('send-push', {
+                body: { event_id: selectedEventForAnnouncements.id },
             });
         } catch (err) {
             logger.error('Push notification failed:', err);
@@ -308,6 +330,14 @@ const AdminEvents = () => {
                                     </div>
                                 ))}
                             </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {['fr', 'en', 'ar'].map(lng => (
+                                    <div key={lng}>
+                                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Description ({lng})</label>
+                                        <textarea value={form.description?.[lng] || ''} onChange={e => setForm({ ...form, description: { ...form.description, [lng]: e.target.value } })} rows={3} className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm resize-none" dir={lng === 'ar' ? 'rtl' : 'ltr'} />
+                                    </div>
+                                ))}
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Category</label>
@@ -346,6 +376,22 @@ const AdminEvents = () => {
                                 </label>
                             </div>
                             <div className="pt-4 border-t border-slate-100 space-y-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Cover Image</label>
+                                    <div className="flex flex-col sm:flex-row gap-2">
+                                        <input
+                                            type="text"
+                                            value={form.image_url}
+                                            onChange={e => setForm({ ...form, image_url: e.target.value })}
+                                            placeholder="https://.../event-cover.jpg"
+                                            className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-sky-500"
+                                        />
+                                        <label className="px-4 py-2 rounded-lg border border-sky-200 text-sky-600 text-xs font-bold hover:bg-sky-50 cursor-pointer flex items-center justify-center whitespace-nowrap">
+                                            {uploadingImage ? 'Uploading...' : 'Upload Image'}
+                                            <input type="file" accept="image/*" onChange={handleEventImageUpload} className="hidden" disabled={uploadingImage} />
+                                        </label>
+                                    </div>
+                                </div>
                                 <div>
                                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Audio Narration URL (MP3)</label>
                                     <input

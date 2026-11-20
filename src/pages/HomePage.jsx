@@ -7,13 +7,16 @@ import fallbackNatural from '../assets/fallback_image_natural.webp';
 import { Link, useNavigate } from 'react-router-dom';
 import FavoriteButton from '../components/FavoriteButton';
 import { useCms } from '../context/CmsContext';
+import { useAuth } from '../context/AuthContext';
 
 const PAGE_SIZE = 6;
 
 const HomePage = () => {
     const { t, i18n } = useTranslation();
+    const { user } = useAuth();
     const [allSites, setAllSites] = useState([]);
     const [siteCategories, setSiteCategories] = useState([]);
+    const [favoriteIds, setFavoriteIds] = useState(new Set());
     const [loading, setLoading] = useState(true);
     const [activeCategory, setActiveCategory] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
@@ -29,6 +32,29 @@ const HomePage = () => {
             if (data) setSiteCategories(data);
         });
     }, []);
+
+    useEffect(() => {
+        if (!user) {
+            setFavoriteIds(new Set());
+            return;
+        }
+        supabase
+            .from('favorites')
+            .select('site_id')
+            .eq('user_id', user.id)
+            .then(({ data }) => {
+                if (data) setFavoriteIds(new Set(data.map(f => f.site_id)));
+            });
+    }, [user]);
+
+    const handleFavToggle = (siteId, isFav) => {
+        setFavoriteIds(prev => {
+            const next = new Set(prev);
+            if (isFav) next.add(siteId);
+            else next.delete(siteId);
+            return next;
+        });
+    };
 
     // Reset and debounce on filter change
     useEffect(() => {
@@ -47,7 +73,7 @@ const HomePage = () => {
 
             let query = supabase
                 .from('tourist_sites')
-                .select('id, name, category_id, avg_rating, address, site_images(image_url)', { count: 'exact' })
+                .select('id, name, category_id, avg_rating, address, site_images(image_url, is_primary, sort_order)', { count: 'exact' })
                 .eq('is_active', true)
                 .range(from, to);
 
@@ -56,8 +82,10 @@ const HomePage = () => {
             }
 
             if (searchQuery.trim()) {
-                const q = searchQuery.trim().toLowerCase();
-                query = query.or(`name->>fr.ilike.%${q}%,name->>en.ilike.%${q}%,name->>ar.ilike.%${q}%,address.ilike.%${q}%`);
+                const q = searchQuery.trim().replace(/[,()%\\]/g, '').toLowerCase();
+                if (q) {
+                    query = query.or(`name->>fr.ilike.%${q}%,name->>en.ilike.%${q}%,name->>ar.ilike.%${q}%,address.ilike.%${q}%`);
+                }
             }
 
             const { data, count } = await query;
@@ -89,7 +117,8 @@ const HomePage = () => {
     };
 
     const getSiteImage = (site) => {
-        if (site.site_images?.[0]?.image_url) return site.site_images[0].image_url;
+        const imgs = [...(site.site_images || [])].sort((a, b) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0));
+        if (imgs[0]?.image_url) return imgs[0].image_url;
         return fallbackNatural;
     };
 
@@ -196,7 +225,12 @@ const HomePage = () => {
                                                 onError={(e) => { e.target.src = fallbackNatural; }}
                                             />
                                             <div className="absolute top-4 right-4 rtl:right-auto rtl:left-4 z-10">
-                                                <FavoriteButton siteId={site.id} size={18} />
+                                                <FavoriteButton
+                                                    siteId={site.id}
+                                                    size={18}
+                                                    initialFav={favoriteIds.has(site.id)}
+                                                    onToggle={handleFavToggle}
+                                                />
                                             </div>
                                             {(site.avg_rating > 0) && (
                                                 <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg text-sm font-bold text-gray-800 flex items-center shadow rtl:left-auto rtl:right-4">

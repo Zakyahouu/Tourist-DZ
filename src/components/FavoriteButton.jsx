@@ -8,16 +8,23 @@ import { useNavigate } from 'react-router-dom';
 /**
  * Reusable Favorite (Heart) button.
  * Toggles the favorites table for the current user + given siteId.
+ * Supports optional controlled `initialFav` and `onToggle` to avoid N+1 queries in lists.
  */
-const FavoriteButton = ({ siteId, className = '', size = 20 }) => {
+const FavoriteButton = ({ siteId, initialFav, onToggle, className = '', size = 20 }) => {
     const { user } = useAuth();
     const navigate = useNavigate();
-    const [isFav, setIsFav] = useState(false);
+    const [isFav, setIsFav] = useState(!!initialFav);
     const [loading, setLoading] = useState(false);
 
-    // Check if already favorited
     useEffect(() => {
-        if (!user || !siteId) return;
+        if (initialFav !== undefined) {
+            setIsFav(!!initialFav);
+        }
+    }, [initialFav]);
+
+    // Check if already favorited (only when not controlled by parent list)
+    useEffect(() => {
+        if (initialFav !== undefined || !user || !siteId) return;
         let cancelled = false;
         supabase
             .from('favorites')
@@ -27,7 +34,7 @@ const FavoriteButton = ({ siteId, className = '', size = 20 }) => {
             .maybeSingle()
             .then(({ data }) => { if (!cancelled) setIsFav(!!data); });
         return () => { cancelled = true; };
-    }, [user, siteId]);
+    }, [user, siteId, initialFav]);
 
     const toggle = async (e) => {
         e.preventDefault(); // don't follow parent <Link>
@@ -43,9 +50,11 @@ const FavoriteButton = ({ siteId, className = '', size = 20 }) => {
             if (isFav) {
                 await supabase.from('favorites').delete().eq('user_id', user.id).eq('site_id', siteId);
                 setIsFav(false);
+                if (onToggle) onToggle(siteId, false);
             } else {
                 await supabase.from('favorites').insert({ user_id: user.id, site_id: siteId });
                 setIsFav(true);
+                if (onToggle) onToggle(siteId, true);
             }
         } catch (err) {
             logger.error('Favorite toggle error:', err);

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Calendar, Users, MapPin, Search, Accessibility, Clock, Headphones, CheckCircle } from 'lucide-react';
+import { Calendar, Users, MapPin, Search, Accessibility, Headphones, CheckCircle } from 'lucide-react';
 import eventsHeroImage from '../assets/events_hero_image.webp';
 import { supabase } from '../supabaseClient';
 import logger from '../utils/logger';
@@ -32,11 +32,12 @@ const EventsPage = () => {
 
     const fetchEvents = useCallback(async () => {
         try {
+            const today = new Date().toISOString().split('T')[0];
             let query = supabase
                 .from('events')
                 .select('*')
                 .eq('is_active', true)
-                .gte('end_date', new Date().toISOString())
+                .or(`end_date.gte.${today},and(end_date.is.null,start_date.gte.${today})`)
                 .order('start_date', { ascending: true });
 
             if (filter !== 'all') {
@@ -211,8 +212,9 @@ const EventsPage = () => {
                                                     </div>
                                                 )}
                                                 <div className="flex items-center text-xs text-gray-500 font-bold bg-gray-50 border border-gray-200 px-2.5 py-1.5 rounded-lg">
-                                                    <Clock size={12} className="mr-1 text-[var(--color-brand-secondary)]" />
-                                                    {new Date(event.start_date).toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' })}
+                                                    <Calendar size={12} className="mr-1 text-[var(--color-brand-secondary)]" />
+                                                    {new Date(event.start_date).toLocaleDateString(lang, { day: 'numeric', month: 'short' })}
+                                                    {event.end_date && event.end_date !== event.start_date ? ` – ${new Date(event.end_date).toLocaleDateString(lang, { day: 'numeric', month: 'short' })}` : ''}
                                                 </div>
                                             </div>
                                         </div>

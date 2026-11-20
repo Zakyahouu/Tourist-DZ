@@ -54,7 +54,8 @@ const StatCard = ({ value, label }) => (
 
 const FeaturedSiteCard = ({ site, lang }) => {
     const getImage = (s) => {
-        if (s.site_images?.[0]?.image_url) return s.site_images[0].image_url;
+        const imgs = [...(s.site_images || [])].sort((a, b) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0));
+        if (imgs[0]?.image_url) return imgs[0].image_url;
         return heroImage;
     };
 
@@ -142,7 +143,7 @@ const LandingPage = () => {
                     supabase.from('tourist_sites').select('*', { count: 'exact', head: true }),
                     supabase.from('reviews').select('*', { count: 'exact', head: true }),
                     supabase.from('tourist_sites')
-                        .select('id, name, category_id, avg_rating, address, latitude, longitude, site_images(image_url)')
+                        .select('id, name, category_id, avg_rating, address, latitude, longitude, site_images(image_url, is_primary, sort_order)')
                         .eq('is_active', true)
                         .not('avg_rating', 'is', null)
                         .order('avg_rating', { ascending: false })

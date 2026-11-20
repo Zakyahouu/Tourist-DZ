@@ -52,10 +52,17 @@ const MapPage = () => {
             try {
                 const [scRes, { data: sitesData }, { data: accData }] = await Promise.all([
                     supabase.from('site_categories').select('*').order('sort_order'),
-                    supabase.from('tourist_sites').select('*, site_images(image_url)').eq('is_active', true),
-                    supabase.from('accommodations').select('*, accommodation_images(image_url)').eq('is_active', true),
+                    supabase.from('tourist_sites').select('*, site_images(image_url, is_primary, sort_order)').eq('is_active', true),
+                    supabase.from('accommodations').select('*, accommodation_images(image_url, is_primary, sort_order)').eq('is_active', true),
                 ]);
                 if (scRes.data) setSiteCategories(scRes.data);
+
+                const sortImages = (imgs) => [...(imgs || [])].sort((a, b) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0));
+
+                const mappedSites = (sitesData || []).map(s => ({
+                    ...s,
+                    site_images: sortImages(s.site_images),
+                }));
 
                 const mappedAccs = (accData || []).map(acc => ({
                     id: acc.id,
@@ -67,11 +74,11 @@ const MapPage = () => {
                     longitude: acc.longitude,
                     avg_rating: acc.rating || 0,
                     is_active: acc.is_active,
-                    site_images: acc.accommodation_images || [],
+                    site_images: sortImages(acc.accommodation_images),
                     is_accommodation: true,
                 }));
 
-                const allSites = [...(sitesData || []), ...mappedAccs];
+                const allSites = [...mappedSites, ...mappedAccs];
                 setSites(allSites);
             } catch (err) {
                 logger.error("Map fetch error:", err);

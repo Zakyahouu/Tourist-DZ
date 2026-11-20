@@ -1,14 +1,21 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../../supabaseClient';
-import { Search, Plus, Edit2, Trash2, X, Image as ImageIcon, Users } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, X, Image as ImageIcon, Users, Settings2 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import ManageCategoriesModal from '../../components/ManageCategoriesModal';
 
 const AdminAccommodations = () => {
+    const { i18n } = useTranslation();
     const { showToast } = useToast();
+    const lang = i18n.language || 'en';
     const [items, setItems] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [filterCategory, setFilterCategory] = useState('all');
     const [modal, setModal] = useState(null);
+    const [showCategoryManager, setShowCategoryManager] = useState(false);
 
     const [showImageModal, setShowImageModal] = useState(false);
     const [selectedAccForImages, setSelectedAccForImages] = useState(null);
@@ -21,9 +28,14 @@ const AdminAccommodations = () => {
     const [selectedAccForRequests, setSelectedAccForRequests] = useState(null);
     const [requests, setRequests] = useState([]);
 
-    const emptyForm = { name: { fr: '', en: '', ar: '' }, description: { fr: '', en: '', ar: '' }, type: 'hotel', latitude: 0, longitude: 0, address: '', phone: '', website: '', price_range: '', rating: 0, is_active: true };
+    const emptyForm = { name: { fr: '', en: '', ar: '' }, description: { fr: '', en: '', ar: '' }, category_id: null, latitude: 34.8484, longitude: 5.7248, address: '', phone: '', website: '', price_range: '', rating: 0, is_active: true };
 
-    useEffect(() => { fetchItems(); }, []);
+    useEffect(() => { fetchItems(); fetchCategories(); }, []);
+
+    async function fetchCategories() {
+        const { data } = await supabase.from('accommodation_categories').select('*').order('sort_order');
+        if (data) setCategories(data);
+    }
 
     async function fetchItems() {
         setLoading(true);
@@ -33,10 +45,14 @@ const AdminAccommodations = () => {
         setLoading(false);
     }
 
+    const getCategory = (id) => categories.find(c => c.id === id);
+
     const filtered = items.filter(i => {
-        if (!search) return true;
+        const matchesCat = filterCategory === 'all' || i.category_id === filterCategory;
+        if (!search) return matchesCat;
         const s = search.toLowerCase();
-        return (i.name?.fr?.toLowerCase().includes(s) || i.name?.en?.toLowerCase().includes(s) || i.address?.toLowerCase().includes(s));
+        const matchesSearch = (i.name?.fr?.toLowerCase().includes(s) || i.name?.en?.toLowerCase().includes(s) || i.name?.ar?.toLowerCase().includes(s) || i.address?.toLowerCase().includes(s));
+        return matchesCat && matchesSearch;
     });
 
     const openRequests = async (acc) => {
@@ -67,11 +83,24 @@ const AdminAccommodations = () => {
     };
 
     async function handleSave(formData) {
+        const payload = {
+            name: formData.name,
+            description: formData.description,
+            category_id: formData.category_id || null,
+            latitude: parseFloat(formData.latitude) || 0,
+            longitude: parseFloat(formData.longitude) || 0,
+            address: formData.address || '',
+            phone: formData.phone || '',
+            website: formData.website || '',
+            price_range: formData.price_range || '',
+            rating: parseFloat(formData.rating) || 0,
+            is_active: formData.is_active ?? true,
+        };
         let error;
         if (modal.mode === 'create') {
-            ({ error } = await supabase.from('accommodations').insert(formData));
+            ({ error } = await supabase.from('accommodations').insert(payload));
         } else {
-            ({ error } = await supabase.from('accommodations').update(formData).eq('id', modal.data.id));
+            ({ error } = await supabase.from('accommodations').update(payload).eq('id', modal.data.id));
         }
         if (error) return showToast(error.message, 'error');
         showToast(`Accommodation ${modal.mode === 'create' ? 'created' : 'updated'} successfully!`, 'success');
@@ -181,8 +210,15 @@ const AdminAccommodations = () => {
             <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1">
                     <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name or address..." className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-sky-500" />
+                    <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name or address..." className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-sky-500" />
                 </div>
+                <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} className="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-medium bg-white focus:ring-2 focus:ring-sky-500">
+                    <option value="all">All Categories</option>
+                    {categories.map(c => <option key={c.id} value={c.id}>{c[`name_${lang}`] || c.name_en}</option>)}
+                </select>
+                <button onClick={() => setShowCategoryManager(true)} className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-sky-600 transition-colors bg-white">
+                    <Settings2 size={16} /> Manage
+                </button>
             </div>
 
             {/* Table */}
@@ -192,7 +228,7 @@ const AdminAccommodations = () => {
                         <thead className="bg-slate-50 text-slate-500 uppercase text-xs font-bold tracking-wider border-b border-slate-200">
                             <tr>
                                 <th className="px-6 py-4">Name</th>
-                                <th className="px-6 py-4">Type</th>
+                                <th className="px-6 py-4">Category</th>
                                 <th className="px-6 py-4">Address</th>
                                 <th className="px-6 py-4">Phone</th>
                                 <th className="px-6 py-4">Price</th>
@@ -208,7 +244,11 @@ const AdminAccommodations = () => {
                             ) : filtered.map(item => (
                                 <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                                     <td className="px-6 py-4 font-semibold text-slate-800">{item.name?.fr || item.name?.en || '—'}</td>
-                                    <td className="px-6 py-4"><span className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-bold capitalize">{item.type || '—'}</span></td>
+                                    <td className="px-6 py-4">
+                                        <span className="bg-sky-50 text-sky-700 px-2.5 py-1 rounded-full text-xs font-bold">
+                                            {getCategory(item.category_id)?.[`name_${lang}`] || getCategory(item.category_id)?.name_en || '—'}
+                                        </span>
+                                    </td>
                                     <td className="px-6 py-4 text-slate-600 max-w-[200px] truncate">{item.address || '—'}</td>
                                     <td className="px-6 py-4 text-slate-600">{item.phone || '—'}</td>
                                     <td className="px-6 py-4 text-slate-600">{item.price_range || '—'}</td>
@@ -233,7 +273,7 @@ const AdminAccommodations = () => {
             </div>
 
             {/* Modal */}
-            {modal && <AccommodationModal modal={modal} onClose={() => setModal(null)} onSave={handleSave} />}
+            {modal && <AccommodationModal modal={modal} categories={categories} lang={lang} onClose={() => setModal(null)} onSave={handleSave} />}
 
             {/* Images Modal */}
             {showImageModal && (
@@ -363,16 +403,24 @@ const AdminAccommodations = () => {
                     </div>
                 </div>
             )}
+            {showCategoryManager && (
+                <ManageCategoriesModal
+                    tableName="accommodation_categories"
+                    categories={categories}
+                    onCategoryChange={c => setCategories(c)}
+                    onClose={() => setShowCategoryManager(false)}
+                />
+            )}
         </div>
     );
 };
 
-const AccommodationModal = ({ modal, onClose, onSave }) => {
+const AccommodationModal = ({ modal, categories, lang, onClose, onSave }) => {
     const [form, setForm] = useState(modal.data);
     const [saving, setSaving] = useState(false);
     const set = (key, val) => setForm(prev => ({ ...prev, [key]: val }));
-    const setName = (lang, val) => setForm(prev => ({ ...prev, name: { ...prev.name, [lang]: val } }));
-    const setDesc = (lang, val) => setForm(prev => ({ ...prev, description: { ...prev.description, [lang]: val } }));
+    const setName = (l, val) => setForm(prev => ({ ...prev, name: { ...prev.name, [l]: val } }));
+    const setDesc = (l, val) => setForm(prev => ({ ...prev, description: { ...prev.description, [l]: val } }));
 
     const submit = async (e) => {
         e.preventDefault();
@@ -389,34 +437,28 @@ const AccommodationModal = ({ modal, onClose, onSave }) => {
                     <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg"><X size={20} /></button>
                 </div>
                 <form onSubmit={submit} className="p-6 space-y-5">
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                         {['fr', 'en', 'ar'].map(l => (
                             <div key={l}>
                                 <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Name ({l})</label>
-                                <input value={form.name?.[l] || ''} onChange={e => setName(l, e.target.value)} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sky-500" required={l === 'fr'} />
+                                <input value={form.name?.[l] || ''} onChange={e => setName(l, e.target.value)} dir={l === 'ar' ? 'rtl' : 'ltr'} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sky-500" required={l === 'fr'} />
                             </div>
                         ))}
                     </div>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                         {['fr', 'en', 'ar'].map(l => (
                             <div key={l}>
                                 <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Description ({l})</label>
-                                <textarea value={form.description?.[l] || ''} onChange={e => setDesc(l, e.target.value)} rows={2} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sky-500" />
+                                <textarea value={form.description?.[l] || ''} onChange={e => setDesc(l, e.target.value)} dir={l === 'ar' ? 'rtl' : 'ltr'} rows={2} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sky-500" />
                             </div>
                         ))}
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
-                            <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Type</label>
-                            <select value={form.type || 'hotel'} onChange={e => set('type', e.target.value)} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
-                                <option value="hotel">Hotel</option>
-                                <option value="guesthouse">Guesthouse</option>
-                                <option value="hostel">Hostel</option>
-                                <option value="restaurant">Restaurant</option>
-                                <option value="cafe">Café</option>
-                                <option value="riad">Riad</option>
-                                <option value="apartment">Apartment</option>
-                                <option value="camping">Camping</option>
+                            <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Category</label>
+                            <select value={form.category_id || ''} onChange={e => set('category_id', e.target.value || null)} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white">
+                                <option value="">Select category...</option>
+                                {categories.map(c => <option key={c.id} value={c.id}>{c[`name_${lang}`] || c.name_en}</option>)}
                             </select>
                         </div>
                         <div>

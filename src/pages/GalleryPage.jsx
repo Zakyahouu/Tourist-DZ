@@ -24,6 +24,8 @@ const GalleryPage = () => {
     const PAGE_SIZE = 24;
     const [showUpload, setShowUpload] = useState(false);
     const [uploadUrl, setUploadUrl] = useState('');
+    const [uploadFile, setUploadFile] = useState(null);
+    const [uploadPreview, setUploadPreview] = useState('');
     const [uploadCaption, setUploadCaption] = useState('');
     const [isCompetition, setIsCompetition] = useState(false);
     const [uploading, setUploading] = useState(false);
@@ -81,22 +83,47 @@ const GalleryPage = () => {
         fetchGallery(next);
     };
 
+    const handleFileSelect = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploadFile(file);
+        setUploadPreview(URL.createObjectURL(file));
+    };
+
     const handleUpload = async (e) => {
         e.preventDefault();
-        if (!uploadUrl.trim()) return showToast('Please enter an image URL.', 'info');
-        if (!isSafeUrl(uploadUrl.trim())) return showToast('Please enter a valid https:// image URL.', 'error');
+        if (!uploadFile && !uploadUrl.trim()) {
+            return showToast('Please select an image file or enter an image URL.', 'info');
+        }
+        if (!uploadFile && !isSafeUrl(uploadUrl.trim())) {
+            return showToast('Please enter a valid https:// image URL.', 'error');
+        }
 
         setUploading(true);
         try {
+            let finalImageUrl = uploadUrl.trim();
+            if (uploadFile) {
+                const ext = uploadFile.name.split('.').pop() || 'jpg';
+                const fileName = `gallery/${user.id}/${Date.now()}.${ext}`;
+                const { error: storageError } = await supabase.storage
+                    .from('gallery')
+                    .upload(fileName, uploadFile, { contentType: uploadFile.type || `image/${ext}` });
+                if (storageError) throw storageError;
+                const { data: urlData } = supabase.storage.from('gallery').getPublicUrl(fileName);
+                finalImageUrl = urlData.publicUrl;
+            }
+
             const { error } = await supabase.from('gallery').insert({
                 user_id: user.id,
-                image_url: uploadUrl.trim(),
+                image_url: finalImageUrl,
                 caption: uploadCaption.trim() || null,
                 is_competition_entry: isCompetition,
             });
             if (error) throw error;
             setShowUpload(false);
             setUploadUrl('');
+            setUploadFile(null);
+            setUploadPreview('');
             setUploadCaption('');
             setIsCompetition(false);
             showToast('Photo shared successfully!', 'success');
@@ -301,12 +328,25 @@ const GalleryPage = () => {
                             </div>
                             <form onSubmit={handleUpload} className="p-6 space-y-5">
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Image URL</label>
-                                    <input value={uploadUrl} onChange={e => setUploadUrl(e.target.value)} placeholder="https://example.com/your-photo.jpg" className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-sky-500" required />
+                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Choose Photo File</label>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleFileSelect}
+                                        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[var(--color-brand-primary)]/10 file:text-[var(--color-brand-primary)] hover:file:bg-[var(--color-brand-primary)]/20"
+                                    />
                                 </div>
-                                {uploadUrl && (
+                                <div className="relative flex items-center py-1">
+                                    <div className="flex-grow border-t border-gray-200"></div>
+                                    <span className="flex-shrink mx-3 text-[10px] font-bold uppercase text-gray-400">or paste image URL</span>
+                                    <div className="flex-grow border-t border-gray-200"></div>
+                                </div>
+                                <div>
+                                    <input value={uploadUrl} onChange={e => setUploadUrl(e.target.value)} placeholder="https://example.com/your-photo.jpg" className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-sky-500" />
+                                </div>
+                                {(uploadPreview || uploadUrl) && (
                                     <div className="rounded-xl overflow-hidden bg-gray-100 h-48">
-                                        <img src={uploadUrl} alt="Preview" className="w-full h-full object-cover" onError={e => e.target.style.display = 'none'} />
+                                        <img src={uploadPreview || uploadUrl} alt="Preview" className="w-full h-full object-cover" onError={e => e.target.style.display = 'none'} />
                                     </div>
                                 )}
                                 <div>

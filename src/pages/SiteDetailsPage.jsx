@@ -38,7 +38,7 @@ const SiteDetailsPage = () => {
                 const [siteRes, catRes] = await Promise.all([
                     supabase
                         .from('tourist_sites')
-                        .select('*, site_images(image_url), reviews(user_id, rating, comment, created_at, profiles(full_name, avatar_url))')
+                        .select('*, site_images(image_url, is_primary, sort_order), reviews(user_id, rating, comment, created_at, profiles(full_name, avatar_url))')
                         .eq('id', id)
                         .single(),
                     supabase.from('site_categories').select('*').order('sort_order'),
@@ -83,7 +83,7 @@ const SiteDetailsPage = () => {
             setUserAlreadyReviewed(true);
             const { data } = await supabase
                 .from('tourist_sites')
-                .select('*, site_images(image_url), reviews(user_id, rating, comment, created_at, profiles(full_name, avatar_url))')
+                .select('*, site_images(image_url, is_primary, sort_order), reviews(user_id, rating, comment, created_at, profiles(full_name, avatar_url))')
                 .eq('id', id)
                 .single();
             if (data) setSite(data);
@@ -110,7 +110,10 @@ const SiteDetailsPage = () => {
     );
 
     const FALLBACK_IMAGE = fallbackHistorical;
-    const images = site.site_images?.map(img => img.image_url).filter(Boolean) || [];
+    const images = [...(site.site_images || [])]
+        .sort((a, b) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0))
+        .map(img => img.image_url)
+        .filter(Boolean);
     const coverImage = images[0] || FALLBACK_IMAGE;
 
     return (
